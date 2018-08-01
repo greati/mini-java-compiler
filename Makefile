@@ -8,6 +8,7 @@ BINDIR = bin
 SRCDIR = src
 BUILDDIR = build
 LIBDIR = lib
+CCFLEX = cc
 # LEXER
 LEXER = $(BINDIR)/mjclexer
 # TARGET
@@ -22,7 +23,7 @@ OBJS = $(patsubst $(SRCDIR)/%, $(BUILDDIR)/%, $(SOURCES:.$(SRCEXT)=.o))
 # COMPILER
 CC = g++ 
 # FLEX
-FLEX = flex
+FLEX = lex
 # FOR CLEANING
 RM = /bin/rm
 # WARNING FLAG
@@ -52,8 +53,9 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 lexer:
 	@echo "Building lexer...";
 	@mkdir -p $(BUILDDIR)
+	@mkdir -p $(BINDIR)
 	$(FLEX) -o $(BUILDDIR)/lex.yy.c $(SRCDIR)/mjlexer.l;
-	$(CC) $(BUILDDIR)/lex.yy.c -o $(LEXER) $(INCFLAG) -ll;
+	$(CCFLEX) $(BUILDDIR)/lex.yy.c -lfl -o $(LEXER) $(INCFLAG);
 	$(RM) -r $(BUILDDIR)/lex.yy.c;
 
 clean:

@@ -2,10 +2,51 @@
 #define __TOKEN__
 
 /**
- * The tokens of the mini-java language. 
+ * Tokens of the Mini-Java language. 
  */
 enum MJToken {
-    IDENTIFIER
+    TOK_PROGRAM,
+    TOK_IDENTIFIER,
+    TOK_SEMICOLON,
+    TOK_CLASS,
+    TOK_LCURLY,
+    TOK_RCURLY,
+    TOK_DECLARATIONS,
+    TOK_ENDDECLARATIONS,
+    TOK_COMMA,
+    TOK_EQUALS,
+    TOK_LSQUARE,
+    TOK_RSQUARE,
+    TOK_INT,
+    TOK_METHOD,
+    TOK_VOID,
+    TOK_LPAREN,
+    TOK_RPAREN,
+    TOK_VAL,
+    TOK_DOT,
+    TOK_ASSIGN,
+    TOK_RETURN,
+    TOK_IF,
+    TOK_ELSE,
+    TOK_WHILE,
+    TOK_LESS,
+    TOK_LESSEQ,
+    TOK_EQEQ,
+    TOK_DIFF,
+    TOK_GREATER,
+    TOK_GREATEREQ,
+    TOK_FOR,
+    TOK_SWITCH,
+    TOK_CASE,
+    TOK_PLUS,
+    TOK_MINUS,
+    TOK_2PIPE,
+    TOK_ASTERISK,
+    TOK_SLASH,
+    TOK_AND,
+    TOK_NOT,
+    TOK_INTEGERCONSTANT,
+    TOK_STRINGCONSTANT
 };
 
 #endif
