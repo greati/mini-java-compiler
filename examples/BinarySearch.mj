@@ -1,11 +1,11 @@
-Program BinarySearchProgram;
+program BinarySearchProgram;
 
-Class BinarySearch
+class BinarySearch
 {
-	Method int binarySearch(int arr; int l; int r; int x)
-		Declarations
+	method int binarySearch(int arr; int l; int r; int x)
+		declarations
 			int mid;
-		EndDeclarations
+		endDeclarations
 	{
 		if r >= 1
 		{
@@ -21,6 +21,6 @@ Class BinarySearch
 			}
 			return binarySearch(arr, mid+1, r, x);
 		}
-		return -1
+		return -1;
 	}
 }
