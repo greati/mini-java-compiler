@@ -14,7 +14,7 @@ LEXER = $(BINDIR)/mjclexer
 # TARGET
 TARGET = $(BINDIR)/mjc
 # EXTENSIONS
-SRCEXT = cpp
+SRCEXT = c
 HEADEREXT = h
 # SOURCES LIST
 SOURCES = $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
