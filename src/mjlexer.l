@@ -20,13 +20,59 @@ void print_token(enum MJToken token);
 
 %}
 
+digit               [0-9]
+alpha               [a-zA-Z]
+id                  [a-zA-z][a-zA-Z0-9_]*
+
 %%
 
 [\t ]+              ;                                           // Ignore spaces and tabs
 \n                  { current_line += 1; offset = 0; }          // Reset counters
+\".*\"              { print_token(TOK_STRINGCONSTANT); }
+#.*                 ;
 ;                   { print_token(TOK_SEMICOLON); }      
 program             { print_token(TOK_PROGRAM); }      
 class               { print_token(TOK_CLASS); }      
+\{                  { print_token(TOK_LCURLY); }
+\}                  { print_token(TOK_RCURLY); }
+declarations        { print_token(TOK_DECLARATIONS); }
+enddeclarations     { print_token(TOK_ENDDECLARATIONS); }
+,                   { print_token(TOK_COMMA); }
+=                   { print_token(TOK_EQUALS); }
+\[                  { print_token(TOK_LSQUARE); }
+\]                  { print_token(TOK_RSQUARE); }
+int                 { print_token(TOK_INT); }
+string              { print_token(TOK_STRING); }
+method              { print_token(TOK_METHOD); }
+void                { print_token(TOK_VOID); }
+\(                  { print_token(TOK_LPAREN); }
+\)                  { print_token(TOK_RPAREN); }
+val                 { print_token(TOK_VAL); }
+\.                  { print_token(TOK_DOT); }
+:=                  { print_token(TOK_ASSIGN); }
+return              { print_token(TOK_RETURN); }
+if                  { print_token(TOK_IF); }
+else                { print_token(TOK_ELSE); }
+while               { print_token(TOK_WHILE); }
+for                 { print_token(TOK_FOR); }
+switch              { print_token(TOK_SWITCH); }
+case                { print_token(TOK_CASE); } 
+\<                  { print_token(TOK_LESS); }
+\<=                 { print_token(TOK_LESSEQ); }
+==                  { print_token(TOK_EQEQ); }
+!=                  { print_token(TOK_DIFF); }
+\>                  { print_token(TOK_GREATER); }
+\>=                 { print_token(TOK_GREATEREQ); }
+\+                  { print_token(TOK_PLUS); }
+\-                  { print_token(TOK_MINUS); }
+\|\|                { print_token(TOK_2PIPE); }
+\*                  { print_token(TOK_ASTERISK); }
+\/                  { print_token(TOK_SLASH); }
+&&                  { print_token(TOK_AND); }
+not                 { print_token(TOK_NOT); }
+{digit}*            { print_token(TOK_INTEGERCONSTANT); }
+{id}                { print_token(TOK_IDENTIFIER); }
+.                   { print_token(UNDEFINED); }
 
 %%
 
