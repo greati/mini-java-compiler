@@ -5,7 +5,7 @@
  * Tokens of the Mini-Java language. 
  */
 enum MJToken {
-    TOK_PROGRAM,
+    TOK_PROGRAM = 0,
     TOK_IDENTIFIER,
     TOK_SEMICOLON,
     TOK_CLASS,
