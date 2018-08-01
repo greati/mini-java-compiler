@@ -26,6 +26,7 @@ void print_token(enum MJToken token);
 \n                  { current_line += 1; offset = 0; }          // Reset counters
 ;                   { print_token(TOK_SEMICOLON); }      
 program             { print_token(TOK_PROGRAM); }      
+class               { print_token(TOK_CLASS); }      
 
 %%
 

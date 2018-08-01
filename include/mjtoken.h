@@ -18,6 +18,7 @@ enum MJToken {
     TOK_LSQUARE,
     TOK_RSQUARE,
     TOK_INT,
+    TOK_STRING,
     TOK_METHOD,
     TOK_VOID,
     TOK_LPAREN,
@@ -71,6 +72,7 @@ char* get_token_name(enum MJToken token) {
         case TOK_LSQUARE: return "TOK_LSQUARE";
         case TOK_RSQUARE: return "TOK_RSQUARE";
         case TOK_INT: return "TOK_INT";
+        case TOK_STRING: return "TOK_STRING";
         case TOK_METHOD: return "TOK_METHOD";
         case TOK_VOID: return "TOK_VOID";
         case TOK_LPAREN: return "TOK_LPAREN";
