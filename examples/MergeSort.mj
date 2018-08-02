@@ -1,0 +1,57 @@
+program BinarySearchProgram;
+
+class MergeSort
+{
+	method void merge(int[] v; int begin; int middle; int end)
+		declarations
+            int i = begin, j = middle+1, k = begin, length = end-begin+1;
+            int[] aux;
+		endDeclarations
+	{
+        while(i <= middle && j <= end)
+        {
+            if(v[i] < v[j]){
+                aux[k] := v[i];
+                i++
+            }
+            else
+            {
+                aux[k] := v[j];
+                j++
+            };
+            k++
+        };
+
+        while(i <= middle)
+        {
+            aux[k] := v[i];
+            i++;
+            k++
+        };
+
+        while(j <= end)
+        {
+            aux[k] := v[j];
+            j++;
+            k++
+        };
+
+        for(k = begin; k <= end; k++)
+        {
+            aux[k] := v[k]
+        }
+	}
+    method void mergeSort(int[] v; int begin; int end)
+		declarations
+            int meio;
+		endDeclarations
+    {
+        if(begin < end)
+        {
+            meio := (fim + comeco)/2;
+            mergeSort(v, comeco, meio);
+            mergeSort(v, meio, fim);
+            merge(v, comeco, meio, fim)
+        }
+	{
+}

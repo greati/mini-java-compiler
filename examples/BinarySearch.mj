@@ -2,7 +2,7 @@ program BinarySearchProgram;
 
 class BinarySearch
 {
-	method int binarySearch(int arr; int l; int r; int x)
+	method int binarySearch(int[] arr; int l; int r; int x)
 		declarations
 			int mid;
 		endDeclarations
@@ -12,15 +12,15 @@ class BinarySearch
 			mid := l + (r - l)/2;
 			if (arr[mid] == x)
 			{
-				return mid;
-			}
+				return mid
+			};
  
-            		if (arr[mid] > x)
+            if (arr[mid] > x)
 			{
-				return binarySearch(arr, l, mid-1, x);
-			}
-			return binarySearch(arr, mid+1, r, x);
-		}
-		return -1;
+				return binarySearch(arr, l, mid-1, x)
+			};
+			return binarySearch(arr, mid+1, r, x)
+		};
+		return -1
 	}
 }
