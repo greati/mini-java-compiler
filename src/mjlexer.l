@@ -22,7 +22,7 @@ void print_token(enum MJToken token);
 
 digit               [0-9]
 alpha               [a-zA-Z]
-id                  [a-zA-z][a-zA-Z0-9_]*
+id                  [a-zA-z_][a-zA-Z0-9_]*
 
 %%
 
@@ -72,7 +72,7 @@ case                    { print_token(TOK_CASE); }
 not                     { print_token(TOK_NOT); }
 {id}                    { print_token(TOK_IDENTIFIER); }
 {digit}+                { print_token(TOK_INTEGERCONSTANT); }
-{digit}+({alpha}|_)+    { print_token(UNDEFINED); }     
+{digit}+({alpha}|_)+    { print_token(UNDEFINED); }             // Invalid identifier
 .                       { print_token(UNDEFINED); }
 
 %%
