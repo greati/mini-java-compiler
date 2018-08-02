@@ -4,7 +4,7 @@ A compiler for the Mini-Java programming language.
 
 ## Mini-Java language
 
-Check the `documentation/mjmanual.pdf` to check 
+Take a look at `documentation/mjmanual.pdf` to read 
 the manual and more details about the Mini-Java programming language. 
 
 ## Mini-Java Compiler (mjc)
