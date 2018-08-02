@@ -1,4 +1,4 @@
-# mini-java-compiler
+# mjc
 
 A compiler for the Mini-Java programming language.
 
