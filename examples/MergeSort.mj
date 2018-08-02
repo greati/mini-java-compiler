@@ -1,4 +1,4 @@
-program BinarySearchProgram;
+program MergeSortProgram;
 
 class MergeSort
 {
@@ -12,28 +12,28 @@ class MergeSort
         {
             if(v[i] < v[j]){
                 aux[k] := v[i];
-                i++
+                i := i + 1
             }
             else
             {
                 aux[k] := v[j];
-                j++
+                j := j + 1
             };
-            k++
+            k := k + 1
         };
 
         while(i <= middle)
         {
             aux[k] := v[i];
-            i++;
-            k++
+            i := i + 1;
+            k := k + 1
         };
 
         while(j <= end)
         {
             aux[k] := v[j];
-            j++;
-            k++
+            j := j + 1;
+            k := k + 1
         };
 
         for(k = begin; k <= end; k++)

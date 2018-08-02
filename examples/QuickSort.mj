@@ -1,0 +1,38 @@
+program QuickSortProgram;
+
+class QuickSort
+{
+	method void quickSort(int[] v; int begin; int end)
+		declarations
+            int i = begin, j = end-1, pivot = v[(begin + end)/2], aux;
+		endDeclarations
+	{
+        while(i <= j)
+        {
+            while(v[i] < pivo && i < end)
+            {
+                i := i + 1
+            };
+            while(v[j] > pivo && j > begin)
+            {
+                j := j - 1
+            };
+            if(i <= j)
+            {
+                aux := v[i];
+                v[i] := v[j];
+                v[j] := aux;
+                i := i + 1;
+                j = j - 1
+            }
+        };
+        if(j > begin)
+        {
+            quickSort(v, begin, j + 1)
+        };
+        if(i < end)
+        {
+            quickSort(v, i, end)
+        }
+    }
+}
