@@ -9,17 +9,22 @@ int current_line = 0;                   // Keep track of the line number
 
 %}
 
+ws                  [\t ]+
+comment             #.*
+ignore              ({ws}|{comment})
 digit               [0-9]
+integer             {digit}+
+string              \".*\"
 alpha               [a-zA-Z]
-id                  [a-zA-z_][a-zA-Z0-9_]*
+id                  ({alpha}|_)({alpha}|{digit}|_)*
+invalid_id          {digit}+({alpha}|_)+
 
 %%
 
 <<EOF>>                 { return END_OF_FILE; }
-[\t ]+                  ;                                           // Ignore spaces and tabs
+{ignore}                ;                                           // Ignore spaces and tabs
 \n                      { current_line += 1; offset = 0; }          // Reset counters
-\".*\"                  { return TOK_STRINGCONSTANT; }
-#.*                     ;
+{string}                { return TOK_STRINGCONSTANT; }
 ;                       { return TOK_SEMICOLON; }      
 program                 { return TOK_PROGRAM; }      
 class                   { return TOK_CLASS; }      
@@ -61,8 +66,8 @@ case                    { return TOK_CASE; }
 &&                      { return TOK_AND; }
 not                     { return TOK_NOT; }
 {id}                    { return TOK_IDENTIFIER; }
-{digit}+                { return TOK_INTEGERCONSTANT; }
-{digit}+({alpha}|_)+    { return UNDEFINED; }             // Invalid identifier
+{integer}               { return TOK_INTEGERCONSTANT; }
+{invalid_id}            { return UNDEFINED; }             // Invalid identifier
 .                       { return UNDEFINED; }
 
 %%
