@@ -1,0 +1,1 @@
+au BufRead,BufNewFile *.mj set filetype=mj
