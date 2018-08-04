@@ -4,10 +4,8 @@
 
 #define YY_USER_ACTION offset += yyleng;
 
-
 int offset = 0;                         // Keep track of the column number
 int current_line = 0;                   // Keep track of the line number
-
 
 %}
 
@@ -70,6 +68,7 @@ not                     { return TOK_NOT; }
 %%
 
 #ifdef __EXECUTABLE__
+
 /**
  * Print a token to the standard output and/or to a file.
  * 
@@ -116,5 +115,6 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
 #endif
 
