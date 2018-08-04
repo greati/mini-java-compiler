@@ -6,7 +6,7 @@ class MergeSort
 		declarations
             int i = begin, j = middle+1, k = begin, length = end-begin+1;
             int[] aux;
-		endDeclarations
+		enddeclarations
 	{
         while(i <= middle && j <= end)
         {
@@ -44,7 +44,7 @@ class MergeSort
     method void mergeSort(int[] v; int begin; int end)
 		declarations
             int meio;
-		endDeclarations
+		enddeclarations
     {
         if(begin < end)
         {

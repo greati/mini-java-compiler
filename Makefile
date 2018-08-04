@@ -55,7 +55,7 @@ lexer:
 	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(BINDIR)
 	$(FLEX) -o $(BUILDDIR)/lex.yy.c $(SRCDIR)/mjlexer.l;
-	$(CCFLEX) $(BUILDDIR)/lex.yy.c -lfl -o $(LEXER) $(INCFLAG);
+	$(CCFLEX) $(BUILDDIR)/lex.yy.c -D__EXECUTABLE__ -lfl -o $(LEXER) $(INCFLAG);
 	$(RM) -r $(BUILDDIR)/lex.yy.c;
 
 clean:

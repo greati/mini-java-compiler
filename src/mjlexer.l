@@ -4,19 +4,10 @@
 
 #define YY_USER_ACTION offset += yyleng;
 
-int std_output = 1;                     // Print to the standard output?
 
 int offset = 0;                         // Keep track of the column number
 int current_line = 0;                   // Keep track of the line number
 
-FILE* output_file = NULL;               // Output file
-
-/**
- * Print a token to the standard output and/or to a file.
- * 
- * @param token The token to be printed
- */
-void print_token(enum MJToken token);
 
 %}
 
@@ -26,58 +17,65 @@ id                  [a-zA-z_][a-zA-Z0-9_]*
 
 %%
 
+<<EOF>>                 { return(END_OF_FILE); }
 [\t ]+                  ;                                           // Ignore spaces and tabs
 \n                      { current_line += 1; offset = 0; }          // Reset counters
-\".*\"                  { print_token(TOK_STRINGCONSTANT); }
+\".*\"                  { return(TOK_STRINGCONSTANT); }
 #.*                     ;
-;                       { print_token(TOK_SEMICOLON); }      
-program                 { print_token(TOK_PROGRAM); }      
-class                   { print_token(TOK_CLASS); }      
-\{                      { print_token(TOK_LCURLY); }
-\}                      { print_token(TOK_RCURLY); }
-declarations            { print_token(TOK_DECLARATIONS); }
-enddeclarations         { print_token(TOK_ENDDECLARATIONS); }
-,                       { print_token(TOK_COMMA); }
-=                       { print_token(TOK_EQUALS); }
-\[                      { print_token(TOK_LSQUARE); }
-\]                      { print_token(TOK_RSQUARE); }
-int                     { print_token(TOK_INT); }
-string                  { print_token(TOK_STRING); }
-method                  { print_token(TOK_METHOD); }
-void                    { print_token(TOK_VOID); }
-\(                      { print_token(TOK_LPAREN); }
-\)                      { print_token(TOK_RPAREN); }
-val                     { print_token(TOK_VAL); }
-\.                      { print_token(TOK_DOT); }
-:=                      { print_token(TOK_ASSIGN); }
-return                  { print_token(TOK_RETURN); }
-if                      { print_token(TOK_IF); }
-else                    { print_token(TOK_ELSE); }
-while                   { print_token(TOK_WHILE); }
-for                     { print_token(TOK_FOR); }
-switch                  { print_token(TOK_SWITCH); }
-case                    { print_token(TOK_CASE); } 
-\<                      { print_token(TOK_LESS); }
-\<=                     { print_token(TOK_LESSEQ); }
-==                      { print_token(TOK_EQEQ); }
-!=                      { print_token(TOK_DIFF); }
-\>                      { print_token(TOK_GREATER); }
-\>=                     { print_token(TOK_GREATEREQ); }
-\+                      { print_token(TOK_PLUS); }
-\-                      { print_token(TOK_MINUS); }
-\|\|                    { print_token(TOK_2PIPE); }
-\*                      { print_token(TOK_ASTERISK); }
-\/                      { print_token(TOK_SLASH); }
-&&                      { print_token(TOK_AND); }
-not                     { print_token(TOK_NOT); }
-{id}                    { print_token(TOK_IDENTIFIER); }
-{digit}+                { print_token(TOK_INTEGERCONSTANT); }
-{digit}+({alpha}|_)+    { print_token(UNDEFINED); }             // Invalid identifier
-.                       { print_token(UNDEFINED); }
+;                       { return(TOK_SEMICOLON); }      
+program                 { return(TOK_PROGRAM); }      
+class                   { return(TOK_CLASS); }      
+\{                      { return(TOK_LCURLY); }
+\}                      { return(TOK_RCURLY); }
+declarations            { return(TOK_DECLARATIONS); }
+enddeclarations         { return(TOK_ENDDECLARATIONS); }
+,                       { return(TOK_COMMA); }
+=                       { return(TOK_EQUALS); }
+\[                      { return(TOK_LSQUARE); }
+\]                      { return(TOK_RSQUARE); }
+int                     { return(TOK_INT); }
+string                  { return(TOK_STRING); }
+method                  { return(TOK_METHOD); }
+void                    { return(TOK_VOID); }
+\(                      { return(TOK_LPAREN); }
+\)                      { return(TOK_RPAREN); }
+val                     { return(TOK_VAL); }
+\.                      { return(TOK_DOT); }
+:=                      { return(TOK_ASSIGN); }
+return                  { return(TOK_RETURN); }
+if                      { return(TOK_IF); }
+else                    { return(TOK_ELSE); }
+while                   { return(TOK_WHILE); }
+for                     { return(TOK_FOR); }
+switch                  { return(TOK_SWITCH); }
+case                    { return(TOK_CASE); } 
+\<                      { return(TOK_LESS); }
+\<=                     { return(TOK_LESSEQ); }
+==                      { return(TOK_EQEQ); }
+!=                      { return(TOK_DIFF); }
+\>                      { return(TOK_GREATER); }
+\>=                     { return(TOK_GREATEREQ); }
+\+                      { return(TOK_PLUS); }
+\-                      { return(TOK_MINUS); }
+\|\|                    { return(TOK_2PIPE); }
+\*                      { return(TOK_ASTERISK); }
+\/                      { return(TOK_SLASH); }
+&&                      { return(TOK_AND); }
+not                     { return(TOK_NOT); }
+{id}                    { return(TOK_IDENTIFIER); }
+{digit}+                { return(TOK_INTEGERCONSTANT); }
+{digit}+({alpha}|_)+    { return(UNDEFINED); }             // Invalid identifier
+.                       { return(UNDEFINED); }
 
 %%
 
-void print_token(enum MJToken token) {
+#ifdef __EXECUTABLE__
+/**
+ * Print a token to the standard output and/or to a file.
+ * 
+ * @param token The token to be printed
+ */
+void print_token(enum MJToken token, FILE* output_file, int std_output) {
     
     char* token_name = get_token_name(token);
 
@@ -88,7 +86,14 @@ void print_token(enum MJToken token) {
         fprintf(output_file, "%d %d %d %s %s\n", current_line, offset - yyleng, yyleng, token_name, yytext);
 }
 
+/**
+ * Main function to allow using the lexer as
+ * an individual program.
+ */
 int main(int argc, char *argv[]) {
+
+    int std_output = 1;                     // Print to the standard output?
+    FILE* output_file = NULL;               // Output file
 
     if (argc > 1) {
         output_file = fopen(argv[1], "w");
@@ -101,11 +106,15 @@ int main(int argc, char *argv[]) {
     if (argc > 2)
         std_output = strtoul(argv[2], NULL, 10);
 
-    yylex();
+    enum MJToken token = UNDEFINED;
+
+    while ((token = yylex()) != END_OF_FILE)
+        print_token(token, output_file, std_output);
 
     if (output_file != NULL)
         fclose(output_file);
 
     return 0;
 }
+#endif
 

@@ -5,7 +5,7 @@ class QuickSort
 	method void quickSort(int[] v; int begin; int end)
 		declarations
             int i = begin, j = end-1, pivot = v[(begin + end)/2], aux;
-		endDeclarations
+		enddeclarations
 	{
         while(i <= j)
         {

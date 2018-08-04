@@ -5,7 +5,7 @@ class BinarySearch
 	method int binarySearch(int[] arr; int l; int r; int x)
 		declarations
 			int mid;
-		endDeclarations
+		enddeclarations
 	{
 		if r >= 1
 		{
