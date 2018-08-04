@@ -80,7 +80,7 @@ void print_token(enum MJToken token, FILE* output_file, int std_output) {
     char* token_name = get_token_name(token);
 
     if (std_output) 
-        printf("%d %d %d %s %s\n", current_line, offset - yyleng, yyleng, token_name, yytext);
+        printf("%-6d %-6d %-6d %-25s %-50s\n", current_line, offset - yyleng, yyleng, token_name, yytext);
 
     if (output_file != NULL)
         fprintf(output_file, "%d %d %d %s %s\n", current_line, offset - yyleng, yyleng, token_name, yytext);
