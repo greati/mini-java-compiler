@@ -10,7 +10,7 @@ class BinarySearch
 		if r >= 1
 		{
 			mid := l + (r - l)/2;
-			if (arr[mid] == x)
+			if arr[mid] == x
 			{
 				return mid
 			};

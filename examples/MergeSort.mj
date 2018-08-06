@@ -8,9 +8,9 @@ class MergeSort
             int[] aux;
 		enddeclarations
 	{
-        while(i <= middle && j <= end)
+        while i <= middle && j <= end
         {
-            if(v[i] < v[j]){
+            if v[i] < v[j] {
                 aux[k] := v[i];
                 i := i + 1
             }
@@ -22,14 +22,14 @@ class MergeSort
             k := k + 1
         };
 
-        while(i <= middle)
+        while (i <= middle)
         {
             aux[k] := v[i];
             i := i + 1;
             k := k + 1
         };
 
-        while(j <= end)
+        while (j <= end)
         {
             aux[k] := v[j];
             j := j + 1;
@@ -43,15 +43,15 @@ class MergeSort
 	}
     method void mergeSort(int[] v; int begin; int end)
 		declarations
-            int meio;
+            int middle;
 		enddeclarations
     {
         if(begin < end)
         {
-            meio := (fim + comeco)/2;
-            mergeSort(v, comeco, meio);
-            mergeSort(v, meio, fim);
-            merge(v, comeco, meio, fim)
+            middle := (end + begin)/2;
+            mergeSort(v, begin, middle);
+            mergeSort(v, middle, end);
+            merge(v, begin, middle, end)
         }
 	{
 }
