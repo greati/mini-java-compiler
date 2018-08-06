@@ -64,6 +64,7 @@ read                    { return TOK_READ; }
 \-                      { return TOK_MINUS; }
 \|\|                    { return TOK_2PIPE; }
 \*                      { return TOK_ASTERISK; }
+\%                      { return TOK_MOD; }
 \/                      { return TOK_SLASH; }
 &&                      { return TOK_AND; }
 not                     { return TOK_NOT; }

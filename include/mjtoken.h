@@ -14,6 +14,7 @@ enum MJToken {
     TOK_DECLARATIONS,
     TOK_ENDDECLARATIONS,
     TOK_COMMA,
+    TOK_MOD,
     TOK_EQUALS,
     TOK_LSQUARE,
     TOK_RSQUARE,
@@ -89,6 +90,7 @@ char* get_token_name(enum MJToken token) {
         case TOK_WHILE: return "TOK_WHILE";
         case TOK_LESS: return "TOK_LESS";
         case TOK_LESSEQ: return "TOK_LESSEQ";
+        case TOK_MOD: return "TOK_MOD";
         case TOK_EQEQ: return "TOK_EQEQ";
         case TOK_DIFF: return "TOK_DIFF";
         case TOK_GREATER: return "TOK_GREATER";
