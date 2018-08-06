@@ -105,6 +105,8 @@ char* get_token_name(enum MJToken token) {
         case TOK_NOT: return "TOK_NOT";
         case TOK_INTEGERCONSTANT: return "TOK_INTEGERCONSTANT";
         case TOK_STRINGCONSTANT: return "TOK_STRINGCONSTANT";
+        case TOK_READ: return "TOK_READ";
+        case TOK_PRINT: return "TOK_PRINT";
         default: return "UNDEFINED";
     }
 }
