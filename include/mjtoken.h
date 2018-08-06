@@ -48,6 +48,8 @@ enum MJToken {
     TOK_NOT,
     TOK_INTEGERCONSTANT,
     TOK_STRINGCONSTANT,
+    TOK_PRINT,
+    TOK_READ,
     UNDEFINED,
     END_OF_FILE
 };

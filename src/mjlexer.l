@@ -52,6 +52,8 @@ while                   { return TOK_WHILE; }
 for                     { return TOK_FOR; }
 switch                  { return TOK_SWITCH; }
 case                    { return TOK_CASE; } 
+print                   { return TOK_PRINT; }
+read                    { return TOK_READ; }
 \<                      { return TOK_LESS; }
 \<=                     { return TOK_LESSEQ; }
 ==                      { return TOK_EQEQ; }
