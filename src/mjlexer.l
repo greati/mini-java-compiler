@@ -72,10 +72,17 @@ read                    { return TOK_READ; }
 not                     { return TOK_NOT; }
 {id}                    { return TOK_IDENTIFIER; }
 {integer}               { return TOK_INTEGERCONSTANT; }
-{invalid_id}            { return UNDEFINED; }             // Invalid identifier
-.                       { return UNDEFINED; }
+{invalid_id}            { lexer_error("invalid identifier"); }
+.                       { lexer_error("unknown sequence"); }
 
 %%
+
+/**
+ * Print an error in lexical analysis.
+ */
+void lexer_error(char * msg) {
+    fprintf(stderr, "[mjclexer %d, %d] %s: %s\n", current_line, offset - yyleng, msg, yytext); 
+}
 
 #ifdef __EXECUTABLE__
 
