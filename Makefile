@@ -54,7 +54,7 @@ lexer:
 	@echo "Building lexer...";
 	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(BINDIR)
-	$(FLEX) -o $(BUILDDIR)/lex.yy.c $(SRCDIR)/mjlexer.l;
+	$(FLEX) -o $(BUILDDIR)/lex.yy.c $(SRCDIR)/mjclexer.l;
 	$(CCFLEX) $(BUILDDIR)/lex.yy.c -D__EXECUTABLE__ -lfl -o $(LEXER) $(INCFLAG);
 	$(RM) -r $(BUILDDIR)/lex.yy.c;
 

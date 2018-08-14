@@ -8,7 +8,7 @@ if exists("b:current_syntax")
 endif
 
 " Keywords
-syn keyword mjKeywords program class if else while for return when not print read break method declarations enddeclarations val switch case not
+syn keyword mjKeywords program class if else while for return when not print read break method declarations enddeclarations val switch case not to step
 syn keyword mjTypes int string void
 syn keyword mjTodo contained TODO FIXME NOTE
 

@@ -7,6 +7,11 @@
 int offset = 0;                         // Keep track of the column number
 int current_line = 0;                   // Keep track of the line number
 
+/**
+ * Print an error in lexical analysis.
+ */
+void lexer_error(char *);
+
 %}
 
 ws                  [\t ]+
@@ -73,15 +78,12 @@ not                     { return TOK_NOT; }
 {id}                    { return TOK_IDENTIFIER; }
 {integer}               { return TOK_INTEGERCONSTANT; }
 {invalid_id}            { lexer_error("invalid identifier"); }
-.                       { lexer_error("unknown sequence"); }
+.                       { lexer_error("unknown character or sequence"); }
 
 %%
 
-/**
- * Print an error in lexical analysis.
- */
 void lexer_error(char * msg) {
-    fprintf(stderr, "[mjclexer %d, %d] %s: %s\n", current_line, offset - yyleng, msg, yytext); 
+    fprintf(stderr, "[mjc warning] (row %d, col %lu) %s: %s\n", current_line, offset - yyleng, msg, yytext); 
 }
 
 #ifdef __EXECUTABLE__
@@ -96,10 +98,10 @@ void print_token(enum MJToken token, FILE* output_file, int std_output) {
     char* token_name = get_token_name(token);
 
     if (std_output) 
-        printf("%-6d %-6d %-6d %-25s %-50s\n", current_line, offset - yyleng, yyleng, token_name, yytext);
+        printf("%-6d %-6lu %-6lu %-25s %-50s\n", current_line, offset - yyleng, yyleng, token_name, yytext);
 
     if (output_file != NULL)
-        fprintf(output_file, "%d %d %d %s %s\n", current_line, offset - yyleng, yyleng, token_name, yytext);
+        fprintf(output_file, "%d %lu %lu %s %s\n", current_line, offset - yyleng, yyleng, token_name, yytext);
 }
 
 /**
