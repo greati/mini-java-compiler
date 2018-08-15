@@ -42,6 +42,7 @@ enum MJToken {
     TOK_STEP,
     TOK_SWITCH,
     TOK_CASE,
+    TOK_DEFAULT,
     TOK_PLUS,
     TOK_MINUS,
     TOK_2PIPE,
@@ -102,6 +103,7 @@ char* get_token_name(enum MJToken token) {
         case TOK_FOR: return "TOK_FOR";
         case TOK_SWITCH: return "TOK_SWITCH";
         case TOK_CASE: return "TOK_CASE";
+        case TOK_DEFAULT: return "TOK_DEFAULT";
         case TOK_PLUS: return "TOK_PLUS";
         case TOK_MINUS: return "TOK_MINUS";
         case TOK_2PIPE: return "TOK_2PIPE";

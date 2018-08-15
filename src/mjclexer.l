@@ -59,6 +59,7 @@ to                      { return TOK_TO; }
 step                    { return TOK_STEP; }
 switch                  { return TOK_SWITCH; }
 case                    { return TOK_CASE; } 
+default                 { return TOK_DEFAULT; }
 print                   { return TOK_PRINT; }
 read                    { return TOK_READ; }
 \<                      { return TOK_LESS; }
