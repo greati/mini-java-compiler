@@ -15,6 +15,8 @@ enum MJToken {
     TOK_ENDDECLARATIONS,
     TOK_COMMA,
     TOK_MOD,
+    TOK_ARROBA,
+    TOK_LRSQUARE,
     TOK_EQUALS,
     TOK_LSQUARE,
     TOK_RSQUARE,
@@ -115,6 +117,8 @@ char* get_token_name(enum MJToken token) {
         case TOK_STRINGCONSTANT: return "TOK_STRINGCONSTANT";
         case TOK_READ: return "TOK_READ";
         case TOK_PRINT: return "TOK_PRINT";
+        case TOK_ARROBA: return "TOK_ARROBA";
+        case TOK_LRSQUARE: return "TOK_LRSQUARE";
         default: return "UNDEFINED";
     }
 }

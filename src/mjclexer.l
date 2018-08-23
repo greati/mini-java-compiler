@@ -39,6 +39,7 @@ declarations            { return TOK_DECLARATIONS; }
 enddeclarations         { return TOK_ENDDECLARATIONS; }
 ,                       { return TOK_COMMA; }
 =                       { return TOK_EQUALS; }
+\[\]                    { return TOK_LRSQUARE; }
 \[                      { return TOK_LSQUARE; }
 \]                      { return TOK_RSQUARE; }
 int                     { return TOK_INT; }
@@ -74,6 +75,7 @@ read                    { return TOK_READ; }
 \*                      { return TOK_ASTERISK; }
 \%                      { return TOK_MOD; }
 \/                      { return TOK_SLASH; }
+\@                      { return TOK_ARROBA; }
 &&                      { return TOK_AND; }
 not                     { return TOK_NOT; }
 {id}                    { return TOK_IDENTIFIER; }
