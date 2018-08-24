@@ -2,6 +2,7 @@
 #define __PARSER__
 
 #include "Lexer.h"
+#include <iostream>
 
 /**
  * Represents a parser, composed with a 
@@ -10,7 +11,6 @@
  * @author Vitor Greati
  * @date 2018-08-23
  */
-template<typename TLexer>
 class Parser { 
 
     private:
@@ -31,7 +31,7 @@ class Parser {
          * Simple constructor.
          *
          */
-        Parser(const Lexer* & _lexer) : lexer {_lexer} {} 
+        Parser(Lexer* & _lexer) : lexer {_lexer} {} 
 
         /**
          * Parse a program, reseting the lexer.
@@ -46,7 +46,11 @@ class Parser {
          * Prints a parse error in the standard output.
          *
          * */
-        virtual void parse_error() = 0;
+        inline void unexpected_error(MJToken unexpected) {
+            std::cout << "[mjc error] " << "(" << this->lexer->current_position().row << "," <<
+                this->lexer->current_position().col << ")" 
+                << " parse error: unexpected " << get_token_name(unexpected) << std::endl;
+        }
 
 };
 
