@@ -1,4 +1,5 @@
 %option noyywrap
+%option nounput
 
 %{
 
@@ -89,7 +90,7 @@ not                     { return TOK_NOT; }
 %%
 
 void lexer_error(std::string msg) {
-    fprintf(stderr, "[mjc warning] (row %d, col %lu) %s: %s\n", current_line, offset - yyleng, msg.c_str(), yytext); 
+    fprintf(stderr, "[mjc warning] (row %d, col %d) %s: %s\n", current_line, offset - yyleng, msg.c_str(), yytext); 
 }
 
 void* setUpBuffer(char const* text)

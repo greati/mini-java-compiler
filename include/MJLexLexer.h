@@ -7,6 +7,8 @@
 extern int   yylex();
 extern char* yytext;
 extern int   yyleng;
+extern int   current_line;
+extern int   offset;
 
 extern void* setUpBuffer(char const* text);
 extern void  tearDownBuffer(void* buffer);
@@ -32,8 +34,11 @@ class MJLexLexer : public Lexer {
             tearDownBuffer(buffer);
         }
         
-        MJToken next_token() override;
+        bool next_token() override;
 
+        Position current_position() override;
+
+        void reset(std::string) override;
 };
 
 #endif

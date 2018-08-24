@@ -53,7 +53,7 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(CPPSRCEXT)
 parser:
 	@echo "Making lexer...";
 	$(FLEX) -o $(SRCDIR)/lex.yy.c -ll $(SRCDIR)/mjclexer.l;
-	g++ $(SRCDIR)/lex.yy.c $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJLexLexer.cpp $(SRCDIR)/LexerDriver.cpp -o $(BINDIR)/lexerdriver $(INCFLAG) -std=c++11 -Wall
+	g++ $(SRCDIR)/lex.yy.c $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJLexLexer.cpp $(SRCDIR)/ParserDriver.cpp -o $(BINDIR)/lexerdriver $(INCFLAG) -std=c++11 -Wall
 
 
 lexer:
@@ -61,7 +61,7 @@ lexer:
 	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(BINDIR)
 	$(FLEX) -o $(BUILDDIR)/lex.yy.c $(SRCDIR)/mjclexer.l;
-	g++ $(SRCDIR)/MJToken.cpp $(BUILDDIR)/lex.yy.c -D__EXECUTABLE__ -lfl -o $(LEXER) $(INCFLAG);
+	g++ $(SRCDIR)/MJToken.cpp $(BUILDDIR)/lex.yy.c -D__EXECUTABLE__ -o $(LEXER) $(INCFLAG);
 	$(RM) -r $(BUILDDIR)/lex.yy.c;
 
 clean:
