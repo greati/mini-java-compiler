@@ -1,6 +1,10 @@
+%option noyywrap
+%option nounput
+
 %{
 
-#include <mjtoken.h>
+#include "MJToken.h"
+#include <string>
 
 #define YY_USER_ACTION offset += yyleng;
 
@@ -10,7 +14,7 @@ int current_line = 0;                   // Keep track of the line number
 /**
  * Print an error in lexical analysis.
  */
-void lexer_error(char *);
+void lexer_error(std::string);
 
 %}
 
@@ -85,9 +89,23 @@ not                     { return TOK_NOT; }
 
 %%
 
-void lexer_error(char * msg) {
-    fprintf(stderr, "[mjc warning] (row %d, col %lu) %s: %s\n", current_line, offset - yyleng, msg, yytext); 
+void lexer_error(std::string msg) {
+    fprintf(stderr, "[mjc warning] (row %d, col %d) %s: %s\n", current_line, offset - yyleng, msg.c_str(), yytext); 
 }
+
+void* setUpBuffer(char const* text)
+{
+    YY_BUFFER_STATE buffer  = yy_scan_string(text);
+    yy_switch_to_buffer(buffer);
+
+    return buffer;
+}
+
+void tearDownBuffer(void* buffer)
+{
+    yy_delete_buffer((YY_BUFFER_STATE)buffer);
+}
+
 
 #ifdef __EXECUTABLE__
 
@@ -98,13 +116,13 @@ void lexer_error(char * msg) {
  */
 void print_token(enum MJToken token, FILE* output_file, int std_output) {
     
-    char* token_name = get_token_name(token);
+    std::string token_name = get_token_name(token);
 
     if (std_output) 
-        printf("%-6d %-6lu %-6lu %-25s %-50s\n", current_line, offset - yyleng, yyleng, token_name, yytext);
+        printf("%-6d %-6lu %-6lu %-25s %-50s\n", current_line, offset - yyleng, yyleng, token_name.c_str(), yytext);
 
     if (output_file != NULL)
-        fprintf(output_file, "%d %lu %lu %s %s\n", current_line, offset - yyleng, yyleng, token_name, yytext);
+        fprintf(output_file, "%d %lu %lu %s %s\n", current_line, offset - yyleng, yyleng, token_name.c_str(), yytext);
 }
 
 /**
@@ -129,7 +147,7 @@ int main(int argc, char *argv[]) {
 
     enum MJToken token = UNDEFINED;
 
-    while ((token = yylex()) != END_OF_FILE)
+    while ((token = (MJToken) yylex()) != END_OF_FILE)
         print_token(token, output_file, std_output);
 
     if (output_file != NULL)

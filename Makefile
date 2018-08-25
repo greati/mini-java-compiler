@@ -14,7 +14,7 @@ LEXER = $(BINDIR)/mjclexer
 # TARGET
 TARGET = $(BINDIR)/mjc
 # EXTENSIONS
-SRCEXT = c
+CPPSRCEXT = hpp
 HEADEREXT = h
 # SOURCES LIST
 SOURCES = $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
@@ -23,7 +23,7 @@ OBJS = $(patsubst $(SRCDIR)/%, $(BUILDDIR)/%, $(SOURCES:.$(SRCEXT)=.o))
 # COMPILER
 CC = g++ 
 # FLEX
-FLEX = lex
+FLEX = flex
 # FOR CLEANING
 RM = /bin/rm
 # WARNING FLAG
@@ -45,17 +45,23 @@ CFLAGS = $(DEBUG) -c $(WARN) -std=c++11
 $(TARGET): $(OBJS)
 	@echo "Linking..."
 	@echo " $(CC) $^ -o $(TARGET) $(LFLAGS)"; $(CC) $^ -o $(TARGET) $(LFLAGS)
-$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
+$(BUILDDIR)/%.o: $(SRCDIR)/%.$(CPPSRCEXT)
 	@mkdir -p $(BUILDDIR)
 	@echo " $(CC) $(CFLAGS) $(INCFLAG) -o $@ $<"; $(CC) $(CFLAGS) $(INCFLAG) -o $@ $<	
 
 # DUMMY ENTRIES
+parser:
+	@echo "Making lexer...";
+	$(FLEX) -o $(SRCDIR)/lex.yy.c -ll $(SRCDIR)/mjclexer.l;
+	g++ $(SRCDIR)/MJRecursiveParser.cpp $(SRCDIR)/lex.yy.c $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJLexLexer.cpp $(SRCDIR)/ParserDriver.cpp -o $(BINDIR)/lexerdriver $(INCFLAG) -std=c++11 -Wall
+
+
 lexer:
 	@echo "Building lexer...";
 	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(BINDIR)
 	$(FLEX) -o $(BUILDDIR)/lex.yy.c $(SRCDIR)/mjclexer.l;
-	$(CCFLEX) $(BUILDDIR)/lex.yy.c -D__EXECUTABLE__ -lfl -o $(LEXER) $(INCFLAG);
+	g++ $(SRCDIR)/MJToken.cpp $(BUILDDIR)/lex.yy.c -D__EXECUTABLE__ -o $(LEXER) $(INCFLAG);
 	$(RM) -r $(BUILDDIR)/lex.yy.c;
 
 clean:

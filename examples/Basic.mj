@@ -1,0 +1,13 @@
+program Oi;
+
+class Ola {
+    declarations
+    enddeclarations
+}
+
+
+#class AnotherClass {
+#    declarations
+#        int[]];
+#    enddeclarations
+#}
