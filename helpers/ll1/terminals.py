@@ -287,7 +287,7 @@ for p in PRODUCTIONS:
     right = r[1].split(' ')
     prod = []
     for s in right:
-        if s == ',' :
+        if s == ',':
             s = 'comma'
         if s in TERM_TOK:
             if TERM_TOK[s] != '':

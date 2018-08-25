@@ -37,7 +37,6 @@ bool MJRecursiveParser::expect(MJToken token) {
         return true;
     else {
         parse_error();
-        this->lexer->next_token();
         return false;
     }
 }
@@ -49,9 +48,10 @@ void MJRecursiveParser::brackets_opt() {
 }
 
 void MJRecursiveParser::type_aux() {
-    if (accept(TOK_IDENTIFIER));
-    else if (accept(TOK_INT));
-    else if (accept(TOK_STRING));
+    if (accept(TOK_IDENTIFIER) ||
+        accept(TOK_INT) ||
+        accept(TOK_STRING)) 
+        ;
     else {
         parse_error(TYPE_AUX);
     };
@@ -79,12 +79,12 @@ void MJRecursiveParser::field_decl_list_decls() {
 }
 
 void MJRecursiveParser::decls() {
-
-    if (lookup(TOK_DECLARATIONS)) {
-        this->lexer->next_token();
+    if (accept(TOK_DECLARATIONS)) {
         field_decl_list_decls();
         expect(TOK_ENDDECLARATIONS);
-    } else parse_error(DECLS);
+    } else {
+        parse_error(DECLS);
+    }
 }
 
 void MJRecursiveParser::decls_opt() {
@@ -105,18 +105,21 @@ void MJRecursiveParser::method_decl_list() {
 }
 
 void MJRecursiveParser::class_body() {
-    if (expect(TOK_LCURLY)) {
+    if (accept(TOK_LCURLY)) {
         decls_opt();
         //method_decl_list();
         expect(TOK_RCURLY);
+    } else {
+        parse_error(CLASS_BODY);
     }
 }
 
 void MJRecursiveParser::class_decl(){
-    if (expect(TOK_CLASS)) {
-        if (expect(TOK_IDENTIFIER)) {
-            class_body();
-        }
+    if (accept(TOK_CLASS)) {
+        expect(TOK_IDENTIFIER);
+        class_body();
+    } else {
+        parse_error(CLASS_DECL);
     }
 }
 

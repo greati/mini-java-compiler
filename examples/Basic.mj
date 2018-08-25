@@ -1,7 +1,8 @@
 program Oi;
 
-class aaa {
+class Ola {
     declarations
+    enddeclarations
 }
 
 
