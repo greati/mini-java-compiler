@@ -1,13 +1,14 @@
 #include <iostream>
 #include "MJLexLexer.h"
+#include "MJRecursiveParser.h"
 
 int main(void) {
 
-    MJLexLexer lexer{"program oi;"};
+    MJLexLexer * lexer = new MJLexLexer;
 
-    while(lexer.next_token()) {
-        std::cout << get_token_name(lexer.current_token()) << std::endl;
-    }
+    MJRecursiveParser parser {lexer};
+
+    parser.parse("programa Ola;");
 
     return 0;
 

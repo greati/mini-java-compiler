@@ -26,6 +26,8 @@ class MJLexLexer : public Lexer {
 
     public:
 
+        MJLexLexer() {}
+
         MJLexLexer(std::string const& input) : text {input} {
             buffer = setUpBuffer(text.c_str());
         }

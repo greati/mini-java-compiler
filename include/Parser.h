@@ -13,7 +13,7 @@
  */
 class Parser { 
 
-    private:
+    protected:
         
         Lexer * lexer;              /** A lexical analyser */
 
@@ -31,7 +31,7 @@ class Parser {
          * Simple constructor.
          *
          */
-        Parser(Lexer* & _lexer) : lexer {_lexer} {} 
+        Parser(Lexer * _lexer) : lexer {_lexer} {} 
 
         /**
          * Parse a program, reseting the lexer.
@@ -46,10 +46,10 @@ class Parser {
          * Prints a parse error in the standard output.
          *
          * */
-        inline void unexpected_error(MJToken unexpected) {
+        inline void unexpected_error(MJToken expected) {
             std::cout << "[mjc error] " << "(" << this->lexer->current_position().row << "," <<
                 this->lexer->current_position().col << ")" 
-                << " parse error: unexpected " << get_token_name(unexpected) << std::endl;
+                << " parse error: expected " << get_token_name(expected) << std::endl;
         }
 
 };
