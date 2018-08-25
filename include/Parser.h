@@ -3,6 +3,7 @@
 
 #include "Lexer.h"
 #include <iostream>
+#include <set>
 
 /**
  * Represents a parser, composed with a 
@@ -16,6 +17,7 @@ class Parser {
     protected:
         
         Lexer * lexer;              /** A lexical analyser */
+        std::set<MJToken> expected_tokens;   /** Store the expected tokens */
 
     protected:
 
@@ -51,6 +53,25 @@ class Parser {
                 this->lexer->current_position().col << ")" 
                 << " parse error: expected " << get_token_name(expected) << std::endl;
         }
+        
+        inline void unexpected_token_error(MJToken unexpected) {
+            std::cout << "[mjc error] " << "(" << this->lexer->current_position().row << "," <<
+                this->lexer->current_position().col << ")" 
+                << " parse error: unexpected " << get_token_name(unexpected) << std::endl;
+            this->lexer->next_token();
+        }
+
+        inline std::string expected_tokens_string() {
+            std::string expected_tokens_str = "";
+            for (auto it = this->expected_tokens.begin(); it != this->expected_tokens.end(); ++it) {
+                if (it != this->expected_tokens.begin())
+                    expected_tokens_str += ",";
+                expected_tokens_str += get_token_name(*it);
+            }
+            return expected_tokens_str;
+        }
+
+
 
 };
 

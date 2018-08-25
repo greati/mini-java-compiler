@@ -2,6 +2,7 @@
 #define __LEXER__
 
 #include "MJToken.h"
+#include <iostream>
 
 /**
  * Lexical analyser.
@@ -50,6 +51,11 @@ class Lexer {
          *
          * */
         virtual void reset(std::string) = 0;
+
+        /**
+         * Print the current token.
+         */
+        inline void print_current_token() { std::cout << get_token_name(current_token()) << std::endl; }
 
 };
 

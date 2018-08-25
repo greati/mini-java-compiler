@@ -1,7 +1,7 @@
 #ifndef __MJRECPARSER__
 #define __MJRECPARSER__
 
-#include "Parser.h"
+#include "MJLL1Parser.h"
 #include <string>
 
 /**
@@ -10,11 +10,11 @@
  * @autor Vitor Greati
  * @date 2018-08-23
  * */
-class MJRecursiveParser : public Parser {
+class MJRecursiveParser : public MJLL1Parser {
 
     public:
 
-        MJRecursiveParser(Lexer * _lexer) : Parser{_lexer} {}
+        MJRecursiveParser(Lexer * _lexer) : MJLL1Parser{_lexer} {}
 
     private:
 
@@ -37,6 +37,16 @@ class MJRecursiveParser : public Parser {
          * @return if argument matches the input
          * */
         bool expect(MJToken token);
+        bool expect(MJToken token, MJNonterminal curnonterm);
+
+        /**
+         * Check the current input symbol without
+         * consuming it anyway.
+         *
+         * @param token The token
+         * @return if the current token is equals to the param
+         * */
+        bool lookup(MJToken token);
 
         /**
          * Grammar implementation.
