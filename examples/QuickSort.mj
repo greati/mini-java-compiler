@@ -9,11 +9,11 @@ class QuickSort
 	{
         while i <= j
         {
-            while (v[i] < pivo && i < end)
+            while (v[i] < pivo) && (i < end)
             {
                 i := i + 1
             };
-            while (v[j] > pivo && j > begin)
+            while (v[j] > pivo) && (j > begin)
             {
                 j := j - 1
             };
@@ -23,7 +23,7 @@ class QuickSort
                 v[i] := v[j];
                 v[j] := aux;
                 i := i + 1;
-                j = j - 1
+                j := j - 1
             }
         };
         if j > begin

@@ -1,11 +1,12 @@
 #include <iostream>
 #include "MJLexLexer.h"
-#include "MJRecursiveParser.h"
 #include "MJNonterminal.h"
 #include <map>
 #include <vector>
 #include <memory>
 #include "MJToken.h"
+#include "MJRecursiveParser.h"
+#include "MJNonRecursiveParser.h"
 
 int main(int argn, char** args) {
 
@@ -18,17 +19,13 @@ int main(int argn, char** args) {
 
     auto lexer = std::make_shared<MJLexLexer>();
 
-    //lexer->reset(program);
+    MJRecursiveParser recparser {lexer};
 
-    //while (lexer->current_token() != END_OF_FILE) {
-	//lexer->next_token();	
-	//std::cout << lexer->current_token() << std::endl;
-    //}
+    recparser.parse(program);
 
+	MJNonRecursiveParser nonrecparser {lexer};
 
-    MJRecursiveParser parser {lexer};
-
-    parser.parse(program);
+    nonrecparser.parse(program);
 
     return 0;
 
