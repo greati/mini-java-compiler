@@ -50,10 +50,10 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(CPPSRCEXT)
 	@echo " $(CC) $(CFLAGS) $(INCFLAG) -o $@ $<"; $(CC) $(CFLAGS) $(INCFLAG) -o $@ $<	
 
 # DUMMY ENTRIES
-parser:
+ll1parser:
 	@echo "Making lexer...";
 	$(FLEX) -o $(SRCDIR)/lex.yy.c -ll $(SRCDIR)/mjclexer.l;
-	g++ $(SRCDIR)/MJNonRecursiveParser.cpp $(SRCDIR)/MJRecursiveParser.cpp $(SRCDIR)/lex.yy.c $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJLexLexer.cpp $(SRCDIR)/ParserDriver.cpp -o $(BINDIR)/lexerdriver $(INCFLAG) -std=c++11 -Wall
+	g++ $(SRCDIR)/MJNonRecursiveParser.cpp $(SRCDIR)/MJRecursiveParser.cpp $(SRCDIR)/lex.yy.c $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJLexLexer.cpp $(SRCDIR)/ParserDriver.cpp -o $(BINDIR)/mjcll1 $(INCFLAG) -std=c++11 -Wall
 
 
 lexer:
