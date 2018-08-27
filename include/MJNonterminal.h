@@ -33,6 +33,7 @@ enum MJNonterminal {
     STMT_LIST,
     STMT_LIST_SEMICOLON,
     STMT,
+    VAL_OPT,
     VARIABLE_START_STMT,
     ASSIGN_STMT,
     METHOD_CALL_STMT,

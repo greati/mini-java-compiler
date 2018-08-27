@@ -41,31 +41,424 @@ bool MJRecursiveParser::expect(MJToken token) {
     }
 }
 
+//TODO: rel-expr
+
+void MJRecursiveParser::expression() {
+    if(lookup(TOK_LPAREN) || lookup(TOK_PLUS) ||
+       lookup(TOK_MINUS) || lookup(TOK_NOT) ||
+       lookup(TOK_INTEGERCONSTANT) || lookup(TOK_STRINGCONSTANT) ||
+       lookup(TOK_IDENTIFIER)) {
+        rel_expr();
+    } else {
+        parse_error(EXPRESSION);
+    }
+}
+
+void MJRecursiveParser::read_stmt() {
+    if (lookup(TOK_READ)) {
+        expect(TOK_READ);
+        expect(TOK_IDENTIFIER);
+    } else {
+        parse_error(READ_STMT);
+    }
+}
+
+void MJRecursiveParser::print_stmt() {
+    if (lookup(TOK_PRINT)) {
+        expect(TOK_PRINT);
+        expression();
+    } else {
+        parse_error(PRINT_STMT);
+    }
+}
+
+void MJRecursiveParser::case_list() {
+    if (lookup(TOK_CASE)) {
+        _case();
+        case_list();
+    } else if (lookup(TOK_DEFAULT)) {
+        expect(TOK_DEFAULT);
+        stmt_list();
+    }
+}
+
+void MJRecursiveParser::_case() {
+    if (lookup(TOK_CASE)) {
+        expect(TOK_CASE);
+        expression();
+        stmt_list();
+    } else {
+        parse_error(CASE);
+    }
+}
+
+void MJRecursiveParser::switch_stmt() {
+    if (lookup(TOK_SWITCH)) {
+        expect(TOK_SWITCH);
+        expression(); 
+        expect(TOK_LCURLY);
+        _case();
+        case_list();
+        expect(TOK_RCURLY);
+    } else {
+        parse_error(SWITCH_STMT);
+    }
+}
+
+void MJRecursiveParser::while_stmt() {
+    if (lookup(TOK_WHILE)) {
+        expect(TOK_WHILE);
+        expression();
+        stmt_list();
+    } else {
+        parse_error(WHILE_STMT);
+    }
+}
+
+void MJRecursiveParser::step_opt() {
+    if (lookup(TOK_STEP)) {
+        expect(TOK_STEP);
+        expression();
+    }
+}
+
+void MJRecursiveParser::if_stmt_aux() {
+    if (lookup(TOK_IF)) {
+        if_stmt();
+    } else (lookup(TOK_LCURLY)) {
+        stmt_list(); 
+    } else {
+        parse_error(IF_STMT_AUX);
+    }
+}
+
+void MJRecursiveParser::else_part() {
+    if (lookup(TOK_ELSE)) {
+        expect(TOK_ELSE);
+        if_stmt_aux();
+    }
+}
+
+void MJRecursiveParser::if_stmt() {
+    if (lookup(TOK_IF)) {
+        expect(TOK_IF);
+        expression();
+        stmt_list();
+        else_part();
+    } else {
+        parse_error(IF_STMT);
+    }
+}
+
+void MJRecursiveParser::expression_opt() {
+    if(lookup(TOK_LPAREN) || lookup(TOK_PLUS) ||
+       lookup(TOK_MINUS) || lookup(TOK_NOT) ||
+       lookup(TOK_INTEGERCONSTANT) || lookup(TOK_STRINGCONSTANT) ||
+       lookup(TOK_IDENTIFIER)) {
+        expression();
+    }   
+}
+
+void MJRecursiveParser::return_stmt() {
+    if (lookup(TOK_RETURN)) {
+        expect(TOK_RETURN);
+        expression_opt();
+    } else {
+        parse_error(RETURN_STMT);
+    }
+}
+
+void MJRecursiveParser::expression_list_comma() {
+    if (lookup(TOK_COMMA)) {
+        expect(TOK_COMMA);
+        expression();
+        expression_list_comma();
+    }
+}
+
+void MJRecursiveParser::actual_params_list() {
+    if(lookup(TOK_LPAREN) || lookup(TOK_PLUS) ||
+       lookup(TOK_MINUS) || lookup(TOK_NOT) ||
+       lookup(TOK_INTEGERCONSTANT) || lookup(TOK_STRINGCONSTANT) ||
+       lookup(TOK_IDENTIFIER)) {
+        expression();
+        expression_list_comma();
+    }
+}
+
+void MJRecursiveParser::method_call_stmt() {
+    if (lookup(TOK_LPAREN)) {
+        expect(TOK_LPAREN);
+        actual_params_list();
+        expect(TOK_RPAREN);
+    } else {
+        parse_error(METHOD_CALL_STMT);
+    }
+}
+
+void MJRecursiveParser::assign_stmt() {
+    if (lookup(TOK_ASSIGN)) {
+        expect(TOK_ASSIGN);
+        expression();
+    } else {
+        parse_error(ASSIGN_STMT);
+    }
+}
+
+void MJRecursiveParser::variable_start_stmt() {
+    if (lookup(TOK_ASSIGN)) {
+        assign_stmt();
+    } else if (lookup(TOK_LPAREN)) {
+        method_call_stmt();
+    } else {
+        parse_error(VARIABLE_START_STMT);
+    }
+}
+
+void MJRecursiveParser::stmt() {
+
+    if (lookup(TOK_IDENTIFIER)) {
+        variable();
+        variable_start_stmt();
+    } else if (lookup(TOK_RETURN)) {
+        return_stmt(); 
+    } else if (lookup(TOK_IF)) {
+        if_stmt();
+    } else if (lookup(TOK_WHILE)) {
+        while_stmt();
+    } else if (lookup(TOK_FOR)) {
+        for_stmt();
+    } else if (lookup(TOK_SWITCH)) {
+        switch_stmt(); 
+    } else if (lookup(TOK_PRINT)) {
+        print_stmt();
+    } else if (lookup(TOK_READ)) {
+        read_stmt();
+    } else {
+        parse_error(STMT);
+    }
+}
+
+void MJRecursiveParser::stmt_list_semicolon() {
+    if (lookup(TOK_SEMICOLON)) {
+        expect(TOK_SEMICOLON);
+        stmt();
+        stmt_list_semicolon();
+    }
+}
+
+void MJRecursiveParser::stmt_list() {
+    if (lookup(TOK_LCURLY)) {
+        expect(TOK_LCURLY);
+        stmt();
+        stmt_list_semicolon();
+        expect(TOK_RCURLY);
+    } else {
+        parse_error(STMT_LIST);
+    }
+}
+
+void MJRecursiveParser::block() {
+    if (lookup(TOK_DECLARATIONS) || lookup(TOK_LCURLY)) {
+        decls_opt(); 
+        stmt_list();
+    } else {
+        parse_error(BLOCK);
+    }
+}
+
+void MJRecursiveParser::array_dim_decl_list() {
+    if (lookup(TOK_LSQUARE)) {
+        array_dim_decl();
+        array_dim_decl_list();
+    }
+}
+
+void MJRecursiveParser::array_dim_decl() {
+    if (lookup(TOK_LSQUARE)) {
+        expect(TOK_LSQUARE);
+        expression();
+        expect(TOK_RSQUARE);
+    } else {
+        parse_error(ARRAY_DIM_DECL);
+    }
+}
+
+void MJRecursiveParser::array_creation_expr() {
+    if (lookup(TOK_ARROBA)) {
+        expect(TOK_ARROBA);
+        type();
+        array_dim_decl();
+        array_dim_decl_list(); 
+    } else {
+        parse_error(ARRAY_CREATION_EXPR);
+    }
+}
+
+void MJRecursiveParser::var_init_list_comma() {
+    if (lookup(TOK_COMMA)) {
+        expect(TOK_COMMA);
+        var_init();
+        var_init_list_comma();
+    }
+}
+
+void MJRecursiveParser::array_init() {
+    if (lookup(TOK_LCURLY)) {
+        expect(TOK_LCURLY);
+        var_init();
+        var_init_list_comma();
+        expect(TOK_RCURLY); 
+    } else {
+        parse_error(ARRAY_INIT);
+    }
+}
+
+void MJRecursiveParser::var_init() {
+    if(lookup(TOK_LPAREN) || lookup(TOK_PLUS) ||
+       lookup(TOK_MINUS) || lookup(TOK_NOT) ||
+       lookup(TOK_INTEGERCONSTANT) || lookup(TOK_STRINGCONSTANT) ||
+       lookup(TOK_IDENTIFIER)) {
+        expression();
+    } else if (lookup(TOK_LCURLY)) {
+        array_init();
+    } else if (lookup(TOK_ARROBA)) {
+        array_creation_expr();
+    } else {
+        parse_error(VAR_INIT);
+    }
+}
+
+void MJRecursiveParser::var_decl_id() {
+    if (lookup(TOK_IDENTIFIER) {
+        expect(TOK_IDENTIFIER);
+        brackets_opt();
+    } else {
+        parse_error(VAR_DECL_ID);
+    }
+}
+
+void MJRecursiveParser::val_opt() {
+    if (lookup(TOK_VAL)) {
+        expect(TOK_VAL);
+    }
+}
+
+void MJRecursiveParser::formal_params_list_opt() {
+    if (lookup(TOK_ID) || lookup(TOK_VAL) || 
+        lookup(TOK_INT) || lookup(TOK_STRING)) {
+        formal_params_list();
+    }
+}
+
+void MJRecursiveParser::id_list_comma() {
+    if (lookup(TOK_COMMA)) {
+        expect(TOK_COMMA);
+        expect(TOK_IDENTIFIER);
+        id_list_comma();
+    }    
+}
+
+void MJRecursiveParser::formal_params_list_aux() {
+    if (lookup(TOK_SEMICOLON)) {
+        expect(TOK_SEMICOLON);
+        formal_params_list();
+    }
+}
+
+void MJRecursiveParser::formal_params_list() {
+    if (lookup(TOK_VAL) || lookup(TOK_IDENTIFIER) ||
+        lookup(TOK_INT) || lookup(TOK_STRING)) {
+        val_opt();
+        type();
+        expect(TOK_IDENTIFIER);
+        id_list_comma();
+        formal_params_list_aux();
+    } else {
+        parse_error(FORMAL_PARAMS_LIST);
+    }    
+}
+
+void MJRecursiveParser::method_return_type() {
+    if (lookup(TOK_VOID)) {
+        expect(TOK_VOID);
+    } else if (lookup(TOK_INT) || lookup(TOK_STRING) || lookup(TOK_IDENTIFIER)) {
+        type();
+    } else {
+        parse_error(METHOD_RETURN_TYPE);
+    }
+}
+
+void MJRecursiveParser::method_decl() {
+    if (lookup(TOK_METHOD)) {
+        expect(TOK_METHOD);
+        method_return_type();
+        expect(TOK_IDENTIFIER);
+        expect(TOK_LPAREN); 
+        formal_params_list_opt();
+        expect(TOK_RPAREN);
+        block();
+    } else {
+        parse_error(METHOD_DECL);
+    }
+}
+
 void MJRecursiveParser::brackets_opt() {
-    if (accept(TOK_LRSQUARE)) {
+    if (lookup(TOK_LRSQUARE)) {
+        expect(TOK_LRSQUARE);
         brackets_opt();
     }
 }
 
 void MJRecursiveParser::type_aux() {
-    if (accept(TOK_IDENTIFIER) ||
-        accept(TOK_INT) ||
-        accept(TOK_STRING)) 
-        ;
+    if (lookup(TOK_IDENTIFIER))
+        expect(TOK_IDENTIFIER);
+    else if (lookup(TOK_INT)) 
+        expect(TOK_INT);
+    else if (lookup(TOK_STRING))
+        expect(TOK_STRING);
     else {
         parse_error(TYPE_AUX);
     };
 }
 
 void MJRecursiveParser::type() {
-    type_aux();
-    brackets_opt();
+    if (lookup(TOK_IDENTIFIER) || 
+        lookup(TOK_INT) ||
+        lookup(TOK_STRING)) {
+        type_aux();
+        brackets_opt();
+    }
+}
+
+void MJRecursiveParser::field_decl_aux_2() {
+    if (lookup(TOK_COMMA)) {
+        expect(TOK_COMMA);  
+        var_decl_id();
+        field_decl_aux_1();
+    }
+}
+
+void MJRecursiveParser::field_decl_aux_1() {
+    if (lookup(TOK_COMMA)) {
+        field_decl_aux_2();
+    } else if (lookup(TOK_EQUALS)) {
+        expect(TOK_EQUALS);
+        var_init();
+        field_decl_aux_2();
+    }
 }
 
 void MJRecursiveParser::field_decl() {
-    type();
-    //var_decl_id();
-    //field_decl_aux_1();
+    if (lookup(TOK_IDENTIFIER) || 
+        lookup(TOK_INT) ||
+        lookup(TOK_STRING)) {
+        type();
+        var_decl_id();
+        field_decl_aux_1();
+    } else {
+        parse_error(FIELD_DECL);
+    }
 }
 
 void MJRecursiveParser::field_decl_list_decls() {
@@ -78,8 +471,16 @@ void MJRecursiveParser::field_decl_list_decls() {
     } 
 }
 
+void MJRecursiveParser::method_decl_list() {
+    if (lookup(TOK_METHOD)) {
+        method_decl();
+        method_decl_list();
+    }
+}
+
 void MJRecursiveParser::decls() {
-    if (accept(TOK_DECLARATIONS)) {
+    if (lookup(TOK_DECLARATIONS)) {
+        expect(TOK_DECLARATIONS);
         field_decl_list_decls();
         expect(TOK_ENDDECLARATIONS);
     } else {
@@ -93,21 +494,11 @@ void MJRecursiveParser::decls_opt() {
     } 
 }
 
-void MJRecursiveParser::method_decl() {
-
-}
-
-void MJRecursiveParser::method_decl_list() {
-    if (lookup(TOK_METHOD)) {
-        method_decl();
-        method_decl_list();
-    }
-}
-
 void MJRecursiveParser::class_body() {
-    if (accept(TOK_LCURLY)) {
+    if (lookup(TOK_LCURLY)) {
+        expect(TOK_LCURLY);
         decls_opt();
-        //method_decl_list();
+        method_decl_list();
         expect(TOK_RCURLY);
     } else {
         parse_error(CLASS_BODY);
@@ -115,7 +506,8 @@ void MJRecursiveParser::class_body() {
 }
 
 void MJRecursiveParser::class_decl(){
-    if (accept(TOK_CLASS)) {
+    if (lookup(TOK_CLASS)) {
+        expect(TOK_CLASS);
         expect(TOK_IDENTIFIER);
         class_body();
     } else {
