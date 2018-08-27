@@ -17,8 +17,7 @@ class Parser {
 
     protected:
         
-	std::shared_ptr<Lexer> lexer;
-        //Lexer * lexer;              /** A lexical analyser */
+        std::shared_ptr<Lexer> lexer;
         std::set<MJToken> expected_tokens;   /** Store the expected tokens */
 
     protected:
@@ -48,23 +47,6 @@ class Parser {
             _parse(program);
         }
 
-        /**
-         * Prints a parse error in the standard output.
-         *
-         * */
-        inline void unexpected_error(MJToken expected) {
-            std::cout << "[mjc error] " << "(" << this->lexer->current_position().row << "," <<
-                this->lexer->current_position().col << ")" 
-                << " parse error: expected " << get_token_name(expected) << std::endl;
-        }
-        
-        inline void unexpected_token_error(MJToken unexpected) {
-            std::cout << "[mjc error] " << "(" << this->lexer->current_position().row << "," <<
-                this->lexer->current_position().col << ")" 
-                << " parse error: unexpected " << get_token_name(unexpected) << std::endl;
-            this->lexer->next_token();
-        }
-
         inline std::string expected_tokens_string() {
             std::string expected_tokens_str = "";
             for (auto it = this->expected_tokens.begin(); it != this->expected_tokens.end(); ++it) {
@@ -74,8 +56,6 @@ class Parser {
             }
             return expected_tokens_str;
         }
-
-
 
 };
 
