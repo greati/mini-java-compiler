@@ -2,6 +2,7 @@ program Oi;
 
 class Ola {
     declarations
+        int a = 0
     enddeclarations
 }
 
