@@ -2,12 +2,13 @@
 #include "MJNonterminal.h"
 #include <map>
 #include <vector>
+#include <memory>
 
 class MJLL1Parser : public Parser {
 
     public:
 
-        MJLL1Parser(Lexer * _lexer) : Parser{_lexer} {}
+        MJLL1Parser(std::shared_ptr<Lexer>_lexer) : Parser{_lexer} {}
 
     protected:
 
