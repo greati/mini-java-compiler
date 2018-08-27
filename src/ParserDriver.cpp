@@ -5,6 +5,8 @@
 #include "MJNonterminal.h"
 #include <map>
 #include <vector>
+#include <memory>
+#include "MJToken.h"
 
 int main(int argn, char** args) {
 
@@ -15,7 +17,7 @@ int main(int argn, char** args) {
         program += program_line + "\n";
     }
 
-    MJLexLexer * lexer = new MJLexLexer;
+    auto lexer = std::make_shared<MJLexLexer>();
 
     //MJRecursiveParser parser {lexer};
 	MJNonRecursiveParser parser {lexer};

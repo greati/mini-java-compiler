@@ -3,6 +3,7 @@
 
 #include "Lexer.h"
 #include <iostream>
+#include <memory>
 #include <set>
 
 /**
@@ -16,7 +17,8 @@ class Parser {
 
     protected:
         
-        Lexer * lexer;              /** A lexical analyser */
+	std::shared_ptr<Lexer> lexer;
+        //Lexer * lexer;              /** A lexical analyser */
         std::set<MJToken> expected_tokens;   /** Store the expected tokens */
 
     protected:
@@ -33,7 +35,9 @@ class Parser {
          * Simple constructor.
          *
          */
-        Parser(Lexer * _lexer) : lexer {_lexer} {} 
+        Parser(std::shared_ptr<Lexer> _lexer) : lexer {_lexer} {} 
+
+	virtual ~Parser() {}
 
         /**
          * Parse a program, reseting the lexer.

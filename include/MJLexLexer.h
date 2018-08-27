@@ -26,14 +26,17 @@ class MJLexLexer : public Lexer {
 
     public:
 
-        MJLexLexer() {}
+        MJLexLexer() {
+           buffer = setUpBuffer(std::string("").c_str());
+	}
 
         MJLexLexer(std::string const& input) : text {input} {
             buffer = setUpBuffer(text.c_str());
         }
 
         ~MJLexLexer() {
-            tearDownBuffer(buffer);
+            if (buffer != nullptr)
+                tearDownBuffer(buffer);
         }
         
         bool next_token() override;

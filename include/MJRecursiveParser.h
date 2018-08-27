@@ -3,6 +3,7 @@
 
 #include "MJLL1Parser.h"
 #include <string>
+#include <memory>
 
 /**
  * Top-down recursive parser for the Mini-Java language.
@@ -14,7 +15,9 @@ class MJRecursiveParser : public MJLL1Parser {
 
     public:
 
-        MJRecursiveParser(Lexer * _lexer) : MJLL1Parser{_lexer} {}
+        MJRecursiveParser(std::shared_ptr<Lexer> _lexer) : MJLL1Parser{_lexer} {}
+
+	~MJRecursiveParser(){}
 
     private:
 
