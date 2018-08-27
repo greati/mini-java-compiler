@@ -1,3 +1,6 @@
+#ifndef __MJLL1PARSER__
+#define __MJLL1PARSER__
+
 #include "Parser.h"
 #include "MJNonterminal.h"
 #include <map>
@@ -311,3 +314,5 @@ class MJLL1Parser : public Parser {
         }
 
 };
+
+#endif

@@ -1,5 +1,5 @@
-#ifndef __MJRECPARSER__
-#define __MJRECPARSER__
+#ifndef __MJNONRECPARSER__
+#define __MJNONRECPARSER__
 
 #include "MJLL1Parser.h"
 #include <string>
@@ -48,8 +48,10 @@ class MJNonRecursiveParser : public MJLL1Parser {
         bool lookup(MJToken token);
 
         /**
-         * Grammar implementation.
-         *
+         * Check if an integer represents a token.
+         * 
+         * @param token the integer
+         * @return if the arg is a token
          * */
         bool isToken(int token);
 
