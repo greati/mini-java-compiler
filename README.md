@@ -22,3 +22,15 @@ You can test `mjlexer` by following the steps below:
 2. run `$ make lexer`
 3. run either `echo "your code goes here" | ./bin/mjlexer` or
     `./bin/mjlexer < your-program.mj`
+
+### Play with the LL(1) parsers
+
+LL(1) parsers apply left derivations from left to right 
+looking at most one token ahead in order to select the
+proper production. `mjc` can be used with two LL(1) parsers,
+a recursive and a non-recursive ones. You can run
+each of those parsers by following these steps:
+
+1. run `$ make ll1parser`
+2. run `$ ./bin/mjcll1 [R | N] < your-program.mj`, where
+`R` indicates to use the recursive parser, and `N`, the non-recursive.
