@@ -10,7 +10,8 @@ MJLexLexer::Position MJLexLexer::current_position() {
 }
 
 void MJLexLexer::reset(std::string _text) {
-    tearDownBuffer(this->buffer); 
+    if (this->buffer != nullptr)
+    	tearDownBuffer(this->buffer); 
     this->text = _text;
     this->buffer = setUpBuffer(_text.c_str());
 }

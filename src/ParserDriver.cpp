@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include "MJToken.h"
 
 int main(int argn, char** args) {
 
@@ -16,6 +17,14 @@ int main(int argn, char** args) {
     }
 
     auto lexer = std::make_shared<MJLexLexer>();
+
+    //lexer->reset(program);
+
+    //while (lexer->current_token() != END_OF_FILE) {
+	//lexer->next_token();	
+	//std::cout << lexer->current_token() << std::endl;
+    //}
+
 
     MJRecursiveParser parser {lexer};
 
