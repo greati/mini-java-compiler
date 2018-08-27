@@ -1,6 +1,6 @@
-#line 1 "src/lex.yy.c"
+#line 2 "src/lex.yy.c"
 
-#line 3 "src/lex.yy.c"
+#line 4 "src/lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -585,8 +585,8 @@ int current_line = 0;                   // Keep track of the line number
  */
 void lexer_error(std::string);
 
-#line 588 "src/lex.yy.c"
 #line 589 "src/lex.yy.c"
+#line 590 "src/lex.yy.c"
 
 #define INITIAL 0
 
@@ -804,7 +804,7 @@ YY_DECL
 #line 31 "src/mjclexer.l"
 
 
-#line 807 "src/lex.yy.c"
+#line 808 "src/lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1156,7 +1156,7 @@ YY_RULE_SETUP
 #line 90 "src/mjclexer.l"
 ECHO;
 	YY_BREAK
-#line 1159 "src/lex.yy.c"
+#line 1160 "src/lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{

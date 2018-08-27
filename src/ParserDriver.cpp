@@ -1,6 +1,7 @@
 #include <iostream>
 #include "MJLexLexer.h"
-#include "MJRecursiveParser.h"
+//#include "MJRecursiveParser.h"
+#include "MJNonRecursiveParser.h"
 #include "MJNonterminal.h"
 #include <map>
 #include <vector>
@@ -16,7 +17,8 @@ int main(int argn, char** args) {
 
     MJLexLexer * lexer = new MJLexLexer;
 
-    MJRecursiveParser parser {lexer};
+    //MJRecursiveParser parser {lexer};
+	MJNonRecursiveParser parser {lexer};
 
     parser.parse(program);
 
