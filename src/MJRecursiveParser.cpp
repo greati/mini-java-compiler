@@ -41,14 +41,152 @@ bool MJRecursiveParser::expect(MJToken token) {
     }
 }
 
-//TODO: rel-expr
+void MJRecursiveParser::mult_op() {
+    if (lookup(TOK_ASTERISK))
+        expect(TOK_ASTERISK);
+    else if (lookup(TOK_SLASH))
+        expect(TOK_SLASH);
+    else if (lookup(TOK_AND))
+        expect(TOK_AND);
+    else if (lookup(TOK_MOD))
+        expect(TOK_MOD);
+    else
+        parse_error(MULT_OP);
+}
+
+void MJRecursiveParser::add_op() {
+    if (lookup(TOK_PLUS))
+        expect(TOK_PLUS);
+    else if (lookup(TOK_MINUS))
+        expect(TOK_MINUS);
+    else if (lookup(TOK_2PIPE))
+        expect(TOK_2PIPE);
+    else
+        parse_error(ADD_OP);
+}
+
+void MJRecursiveParser::unary_op() {
+    if (lookup(TOK_PLUS))
+        expect(TOK_PLUS);
+    else if (lookup(TOK_MINUS))
+        expect(TOK_MINUS);
+    else if (lookup(TOK_NOT))
+        expect(TOK_NOT);
+    else
+        parse_error(UNARY_OP);
+}
+
+void MJRecursiveParser::method_call_opt() {
+    if(lookup(TOK_LPAREN)) {
+        method_call_stmt();
+    }
+}
+
+void MJRecursiveParser::rel_op() {
+    if (lookup(TOK_LESS))
+        expect(TOK_LESS);
+    else if (lookup(TOK_LESSEQ))
+        expect(TOK_LESSEQ);
+    else if (lookup(TOK_EQEQ))
+        expect(TOK_EQEQ);
+    else if (lookup(TOK_DIFF))
+        expect(TOK_DIFF);
+    else if (lookup(TOK_GREATEREQ))
+        expect(TOK_GREATEREQ);
+    else if (lookup(TOK_GREATER))
+        expect(TOK_GREATER);
+    else
+        parse_error(UNARY_EXPR);
+}
+
+void MJRecursiveParser::unary_expr() {
+    if(lookup(TOK_PLUS) || lookup(TOK_MINUS) ||
+       lookup(TOK_NOT)) {
+        unary_op();
+        unary_expr();
+    } else if (lookup(TOK_INTEGERCONSTANT) || lookup(TOK_STRINGCONSTANT)) {
+        unsig_lit();
+    } else if (lookup(TOK_IDENTIFIER)) {
+        variable();
+        method_call_opt();
+    } else if (lookup(TOK_LPAREN)) {
+        expect(TOK_LPAREN);
+        expression();
+        expect(TOK_RPAREN);
+    } else {
+        parse_error(UNARY_EXPR);
+    }
+}
+
+void MJRecursiveParser::mult_expr_aux() {
+    if(lookup(TOK_ASTERISK) || lookup(TOK_SLASH) ||
+       lookup(TOK_AND) || lookup(TOK_MOD)) {
+        mult_op();
+        unary_expr();
+        mult_expr_aux();
+    }
+}
+
+void MJRecursiveParser::mult_expr() {
+    if(lookup(TOK_LPAREN) || lookup(TOK_PLUS) ||
+       lookup(TOK_MINUS) || lookup(TOK_NOT) ||
+       lookup(TOK_INTEGERCONSTANT) || lookup(TOK_STRINGCONSTANT) ||
+       lookup(TOK_IDENTIFIER)) {
+        unary_expr();
+        mult_expr_aux();
+    } else {
+        parse_error(MULT_EXPR);
+    }
+}
+
+void MJRecursiveParser::add_expr_aux() {
+    if(lookup(TOK_LPAREN) || lookup(TOK_PLUS) ||
+       lookup(TOK_2PIPE)) {
+        add_op();
+        mult_expr();
+        add_expr_aux();
+    }
+}
+
+void MJRecursiveParser::add_expr() {
+    if(lookup(TOK_LPAREN) || lookup(TOK_PLUS) ||
+       lookup(TOK_MINUS) || lookup(TOK_NOT) ||
+       lookup(TOK_INTEGERCONSTANT) || lookup(TOK_STRINGCONSTANT) ||
+       lookup(TOK_IDENTIFIER)) {
+        mult_expr();
+        add_expr_aux();
+    } else {
+        parse_error(ADD_EXPR);
+    }
+}
+
+void MJRecursiveParser::rel_expr_aux() {
+    if(lookup(TOK_LESS) || lookup(TOK_LESSEQ) ||
+       lookup(TOK_EQEQ) || lookup(TOK_DIFF) ||
+       lookup(TOK_GREATEREQ) || lookup(TOK_GREATER)) {
+        rel_op();
+        add_expr();
+    }
+}
+
+void MJRecursiveParser::rel_expr() {
+    if(lookup(TOK_LPAREN) || lookup(TOK_PLUS) ||
+       lookup(TOK_MINUS) || lookup(TOK_NOT) ||
+       lookup(TOK_INTEGERCONSTANT) || lookup(TOK_STRINGCONSTANT) ||
+       lookup(TOK_IDENTIFIER)) {
+        add_expr();
+        rel_expr_aux();
+    } else {
+        parse_error(REL_EXPR);
+    }
+}
 
 void MJRecursiveParser::expression() {
     if(lookup(TOK_LPAREN) || lookup(TOK_PLUS) ||
        lookup(TOK_MINUS) || lookup(TOK_NOT) ||
        lookup(TOK_INTEGERCONSTANT) || lookup(TOK_STRINGCONSTANT) ||
        lookup(TOK_IDENTIFIER)) {
-        return;//rel_expr();
+        rel_expr();
     } else {
         parse_error(EXPRESSION);
     }
@@ -218,7 +356,7 @@ void MJRecursiveParser::variable_start_stmt() {
 void MJRecursiveParser::stmt() {
 
     if (lookup(TOK_IDENTIFIER)) {
-        //variable();
+        variable();
         variable_start_stmt();
     } else if (lookup(TOK_RETURN)) {
         return_stmt(); 
@@ -227,7 +365,7 @@ void MJRecursiveParser::stmt() {
     } else if (lookup(TOK_WHILE)) {
         while_stmt();
     } else if (lookup(TOK_FOR)) {
-        return;//for_stmt();
+        for_stmt();
     } else if (lookup(TOK_SWITCH)) {
         switch_stmt(); 
     } else if (lookup(TOK_PRINT)) {
