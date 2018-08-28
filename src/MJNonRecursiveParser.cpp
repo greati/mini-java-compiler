@@ -44,7 +44,7 @@ void MJNonRecursiveParser::_parse(std::string program) {
             stack.pop();
         }
         else if (this->parse_table[static_cast<MJNonterminal>(stack.top())].count(this->lexer->current_token()) == 0){
-            parse_error(static_cast<MJNonterminal>(stack.top()));
+            parse_error();
             stack.pop();
         }
         else {
