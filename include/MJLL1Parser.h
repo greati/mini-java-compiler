@@ -17,6 +17,77 @@ class MJLL1Parser : public Parser {
 
         typedef std::pair<MJNonterminal, std::vector<int>> Production;
 
+        std::map<MJNonterminal, std::set<MJToken>> first =
+        {
+            { PROGRAM, {TOK_PROGRAM} },
+            { CLASS_DECL_LIST, {LAMBDA,TOK_CLASS} },
+            { CLASS_DECL, {TOK_CLASS} },
+            { CLASS_BODY, {TOK_LCURLY} },
+            { DECLS_OPT, {LAMBDA,TOK_DECLARATIONS} },
+            { DECLS, {TOK_DECLARATIONS} },
+            { METHOD_DECL_LIST, {LAMBDA,TOK_METHOD} },
+            { FIELD_DECL_LIST_DECLS, {LAMBDA,TOK_IDENTIFIER,TOK_INT,TOK_STRING} },
+            { FIELD_DECL, {TOK_IDENTIFIER,TOK_INT,TOK_STRING} },
+            { FIELD_DECL_AUX1, {TOK_EQUALS,TOK_COMMA,LAMBDA} },
+            { FIELD_DECL_AUX2, {TOK_COMMA,LAMBDA} },
+            { TYPE, {TOK_IDENTIFIER,TOK_INT,TOK_STRING} },
+            { TYPE_AUX, {TOK_IDENTIFIER,TOK_INT,TOK_STRING} },
+            { BRACKETS_OPT, {TOK_LRSQUARE,LAMBDA} },
+            { METHOD_DECL, {TOK_METHOD} },
+            { METHOD_RETURN_TYPE, {TOK_VOID,TOK_IDENTIFIER,TOK_INT,TOK_STRING} },
+            { FORMAL_PARAMS_LIST, {TOK_VAL,TOK_IDENTIFIER,TOK_INT,TOK_STRING} },
+            { VAL_OPT, {TOK_VAL,LAMBDA} },
+            { FORMAL_PARAMS_LIST_AUX, {TOK_SEMICOLON,LAMBDA} },
+            { ID_LIST_COMMA, {TOK_COMMA,LAMBDA} },
+            { FORMAL_PARAMS_LIST_OPT, {LAMBDA,TOK_VAL,TOK_IDENTIFIER,TOK_INT,TOK_STRING} },
+            { VAR_DECL_ID, {TOK_IDENTIFIER} },
+            { VAR_INIT, {TOK_LCURLY,TOK_ARROBA,TOK_LPAREN,TOK_PLUS,TOK_MINUS,TOK_NOT,TOK_INTEGERCONSTANT,TOK_STRINGCONSTANT,TOK_IDENTIFIER} },
+            { ARRAY_INIT, {TOK_LCURLY} },
+            { VAR_INIT_LIST_COMMA, {TOK_COMMA,LAMBDA} },
+            { ARRAY_CREATION_EXPR, {TOK_ARROBA} },
+            { ARRAY_DIM_DECL, {TOK_LSQUARE} },
+            { ARRAY_DIM_DECL_LIST, {LAMBDA,TOK_LSQUARE} },
+            { BLOCK, {TOK_DECLARATIONS,TOK_LCURLY} },
+            { STMT_LIST, {TOK_LCURLY} },
+            { STMT_LIST_SEMICOLON, {TOK_SEMICOLON,LAMBDA} },
+            { STMT, {TOK_IDENTIFIER,TOK_RETURN,TOK_IF,TOK_WHILE,TOK_FOR,TOK_SWITCH,TOK_PRINT,TOK_READ} },
+            { VARIABLE_START_STMT, {TOK_ASSIGN,TOK_LPAREN} },
+            { ASSIGN_STMT, {TOK_ASSIGN} },
+            { METHOD_CALL_STMT, {TOK_LPAREN} },
+            { ACTUAL_PARAMS_LIST, {LAMBDA,TOK_LPAREN,TOK_PLUS,TOK_MINUS,TOK_NOT,TOK_INTEGERCONSTANT,TOK_STRINGCONSTANT,TOK_IDENTIFIER} },
+            { EXPRESSION_LIST_COMMA, {TOK_COMMA,LAMBDA} },
+            { RETURN_STMT, {TOK_RETURN} },
+            { EXPRESSION_OPT, {LAMBDA,TOK_LPAREN,TOK_PLUS,TOK_MINUS,TOK_NOT,TOK_INTEGERCONSTANT,TOK_STRINGCONSTANT,TOK_IDENTIFIER} },
+            { IF_STMT, {TOK_IF} },
+            { ELSE_PART, {TOK_ELSE,LAMBDA} },
+            { IF_STMT_AUX, {TOK_IF,TOK_LCURLY} },
+            { FOR_STMT, {TOK_FOR} },
+            { FOR_INIT_EXPR, {TOK_IDENTIFIER} },
+            { STEP_OPT, {TOK_STEP,LAMBDA} },
+            { WHILE_STMT, {TOK_WHILE} },
+            { SWITCH_STMT, {TOK_SWITCH} },
+            { CASE, {TOK_CASE} },
+            { CASE_LIST, {TOK_DEFAULT,LAMBDA,TOK_CASE} },
+            { PRINT_STMT, {TOK_PRINT} },
+            { READ_STMT, {TOK_READ} },
+            { EXPRESSION, {TOK_LPAREN,TOK_PLUS,TOK_MINUS,TOK_NOT,TOK_INTEGERCONSTANT,TOK_STRINGCONSTANT,TOK_IDENTIFIER} },
+            { REL_EXPR, {TOK_LPAREN,TOK_PLUS,TOK_MINUS,TOK_NOT,TOK_INTEGERCONSTANT,TOK_STRINGCONSTANT,TOK_IDENTIFIER} },
+            { REL_EXPR_AUX, {LAMBDA,TOK_LESS,TOK_LESSEQ,TOK_EQEQ,TOK_DIFF,TOK_GREATEREQ,TOK_GREATER} },
+            { ADD_EXPR, {TOK_LPAREN,TOK_PLUS,TOK_MINUS,TOK_NOT,TOK_INTEGERCONSTANT,TOK_STRINGCONSTANT,TOK_IDENTIFIER} },
+            { ADD_EXPR_AUX, {LAMBDA,TOK_PLUS,TOK_MINUS,TOK_2PIPE} },
+            { MULT_EXPR, {TOK_LPAREN,TOK_PLUS,TOK_MINUS,TOK_NOT,TOK_INTEGERCONSTANT,TOK_STRINGCONSTANT,TOK_IDENTIFIER} },
+            { MULT_EXPR_AUX, {LAMBDA,TOK_ASTERISK,TOK_SLASH,TOK_AND,TOK_MOD} },
+            { UNARY_EXPR, {TOK_LPAREN,TOK_PLUS,TOK_MINUS,TOK_NOT,TOK_INTEGERCONSTANT,TOK_STRINGCONSTANT,TOK_IDENTIFIER} },
+            { METHOD_CALL_OPT, {LAMBDA,TOK_LPAREN} },
+            { REL_OP, {TOK_LESS,TOK_LESSEQ,TOK_EQEQ,TOK_DIFF,TOK_GREATEREQ,TOK_GREATER} },
+            { UNARY_OP, {TOK_PLUS,TOK_MINUS,TOK_NOT} },
+            { ADD_OP, {TOK_PLUS,TOK_MINUS,TOK_2PIPE} },
+            { MULT_OP, {TOK_ASTERISK,TOK_SLASH,TOK_AND,TOK_MOD} },
+            { UNSIG_LIT, {TOK_INTEGERCONSTANT,TOK_STRINGCONSTANT} },
+            { VARIABLE, {TOK_IDENTIFIER} },
+            { VARIABLE_AUX, {TOK_DOT,LAMBDA,TOK_LSQUARE} }
+        };
+
         std::map<MJNonterminal, std::set<MJToken>> follow =
         {
             { PROGRAM, {END_OF_FILE} },
@@ -214,7 +285,7 @@ class MJLL1Parser : public Parser {
             { 121, { VARIABLE_AUX, {TOK_DOT,TOK_IDENTIFIER,VARIABLE_AUX} } },
             { 122, { VARIABLE_AUX, {} } },
             { 123, { VARIABLE_AUX, {TOK_LSQUARE,EXPRESSION,EXPRESSION_LIST_COMMA,TOK_RSQUARE,VARIABLE_AUX} } }
-        }; 
+        };
 
         std::map<MJNonterminal, std::map<MJToken,int>> parse_table = 
         {
@@ -286,6 +357,22 @@ class MJLL1Parser : public Parser {
             { VARIABLE, { { TOK_IDENTIFIER, 120 } } },
             { VARIABLE_AUX, { { TOK_SEMICOLON, 122 },{ TOK_LCURLY, 122 },{ TOK_RCURLY, 122 },{ TOK_COMMA, 122 },{ TOK_LPAREN, 122 },{ TOK_RPAREN, 122 },{ TOK_LSQUARE, 123 },{ TOK_RSQUARE, 122 },{ TOK_ASSIGN, 122 },{ TOK_TO, 122 },{ TOK_STEP, 122 },{ TOK_LESS, 122 },{ TOK_LESSEQ, 122 },{ TOK_EQEQ, 122 },{ TOK_DIFF, 122 },{ TOK_GREATEREQ, 122 },{ TOK_GREATER, 122 },{ TOK_PLUS, 122 },{ TOK_MINUS, 122 },{ TOK_2PIPE, 122 },{ TOK_ASTERISK, 122 },{ TOK_SLASH, 122 },{ TOK_AND, 122 },{ TOK_MOD, 122 },{ TOK_DOT, 121 } } }
         };
+
+        std::map<MJNonterminal, std::set<MJToken>> predict = get_predict();
+
+        inline std::map<MJNonterminal, std::set<MJToken>> get_predict() {
+            std::map<MJNonterminal, std::set<MJToken>> p;
+            for (std::map<MJNonterminal, std::set<MJToken>>::iterator it=first.begin(); it!=first.end(); ++it){
+                std::set<MJToken> firsts = it->second;
+                std::set<MJToken>::iterator lambda = firsts.find(LAMBDA);
+                if (lambda != firsts.end()){
+                    firsts.erase(lambda);
+                    firsts.insert(follow[it->first].begin(), follow[it->first].end());
+                }
+                p.insert(std::pair<MJNonterminal,std::set<MJToken>> (it->first,firsts));
+            }
+            return p;
+        }
 
         /**
          * Skip until a token in the follow set is reached.

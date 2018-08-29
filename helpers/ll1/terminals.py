@@ -7,7 +7,7 @@ string,[],method,(,),void,val,@,[,],:=,return,if,else,for,to,step,while\
 ,switch,case,default,print,read,<,<=,==,!=,>=,>,+,-,not,||,*,/,&&,%,num,str,.,$"
 TERMS = TERMS.split(',')
 
-NON_TERMS = "PROGRAM,CLASS-DECL-LIST,CLASS-DECL,CLASS-BODY,DECLS-OPT,DECLS,METHOD-DECL-LIST,FIELD-DECL-LIST-DECLS,FIELD-DECL,FIELD-DECL-AUX1,FIELD-DECL-AUX2,TYPE,TYPE-AUX,BRACKETS-OPT,METHOD-DECL,METHOD-RETURN-TYPE,FORMAL-PARAMS-LIST,FORMAL-PARAMS-LIST-AUX,ID-LIST-COMMA,FORMAL-PARAMS-LIST-OPT,VAR-DECL-ID,VAR-INIT,ARRAY-INIT,VAR-INIT-LIST-COMMA,ARRAY-CREATION-EXPR,ARRAY-DIM-DECL,ARRAY-DIM-DECL-LIST,BLOCK,STMT-LIST,STMT-LIST-SEMICOLON,STMT,VARIABLE-START-STMT,ASSIGN-STMT,METHOD-CALL-STMT,ACTUAL-PARAMS-LIST,EXPRESSION-LIST-COMMA,RETURN-STMT,EXPRESSION-OPT,IF-STMT,ELSE-PART,IF-STMT-AUX,FOR-STMT,FOR-INIT-EXPR,STEP-OPT,WHILE-STMT,SWITCH-STMT,CASE,CASE-LIST,PRINT-STMT,READ-STMT,EXPRESSION,REL-EXPR,REL-EXPR-AUX,ADD-EXPR,ADD-EXPR-AUX,MULT-EXPR,MULT-EXPR-AUX,UNARY-EXPR,METHOD-CALL-OPT,REL-OP,UNARY-OP,ADD-OP,MULT-OP,UNSIG-LIT,VARIABLE,VARIABLE-AUX"
+NON_TERMS = "PROGRAM,CLASS-DECL-LIST,CLASS-DECL,CLASS-BODY,DECLS-OPT,DECLS,METHOD-DECL-LIST,FIELD-DECL-LIST-DECLS,FIELD-DECL,FIELD-DECL-AUX1,FIELD-DECL-AUX2,TYPE,TYPE-AUX,BRACKETS-OPT,METHOD-DECL,METHOD-RETURN-TYPE,FORMAL-PARAMS-LIST,VAL-OPT,FORMAL-PARAMS-LIST-AUX,ID-LIST-COMMA,FORMAL-PARAMS-LIST-OPT,VAR-DECL-ID,VAR-INIT,ARRAY-INIT,VAR-INIT-LIST-COMMA,ARRAY-CREATION-EXPR,ARRAY-DIM-DECL,ARRAY-DIM-DECL-LIST,BLOCK,STMT-LIST,STMT-LIST-SEMICOLON,STMT,VARIABLE-START-STMT,ASSIGN-STMT,METHOD-CALL-STMT,ACTUAL-PARAMS-LIST,EXPRESSION-LIST-COMMA,RETURN-STMT,EXPRESSION-OPT,IF-STMT,ELSE-PART,IF-STMT-AUX,FOR-STMT,FOR-INIT-EXPR,STEP-OPT,WHILE-STMT,SWITCH-STMT,CASE,CASE-LIST,PRINT-STMT,READ-STMT,EXPRESSION,REL-EXPR,REL-EXPR-AUX,ADD-EXPR,ADD-EXPR-AUX,MULT-EXPR,MULT-EXPR-AUX,UNARY-EXPR,METHOD-CALL-OPT,REL-OP,UNARY-OP,ADD-OP,MULT-OP,UNSIG-LIT,VARIABLE,VARIABLE-AUX"
 
 NON_TERMS_CPP = NON_TERMS.replace('-', '_').split(',')
 
@@ -69,6 +69,90 @@ TOKS = "TOK_PROGRAM,\
 TOKS = TOKS.replace(" ", "").split(',')
 
 TERM_TOK = dict(zip(TERMS, TOKS))
+
+FIRST = """PROGRAM : program
+CLASS-DECL-LIST : ε,class
+CLASS-DECL : class
+CLASS-BODY : {
+DECLS-OPT : ε,declarations
+DECLS : declarations
+METHOD-DECL-LIST : ε,method
+FIELD-DECL-LIST-DECLS : ε,id,int,string
+FIELD-DECL : id,int,string
+FIELD-DECL-AUX1 : =,,,ε
+FIELD-DECL-AUX2 : ,,ε
+TYPE : id,int,string
+TYPE-AUX : id,int,string
+BRACKETS-OPT : [],ε
+METHOD-DECL : method
+METHOD-RETURN-TYPE : void,id,int,string
+FORMAL-PARAMS-LIST : val,id,int,string
+VAL-OPT : val,ε
+FORMAL-PARAMS-LIST-AUX : ;,ε
+ID-LIST-COMMA : ,,ε
+FORMAL-PARAMS-LIST-OPT : ε,val,id,int,string
+VAR-DECL-ID : id
+VAR-INIT : {,@,(,+,-,not,num,str,id
+ARRAY-INIT : {
+VAR-INIT-LIST-COMMA : ,,ε
+ARRAY-CREATION-EXPR : @
+ARRAY-DIM-DECL : [
+ARRAY-DIM-DECL-LIST : ε,[
+BLOCK : declarations,{
+STMT-LIST : {
+STMT-LIST-SEMICOLON : ;,ε
+STMT : id,return,if,while,for,switch,print,read
+VARIABLE-START-STMT : :=,(
+ASSIGN-STMT : :=
+METHOD-CALL-STMT : (
+ACTUAL-PARAMS-LIST : ε,(,+,-,not,num,str,id
+EXPRESSION-LIST-COMMA : ,,ε
+RETURN-STMT : return
+EXPRESSION-OPT : ε,(,+,-,not,num,str,id
+IF-STMT : if
+ELSE-PART : else,ε
+IF-STMT-AUX : if,{
+FOR-STMT : for
+FOR-INIT-EXPR : id
+STEP-OPT : step,ε
+WHILE-STMT : while
+SWITCH-STMT : switch
+CASE : case
+CASE-LIST : default,ε,case
+PRINT-STMT : print
+READ-STMT : read
+EXPRESSION : (,+,-,not,num,str,id
+REL-EXPR : (,+,-,not,num,str,id
+REL-EXPR-AUX : ε,<,<=,==,!=,>=,>
+ADD-EXPR : (,+,-,not,num,str,id
+ADD-EXPR-AUX : ε,+,-,||
+MULT-EXPR : (,+,-,not,num,str,id
+MULT-EXPR-AUX : ε,*,/,&&,%
+UNARY-EXPR : (,+,-,not,num,str,id
+METHOD-CALL-OPT : ε,(
+REL-OP : <,<=,==,!=,>=,>
+UNARY-OP : +,-,not
+ADD-OP : +,-,||
+MULT-OP : *,/,&&,%
+UNSIG-LIT : num,str
+VARIABLE : id
+VARIABLE-AUX : .,ε,[""".splitlines()
+
+FIRST_DECL = ""
+
+FIRST_STRING = ""
+for l in FIRST:
+    l = l.replace(" ", "")
+    l = l.split(":", 1)
+    variable = NON_TERMS_DICT[l[0]]
+    terms = []
+    for t in l[1].replace(',,,', ',comma,').replace(',,', 'comma,').split(','):
+        if t != '':
+            terms.append(TERM_TOK[t])
+    terms = ','.join(terms)
+    FIRST_STRING += "{ " + variable + ", {" + terms +"} },\n"
+
+print(FIRST_STRING)
 
 FOLLOW = """PROGRAM : $
 CLASS-DECL-LIST : $
@@ -150,6 +234,7 @@ for l in FOLLOW:
             terms.append(TERM_TOK[t])
     terms = ','.join(terms)
     FOLLOW_STRING += "{ " + variable + ", {" + terms +"} },\n"
+print(FOLLOW_STRING)
 
 PRODUCTIONS = """0  PROGRAM ➝ program id ; CLASS-DECL CLASS-DECL-LIST
 1  CLASS-DECL-LIST ➝ CLASS-DECL CLASS-DECL-LIST
@@ -278,7 +363,6 @@ PRODUCTIONS = """0  PROGRAM ➝ program id ; CLASS-DECL CLASS-DECL-LIST
 
 prods = ""
 for p in PRODUCTIONS:
-    print(p)
     p = p.split("  ", 1)
     k = p[0]
     r = p[1].split(" ➝ ")
@@ -297,7 +381,6 @@ for p in PRODUCTIONS:
     prod = ",".join(prod)
     if prod == "''":
         prod = ""
-    print(prod)
     prods += "{ " + str(k) + ", { " + var + ", {" + prod + "}" + " }" + " },\n"
 print(prods)
 

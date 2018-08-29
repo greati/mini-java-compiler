@@ -59,6 +59,7 @@ enum MJToken {
     TOK_STRINGCONSTANT,
     TOK_DOT,
     END_OF_FILE,
+    LAMBDA,
     UNDEFINED
 };
 

@@ -55,6 +55,7 @@ std::string get_token_name(enum MJToken token) {
         case TOK_ARROBA: return "TOK_ARROBA";
         case TOK_LRSQUARE: return "TOK_LRSQUARE";
         case END_OF_FILE: return "END_OF_FILE";
+        case LAMBDA: return "LAMBDA";
         default: return "UNDEFINED";
     }
 }
