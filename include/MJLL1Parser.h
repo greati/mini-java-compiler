@@ -381,7 +381,9 @@ class MJLL1Parser : public Parser {
          * */
         inline void skip_to_follow(MJNonterminal nonterm) {
             auto follow_set = follow[nonterm];
-            while (follow_set.find(this->lexer->current_token()) == follow_set.end() &&
+            auto synchr_set = first[nonterm];
+            synchr_set.insert(follow_set.begin(), follow_set.end());
+            while (synchr_set.find(this->lexer->current_token()) == synchr_set.end() &&
                     this->lexer->current_token() != END_OF_FILE) {
                 this->lexer->next_token();
             }

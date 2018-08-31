@@ -17,7 +17,7 @@ class MJRecursiveParser : public MJLL1Parser {
 
         MJRecursiveParser(std::shared_ptr<Lexer> _lexer) : MJLL1Parser{_lexer} {}
 
-	~MJRecursiveParser(){}
+        ~MJRecursiveParser(){}
 
     private:
 

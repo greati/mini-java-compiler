@@ -7,6 +7,7 @@
 #include "MJToken.h"
 #include "MJRecursiveParser.h"
 #include "MJNonRecursiveParser.h"
+#include "MJMessage.h"
 
 int main(int argn, char** args) {
 
@@ -41,6 +42,8 @@ int main(int argn, char** args) {
 
     std::cout << "Parsing finished. No output means no parse errors." << std::endl;
 
+    MJMessage::print(MJMessage::Type::SUCCESS, "testing");
+    
     return 0;
 
 }
