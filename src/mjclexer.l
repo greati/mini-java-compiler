@@ -5,6 +5,8 @@
 
 #include "MJToken.h"
 #include <string>
+#include "MJMessage.h"
+#include "Lexer.h"
 
 #define YY_USER_ACTION offset += yyleng;
 
@@ -90,7 +92,7 @@ not                     { return TOK_NOT; }
 %%
 
 void lexer_error(std::string msg) {
-    fprintf(stderr, "[mjc warning] (row %d, col %d) %s: %s\n", current_line, offset - yyleng, msg.c_str(), yytext); 
+    MJMessage::print(MJMessage::Type::WARNING, msg + " " + std::string(yytext), Lexer::Position (current_line, offset-yyleng));
 }
 
 void* setUpBuffer(char const* text)

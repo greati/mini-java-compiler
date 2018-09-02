@@ -4,6 +4,7 @@
 #include "colormod.h"
 #include <map>
 #include <iostream>
+#include <iomanip>
 #include "Lexer.h"
 
 /**
@@ -32,8 +33,9 @@ class MJMessage {
             if (pos.row != -1 && pos.col != -1)
                 position_string = "(" + std::to_string(pos.row) + "," + std::to_string(pos.col) + ") ";
             std::cout << "[" << Color::Modifier {Color::BG_DEFAULT} << "mjc" << Color::Modifier {Color::BG_DEFAULT} 
-                << Color::Modifier {type_to_color[type]} << " "
-                << type_to_string[type] << Color::Modifier {Color::FG_DEFAULT} << "] " << position_string
+                << Color::Modifier {type_to_color[type]} << " " <<
+                std::setw(7) << type_to_string[type] << Color::Modifier {Color::FG_DEFAULT} << "] " 
+                << position_string
                 << text << std::endl;
         }
 

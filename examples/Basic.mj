@@ -1,6 +1,6 @@
 program string ;
 
-class oi {
+class $oi {
     declarations
         int a = 2
     enddeclarations
