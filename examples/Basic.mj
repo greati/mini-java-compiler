@@ -2,6 +2,6 @@ program string ;
 
 class $oi {
     declarations
-        int a = 2
+        int a = /2;
     enddeclarations
 }
