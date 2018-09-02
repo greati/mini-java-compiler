@@ -37,7 +37,9 @@ bool MJRecursiveParser::expect(MJToken token) {
         return true;
     else {
         parse_error();
-        std::cout << "inserting " << get_token_name(token) << std::endl;
+        MJMessage::print(MJMessage::Type::NOTE,  
+                "inserting " + get_token_name(token), 
+                this->lexer->current_position());
         this->lexer->next_token();
         return false;
     }

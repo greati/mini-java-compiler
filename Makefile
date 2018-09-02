@@ -53,7 +53,7 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(CPPSRCEXT)
 ll1parser:
 	@echo "Making lexer...";
 	$(FLEX) -o $(SRCDIR)/lex.yy.c -ll $(SRCDIR)/mjclexer.l;
-	g++ $(SRCDIR)/MJNonRecursiveParser.cpp $(SRCDIR)/MJRecursiveParser.cpp $(SRCDIR)/lex.yy.c $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJLexLexer.cpp $(SRCDIR)/ParserDriver.cpp -o $(BINDIR)/mjcll1 $(INCFLAG) -std=c++11 -Wall
+	g++ $(SRCDIR)/MJMessage.cpp $(SRCDIR)/MJNonRecursiveParser.cpp $(SRCDIR)/MJRecursiveParser.cpp $(SRCDIR)/lex.yy.c $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJLexLexer.cpp $(SRCDIR)/ParserDriver.cpp -o $(BINDIR)/mjcll1 $(INCFLAG) -std=c++11 -Wall
 
 
 lexer:

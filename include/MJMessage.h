@@ -3,6 +3,8 @@
 
 #include "colormod.h"
 #include <map>
+#include <iostream>
+#include "Lexer.h"
 
 /**
  * A message to be printed to the
@@ -25,8 +27,14 @@ class MJMessage {
             WARNING,
         };
 
-        static void print(Type type, std::string text) {
-            std::cout << Color::Modifier {type_to_color[type]} << text << std::endl;
+        static void print(Type type, std::string text, Lexer::Position pos = Lexer::Position {-1, -1}) {
+            std::string position_string = "";
+            if (pos.row != -1 && pos.col != -1)
+                position_string = "(" + std::to_string(pos.row) + "," + std::to_string(pos.col) + ") ";
+            std::cout << "[" << Color::Modifier {Color::BG_DEFAULT} << "mjc" << Color::Modifier {Color::BG_DEFAULT} 
+                << Color::Modifier {type_to_color[type]} << " "
+                << type_to_string[type] << Color::Modifier {Color::FG_DEFAULT} << "] " << position_string
+                << text << std::endl;
         }
 
     private:
@@ -36,14 +44,12 @@ class MJMessage {
          *
          * */
         static std::map<Type, Color::Code> type_to_color;
-};
 
-std::map<MJMessage::Type, Color::Code> MJMessage::type_to_color = 
-    {
-        {MJMessage::Type::SUCCESS, Color::FG_GREEN},
-        {MJMessage::Type::ERROR, Color::FG_RED},
-        {MJMessage::Type::NOTE, Color::FG_BLUE},
-        {MJMessage::Type::WARNING, Color::FG_YELLOW},
-    };
+        /**
+         * Map type to string representation.
+         *
+         * */
+        static std::map<Type, std::string> type_to_string;
+};
 
 #endif

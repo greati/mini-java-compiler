@@ -6,6 +6,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include "MJMessage.h"
 
 class MJLL1Parser : public Parser {
 
@@ -395,12 +396,9 @@ class MJLL1Parser : public Parser {
         }
 
         inline void parse_error() {
-            std::cout << "[mjc error] " << 
-                "(" << this->lexer->current_position().row << "," <<
-                this->lexer->current_position().col << ")" 
-                << " parse error: unexpected " << get_token_name(lexer->current_token()) 
-                << ", expecting " << expected_tokens_string()
-                << std::endl;
+            std::string parse_error = "parse error: unexpected " + get_token_name(lexer->current_token()) +
+                + ", expecting " + expected_tokens_string();
+            MJMessage::print(MJMessage::Type::ERROR, parse_error, this->lexer->current_position());
             this->expected_tokens.clear();
         }
 
