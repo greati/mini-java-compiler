@@ -579,8 +579,8 @@ char *yytext_ptr;
 
 #define YY_USER_ACTION offset += yyleng;
 
-int offset = 0;                         // Keep track of the column number
-int current_line = 0;                   // Keep track of the line number
+int offset = 1;                         // Keep track of the column number
+int current_line = 1;                   // Keep track of the line number
 
 /**
  * Print an error in lexical analysis.
@@ -875,7 +875,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case YY_STATE_EOF(INITIAL):
 #line 35 "src/mjclexer.l"
-{ return END_OF_FILE; }
+{ offset = 2; return END_OF_FILE; }
 	YY_BREAK
 case 1:
 YY_RULE_SETUP
@@ -886,7 +886,7 @@ case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
 #line 37 "src/mjclexer.l"
-{ current_line += 1; offset = 0; }          // Reset counters
+{ current_line += 1; offset = 1; }          // Reset counters
 	YY_BREAK
 case 3:
 YY_RULE_SETUP

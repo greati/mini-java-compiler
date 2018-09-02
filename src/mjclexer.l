@@ -10,8 +10,8 @@
 
 #define YY_USER_ACTION offset += yyleng;
 
-int offset = 0;                         // Keep track of the column number
-int current_line = 0;                   // Keep track of the line number
+int offset = 1;                         // Keep track of the column number
+int current_line = 1;                   // Keep track of the line number
 
 /**
  * Print an error in lexical analysis.
@@ -32,9 +32,9 @@ invalid_id          {digit}+({alpha}|_)+
 
 %%
 
-<<EOF>>                 { return END_OF_FILE; }
+<<EOF>>                 { offset = 2; return END_OF_FILE; }
 {ignore}                ;                                           // Ignore spaces and tabs
-\n                      { current_line += 1; offset = 0; }          // Reset counters
+\n                      { current_line += 1; offset = 1; }          // Reset counters
 {string}                { return TOK_STRINGCONSTANT; }
 ;                       { return TOK_SEMICOLON; }      
 program                 { return TOK_PROGRAM; }      

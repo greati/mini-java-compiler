@@ -61,7 +61,7 @@ lexer:
 	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(BINDIR)
 	$(FLEX) -o $(BUILDDIR)/lex.yy.c $(SRCDIR)/mjclexer.l;
-	g++ $(SRCDIR)/MJToken.cpp $(BUILDDIR)/lex.yy.c -D__EXECUTABLE__ -o $(LEXER) $(INCFLAG);
+	g++ $(SRCDIR)/MJMessage.cpp $(SRCDIR)/MJToken.cpp $(BUILDDIR)/lex.yy.c -D__EXECUTABLE__ -o $(LEXER) $(INCFLAG);
 	$(RM) -r $(BUILDDIR)/lex.yy.c;
 
 clean:
