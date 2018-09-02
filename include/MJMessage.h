@@ -28,6 +28,10 @@ class MJMessage {
             WARNING,
         };
 
+        /**
+         * Print a message according to its type.
+         *
+         * */
         static void print(Type type, std::string text, Lexer::Position pos = Lexer::Position {-1, -1}) {
             std::string position_string = "";
             if (pos.row != -1 && pos.col != -1)
