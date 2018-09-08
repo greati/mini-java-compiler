@@ -47,7 +47,7 @@ void MJNonRecursiveParser::_parse(std::string program) {
             auto nonterm = static_cast<MJNonterminal>(stack.top());
             this->expected_tokens.insert(predict[nonterm].begin(), predict[nonterm].end());
             parse_error();
-            while(predict[static_cast<MJNonterminal>(stack.top())].count(this->lexer->current_token()) == 0){
+            while(!isToken(stack.top()) && predict[static_cast<MJNonterminal>(stack.top())].count(this->lexer->current_token()) == 0){
                 stack.pop();
                 if (stack.top() == END_OF_FILE)
                     break;
