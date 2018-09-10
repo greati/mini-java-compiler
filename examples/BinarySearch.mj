@@ -13,9 +13,8 @@ class BinarySearch
 			if arr[mid] == x
 			{
 				return mid
-			};
- 
-            if (arr[mid] > x)
+			} 
+            else if arr[mid] > x
 			{
 				return binarySearch(arr, l, mid-1, x)
 			};
