@@ -16,9 +16,7 @@ class HalfUseless {
 }
 
 class Switch {
-
     method string map(val int key) {
-        
         switch key {
             case 1 {
                 return "A"
@@ -26,37 +24,26 @@ class Switch {
             case 2 {
                 return "B"
             }
-            case 3 {
-                return "C"
-            }
             default {
                 return "Invalid"
             }
         };
-
         print "Finished."
     }
 }
 
 class Expr {
-
     declarations
         MyClass[][] v = @MyClass[10][10];
         int a, b;
         int bool;
     enddeclarations
-
     method void makeExpr() {
         read a;
-        read b;   
-    
-        bool := not (a != b);
-        bool := a && b;
-        bool := a || b;
-        bool := a + b - a * b / a % b;
+        bool := not ((a != b) && b || (a || b));
+        bool := a + b - a * b / a % b + a + v[2,3].name[19];
         a := -2;
         a := +2;
-        bool := a + v[2,3].name[19];
         makeExpr()
     }
 }
