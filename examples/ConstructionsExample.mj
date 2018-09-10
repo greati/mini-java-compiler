@@ -1,9 +1,12 @@
 program Example;
+
 class Useless { }
+
 class QuasiUseless {
     declarations
     enddeclarations
 }
+
 class HalfUseless {
     declarations
         MyClass[] v = @MyClass[10]; 
@@ -11,6 +14,7 @@ class HalfUseless {
         int[][] identity = { {1, 0, 0}, {0, 1, 0}, {0, 0, 1} };
     enddeclarations
 }
+
 class Switch {
     method string map(val int key) {
         switch key {
@@ -42,6 +46,3 @@ class Expr {
         makeExpr()
     }
 }
-#Saída do Parser
-Parsing with LL(1) non-recursive parsing.
-Parsing finished. No output means no parse errors.
