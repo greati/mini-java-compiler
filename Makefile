@@ -57,6 +57,13 @@ ll1parser:
 	$(FLEX) -o $(SRCDIR)/lex.yy.c -ll $(SRCDIR)/mjclexer.l;
 	g++ $(SRCDIR)/MJMessage.cpp $(SRCDIR)/MJNonRecursiveParser.cpp $(SRCDIR)/MJRecursiveParser.cpp $(SRCDIR)/lex.yy.c $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJLexLexer.cpp $(SRCDIR)/ParserDriver.cpp -o $(BINDIR)/mjcll1 $(INCFLAG) -std=c++11 -Wall
 
+lalrparser:
+	@echo "Making lexer...";
+	@mkdir -p $(BUILDDIR)
+	@mkdir -p $(BINDIR)
+	lex -o $(SRCDIR)/lex.yy.c $(SRCDIR)/mjclexeryacc.l
+	yacc -o $(SRCDIR)/y.tab.c $(SRCDIR)/MJLALRParser.y -d 
+	gcc -o $(BINDIR)/mjclalr $(SRCDIR)/y.tab.c $(SRCDIR)/lex.yy.c 
 
 lexer:
 	@echo "Building lexer...";
