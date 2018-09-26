@@ -40,8 +40,35 @@ formal_params_list_opt : /* empty */ | formal_params_list
 var_decl_id         : TOK_IDENTIFIER brackets_opt
 var_init            : expr | array_init | array_creation_expr
 array_init          : var_init var_init_list_comma
-var_init_list_comma | /* empty */ | TOK_COMMA var_init var_init_list_comma 
-array_creation_expr : /* doing */
+var_init_list_comma : /* empty */ | TOK_COMMA var_init var_init_list_comma 
+array_creation_expr : TOK_ARROBA type array_dim_decl array_dim_decl_list
+array_dim_decl      : TOK_LSQUARE expr TOK_RSQUARE
+array_dim_decl_list : /* empty */ | array_dim_decl array_dim_decl_list
+block               : decls_opt stmt_list
+stmt_list           : stmt stmt_list_semicolon
+stmt_list_semicolon : /* empty */ | TOK_SEMICOLON stmt stmt_list_semicolon
+stmt		    : var var_start_stmt | return_stmt| if_stmt
+	  	    | while_stmt | for_stmt | switch_stmt | print_stmt
+		    | read_stmt
+var_start_stmt : assign_stmt | method_call_stmt
+assign_stmt	    : TOK_ASSIGN expr
+method_call_stmt    : TOK_LPAREN actual_params_list TOK_RPAREN
+actual_params_list  : /* empty */ | expr expr_list_comma
+expr_list_comma	    : /* empty */ | TOK_COMMA expr expr_list_comma		    
+return_stmt	    : TOK_RETURN expr_opt
+expr_opt	    : /* empty */ | expr
+if_stmt		    : TOK_IF expr stmt_list else_part
+else_part	    : /* empty */ | TOK_ELSE if_stmt_aux	     
+if_stmt_aux	    : if_stmt | stmt_list
+for_stmt	    : TOK_FOR for_init_expr TOK_TO expr step_opt stmt_list
+for_init_expr	    : TOK_IDENTIFIER assign_stmt
+step_opt	    : /* empty */ | TOK_STEP expr
+while_stmt	    : TOK_WHILE expr stmt_list
+switch_stmt	    : TOK_SWITCH expr case case_list
+case		    : TOK_CASE expr stmt_list
+case_list	    : /* empty */ | case case_list | TOK_DEFAULT stmt_list
+print_stmt	    : TOK_PRINT expr
+read_stmt	    : TOK_READ TOK_IDENTIFIER	      
 expr                : al_expr TOK_EQEQ al_expr 
                     | al_expr TOK_LESS al_expr 
                     | al_expr TOK_LESSEQ al_expr 
@@ -64,6 +91,9 @@ al_expr             : TOK_PLUS al_expr %prec TOK_UPLUS
                     | TOK_STRINGCONSTANT
                     | TOK_IDENTIFIER
                     | TOK_IDENTIFIER TOK_LPAREN al_expr TOK_RPAREN
+var		    : TOK_IDENTIFIER var_aux
+var_aux		    : /* empty */ | TOK_DOT TOK_IDENTIFIER var_aux
+    		    | TOK_LSQUARE expr expr_list_comma TOK_RSQUARE var_aux	     
 %%
 
 main() {
