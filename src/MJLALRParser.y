@@ -2,11 +2,14 @@
 
 #include <stdio.h>
 
-void yyerror(char *s) { printf("Deu erro 2\n"); }
+extern current_line;
+extern offset;
+
+void yyerror(char *s);
 
 %}
 
-%token TOK_PROGRAM TOK_IDENTIFIER TOK_SEMICOLON TOK_CLASS TOK_LCURLY TOK_RCURLY TOK_DECLARATIONS TOK_ENDDECLARATIONS TOK_EQUALS TOK_COMMA TOK_INT TOK_STRING TOK_LRSQUARE TOK_METHOD TOK_LPAREN TOK_RPAREN TOK_VOID TOK_VAL TOK_ARROBA TOK_LSQUARE TOK_RSQUARE TOK_ASSIGN TOK_RETURN TOK_IF TOK_ELSE TOK_FOR TOK_TO TOK_STEP TOK_WHILE TOK_SWITCH TOK_CASE TOK_DEFAULT TOK_PRINT TOK_READ TOK_LESS TOK_LESSEQ TOK_EQEQ TOK_DIFF TOK_GREATEREQ TOK_GREATER TOK_PLUS TOK_UPLUS TOK_MINUS TOK_UMINUS TOK_NOT TOK_2PIPE TOK_ASTERISK TOK_SLASH TOK_AND TOK_MOD TOK_INTEGERCONSTANT TOK_STRINGCONSTANT TOK_DOT END_OF_FILE
+%token TOK_PROGRAM TOK_IDENTIFIER TOK_SEMICOLON TOK_CLASS TOK_LCURLY TOK_RCURLY TOK_DECLARATIONS TOK_ENDDECLARATIONS TOK_EQUALS TOK_COMMA TOK_INT TOK_STRING TOK_LRSQUARE TOK_METHOD TOK_LPAREN TOK_RPAREN TOK_VOID TOK_VAL TOK_ARROBA TOK_LSQUARE TOK_RSQUARE TOK_ASSIGN TOK_RETURN TOK_IF TOK_ELSE TOK_FOR TOK_TO TOK_STEP TOK_WHILE TOK_SWITCH TOK_CASE TOK_DEFAULT TOK_PRINT TOK_READ TOK_LESS TOK_LESSEQ TOK_EQEQ TOK_DIFF TOK_GREATEREQ TOK_GREATER TOK_PLUS TOK_UPLUS TOK_MINUS TOK_UMINUS TOK_NOT TOK_2PIPE TOK_ASTERISK TOK_SLASH TOK_AND TOK_MOD TOK_INTEGERCONSTANT TOK_STRINGCONSTANT TOK_DOT
 
 %start program
 
@@ -25,7 +28,7 @@ decls               : TOK_DECLARATIONS field_decl_list_decls TOK_ENDDECLARATIONS
 method_decl_list    : /* empty */ | method_decl method_decl_list 
 field_decl_list_decls : /* empty */ | field_decl TOK_SEMICOLON field_decl_list_decls
 field_decl          : type var_decl_id field_decl_aux1
-field_decl_aux1     : field_decl_aux2 | TOK_ASSIGN var_init field_decl_aux2
+field_decl_aux1     : field_decl_aux2 | TOK_EQUALS var_init field_decl_aux2
 field_decl_aux2     : /* empty */ | TOK_COMMA var_decl_id field_decl_aux1
 type                : type_aux brackets_opt
 type_aux            : TOK_IDENTIFIER | TOK_INT | TOK_STRING
@@ -39,13 +42,13 @@ id_list_comma       : /* empty */ | TOK_COMMA TOK_IDENTIFIER id_list_comma
 formal_params_list_opt : /* empty */ | formal_params_list
 var_decl_id         : TOK_IDENTIFIER brackets_opt
 var_init            : expr | array_init | array_creation_expr
-array_init          : var_init var_init_list_comma
+array_init          : TOK_LCURLY var_init var_init_list_comma TOK_RCURLY
 var_init_list_comma : /* empty */ | TOK_COMMA var_init var_init_list_comma 
 array_creation_expr : TOK_ARROBA type array_dim_decl array_dim_decl_list
 array_dim_decl      : TOK_LSQUARE expr TOK_RSQUARE
 array_dim_decl_list : /* empty */ | array_dim_decl array_dim_decl_list
 block               : decls_opt stmt_list
-stmt_list           : stmt stmt_list_semicolon
+stmt_list           : TOK_LCURLY stmt stmt_list_semicolon TOK_RCURLY
 stmt_list_semicolon : /* empty */ | TOK_SEMICOLON stmt stmt_list_semicolon
 stmt		    : var var_start_stmt | return_stmt| if_stmt
 	  	    | while_stmt | for_stmt | switch_stmt | print_stmt
@@ -64,7 +67,7 @@ for_stmt	    : TOK_FOR for_init_expr TOK_TO expr step_opt stmt_list
 for_init_expr	    : TOK_IDENTIFIER assign_stmt
 step_opt	    : /* empty */ | TOK_STEP expr
 while_stmt	    : TOK_WHILE expr stmt_list
-switch_stmt	    : TOK_SWITCH expr case case_list
+switch_stmt	    : TOK_SWITCH expr TOK_LCURLY case case_list TOK_RCURLY
 case		    : TOK_CASE expr stmt_list
 case_list	    : /* empty */ | case case_list | TOK_DEFAULT stmt_list
 print_stmt	    : TOK_PRINT expr
@@ -86,15 +89,19 @@ al_expr             : TOK_PLUS al_expr %prec TOK_UPLUS
                     | al_expr TOK_SLASH al_expr
                     | al_expr TOK_AND al_expr
                     | al_expr TOK_MOD al_expr
-                    | TOK_LPAREN al_expr TOK_RPAREN
+                    | TOK_LPAREN expr TOK_RPAREN
                     | TOK_INTEGERCONSTANT 
                     | TOK_STRINGCONSTANT
-                    | TOK_IDENTIFIER
-                    | TOK_IDENTIFIER TOK_LPAREN al_expr TOK_RPAREN
-var		    : TOK_IDENTIFIER var_aux
-var_aux		    : /* empty */ | TOK_DOT TOK_IDENTIFIER var_aux
-    		    | TOK_LSQUARE expr expr_list_comma TOK_RSQUARE var_aux	     
+                    | var method_call_opt
+method_call_opt     : /* empty */ | method_call_stmt
+var		            : TOK_IDENTIFIER var_aux
+var_aux		        : /* empty */ | TOK_DOT TOK_IDENTIFIER var_aux
+    		        | TOK_LSQUARE expr expr_list_comma TOK_RSQUARE var_aux	     
 %%
+
+void yyerror(char *s) { 
+    printf("[mjc error] (%d, %d)\n", current_line, offset); 
+}
 
 main() {
     return (yyparse());

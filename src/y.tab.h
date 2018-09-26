@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.5.  */
+/* A Bison parser, made by GNU Bison 3.0.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -97,8 +97,7 @@ extern int yydebug;
     TOK_MOD = 307,
     TOK_INTEGERCONSTANT = 308,
     TOK_STRINGCONSTANT = 309,
-    TOK_DOT = 310,
-    END_OF_FILE = 311
+    TOK_DOT = 310
   };
 #endif
 /* Tokens.  */
@@ -155,7 +154,6 @@ extern int yydebug;
 #define TOK_INTEGERCONSTANT 308
 #define TOK_STRINGCONSTANT 309
 #define TOK_DOT 310
-#define END_OF_FILE 311
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

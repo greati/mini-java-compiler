@@ -62,7 +62,7 @@ lalrparser:
 	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(BINDIR)
 	lex -o $(SRCDIR)/lex.yy.c $(SRCDIR)/mjclexeryacc.l
-	yacc -o $(SRCDIR)/y.tab.c $(SRCDIR)/MJLALRParser.y -d 
+	yacc -o $(SRCDIR)/y.tab.c $(SRCDIR)/MJLALRParser.y -d -v
 	gcc -o $(BINDIR)/mjclalr $(SRCDIR)/y.tab.c $(SRCDIR)/lex.yy.c 
 
 lexer:

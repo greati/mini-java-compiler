@@ -1,3 +1,7 @@
 program MeuPrograma;
 
-class MinhaClasse {2+---++-+--+-+--+---hh+-+2}
+class MinhaClasse {
+    declarations
+        int a = (a + 5 == 2);
+    enddeclarations
+}

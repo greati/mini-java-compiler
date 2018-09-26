@@ -1,0 +1,2637 @@
+Gramática
+
+    0 $accept: program $end
+
+    1 program: TOK_PROGRAM TOK_IDENTIFIER TOK_SEMICOLON class_decl class_decl_list
+
+    2 class_decl_list: %empty
+    3                | class_decl class_decl_list
+
+    4 class_decl: TOK_CLASS TOK_IDENTIFIER class_body
+
+    5 class_body: TOK_LCURLY decls_opt method_decl_list TOK_RCURLY
+
+    6 decls_opt: %empty
+    7          | decls
+
+    8 decls: TOK_DECLARATIONS field_decl_list_decls TOK_ENDDECLARATIONS
+
+    9 method_decl_list: %empty
+   10                 | method_decl method_decl_list
+
+   11 field_decl_list_decls: %empty
+   12                      | field_decl TOK_SEMICOLON field_decl_list_decls
+
+   13 field_decl: type var_decl_id field_decl_aux1
+
+   14 field_decl_aux1: field_decl_aux2
+   15                | TOK_EQUALS var_init field_decl_aux2
+
+   16 field_decl_aux2: %empty
+   17                | TOK_COMMA var_decl_id field_decl_aux1
+
+   18 type: type_aux brackets_opt
+
+   19 type_aux: TOK_IDENTIFIER
+   20         | TOK_INT
+   21         | TOK_STRING
+
+   22 brackets_opt: %empty
+   23             | TOK_LRSQUARE brackets_opt
+
+   24 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN formal_params_list_opt TOK_RPAREN block
+
+   25 method_return_type: TOK_VOID
+   26                   | type
+
+   27 formal_params_list: TOK_VAL type TOK_IDENTIFIER id_list_comma formal_params_list_aux
+   28                   | type TOK_IDENTIFIER id_list_comma formal_params_list_aux
+
+   29 formal_params_list_aux: %empty
+   30                       | TOK_SEMICOLON formal_params_list
+
+   31 id_list_comma: %empty
+   32              | TOK_COMMA TOK_IDENTIFIER id_list_comma
+
+   33 formal_params_list_opt: %empty
+   34                       | formal_params_list
+
+   35 var_decl_id: TOK_IDENTIFIER brackets_opt
+
+   36 var_init: expr
+   37         | array_init
+   38         | array_creation_expr
+
+   39 array_init: TOK_LCURLY var_init var_init_list_comma TOK_RCURLY
+
+   40 var_init_list_comma: %empty
+   41                    | TOK_COMMA var_init var_init_list_comma
+
+   42 array_creation_expr: TOK_ARROBA type array_dim_decl array_dim_decl_list
+
+   43 array_dim_decl: TOK_LSQUARE expr TOK_RSQUARE
+
+   44 array_dim_decl_list: %empty
+   45                    | array_dim_decl array_dim_decl_list
+
+   46 block: decls_opt stmt_list
+
+   47 stmt_list: TOK_LCURLY stmt stmt_list_semicolon TOK_RCURLY
+
+   48 stmt_list_semicolon: %empty
+   49                    | TOK_SEMICOLON stmt stmt_list_semicolon
+
+   50 stmt: var var_start_stmt
+   51     | return_stmt
+   52     | if_stmt
+   53     | while_stmt
+   54     | for_stmt
+   55     | switch_stmt
+   56     | print_stmt
+   57     | read_stmt
+
+   58 var_start_stmt: assign_stmt
+   59               | method_call_stmt
+
+   60 assign_stmt: TOK_ASSIGN expr
+
+   61 method_call_stmt: TOK_LPAREN actual_params_list TOK_RPAREN
+
+   62 actual_params_list: %empty
+   63                   | expr expr_list_comma
+
+   64 expr_list_comma: %empty
+   65                | TOK_COMMA expr expr_list_comma
+
+   66 return_stmt: TOK_RETURN expr_opt
+
+   67 expr_opt: %empty
+   68         | expr
+
+   69 if_stmt: TOK_IF expr stmt_list else_part
+
+   70 else_part: %empty
+   71          | TOK_ELSE if_stmt_aux
+
+   72 if_stmt_aux: if_stmt
+   73            | stmt_list
+
+   74 for_stmt: TOK_FOR for_init_expr TOK_TO expr step_opt stmt_list
+
+   75 for_init_expr: TOK_IDENTIFIER assign_stmt
+
+   76 step_opt: %empty
+   77         | TOK_STEP expr
+
+   78 while_stmt: TOK_WHILE expr stmt_list
+
+   79 switch_stmt: TOK_SWITCH expr TOK_LCURLY case case_list TOK_RCURLY
+
+   80 case: TOK_CASE expr stmt_list
+
+   81 case_list: %empty
+   82          | case case_list
+   83          | TOK_DEFAULT stmt_list
+
+   84 print_stmt: TOK_PRINT expr
+
+   85 read_stmt: TOK_READ TOK_IDENTIFIER
+
+   86 expr: al_expr TOK_EQEQ al_expr
+   87     | al_expr TOK_LESS al_expr
+   88     | al_expr TOK_LESSEQ al_expr
+   89     | al_expr TOK_GREATEREQ al_expr
+   90     | al_expr TOK_GREATER al_expr
+   91     | al_expr TOK_DIFF al_expr
+   92     | al_expr
+
+   93 al_expr: TOK_PLUS al_expr
+   94        | TOK_MINUS al_expr
+   95        | TOK_NOT al_expr
+   96        | al_expr TOK_PLUS al_expr
+   97        | al_expr TOK_MINUS al_expr
+   98        | al_expr TOK_2PIPE al_expr
+   99        | al_expr TOK_ASTERISK al_expr
+  100        | al_expr TOK_SLASH al_expr
+  101        | al_expr TOK_AND al_expr
+  102        | al_expr TOK_MOD al_expr
+  103        | TOK_LPAREN expr TOK_RPAREN
+  104        | TOK_INTEGERCONSTANT
+  105        | TOK_STRINGCONSTANT
+  106        | var method_call_opt
+
+  107 method_call_opt: %empty
+  108                | method_call_stmt
+
+  109 var: TOK_IDENTIFIER var_aux
+
+  110 var_aux: %empty
+  111        | TOK_DOT TOK_IDENTIFIER var_aux
+  112        | TOK_LSQUARE expr expr_list_comma TOK_RSQUARE var_aux
+
+
+Terminais, com as regras onde eles aparecem
+
+$end (0) 0
+error (256)
+TOK_PROGRAM (258) 1
+TOK_IDENTIFIER (259) 1 4 19 24 27 28 32 35 75 85 109 111
+TOK_SEMICOLON (260) 1 12 30 49
+TOK_CLASS (261) 4
+TOK_LCURLY (262) 5 39 47 79
+TOK_RCURLY (263) 5 39 47 79
+TOK_DECLARATIONS (264) 8
+TOK_ENDDECLARATIONS (265) 8
+TOK_EQUALS (266) 15
+TOK_COMMA (267) 17 32 41 65
+TOK_INT (268) 20
+TOK_STRING (269) 21
+TOK_LRSQUARE (270) 23
+TOK_METHOD (271) 24
+TOK_LPAREN (272) 24 61 103
+TOK_RPAREN (273) 24 61 103
+TOK_VOID (274) 25
+TOK_VAL (275) 27
+TOK_ARROBA (276) 42
+TOK_LSQUARE (277) 43 112
+TOK_RSQUARE (278) 43 112
+TOK_ASSIGN (279) 60
+TOK_RETURN (280) 66
+TOK_IF (281) 69
+TOK_ELSE (282) 71
+TOK_FOR (283) 74
+TOK_TO (284) 74
+TOK_STEP (285) 77
+TOK_WHILE (286) 78
+TOK_SWITCH (287) 79
+TOK_CASE (288) 80
+TOK_DEFAULT (289) 83
+TOK_PRINT (290) 84
+TOK_READ (291) 85
+TOK_LESS (292) 87
+TOK_LESSEQ (293) 88
+TOK_EQEQ (294) 86
+TOK_DIFF (295) 91
+TOK_GREATEREQ (296) 89
+TOK_GREATER (297) 90
+TOK_PLUS (298) 93 96
+TOK_UPLUS (299)
+TOK_MINUS (300) 94 97
+TOK_UMINUS (301)
+TOK_NOT (302) 95
+TOK_2PIPE (303) 98
+TOK_ASTERISK (304) 99
+TOK_SLASH (305) 100
+TOK_AND (306) 101
+TOK_MOD (307) 102
+TOK_INTEGERCONSTANT (308) 104
+TOK_STRINGCONSTANT (309) 105
+TOK_DOT (310) 111
+
+
+Não terminais com as regras onde eles aparecem
+
+$accept (56)
+    à esquerda: 0
+program (57)
+    à esquerda: 1, à direita: 0
+class_decl_list (58)
+    à esquerda: 2 3, à direita: 1 3
+class_decl (59)
+    à esquerda: 4, à direita: 1 3
+class_body (60)
+    à esquerda: 5, à direita: 4
+decls_opt (61)
+    à esquerda: 6 7, à direita: 5 46
+decls (62)
+    à esquerda: 8, à direita: 7
+method_decl_list (63)
+    à esquerda: 9 10, à direita: 5 10
+field_decl_list_decls (64)
+    à esquerda: 11 12, à direita: 8 12
+field_decl (65)
+    à esquerda: 13, à direita: 12
+field_decl_aux1 (66)
+    à esquerda: 14 15, à direita: 13 17
+field_decl_aux2 (67)
+    à esquerda: 16 17, à direita: 14 15
+type (68)
+    à esquerda: 18, à direita: 13 26 27 28 42
+type_aux (69)
+    à esquerda: 19 20 21, à direita: 18
+brackets_opt (70)
+    à esquerda: 22 23, à direita: 18 23 35
+method_decl (71)
+    à esquerda: 24, à direita: 10
+method_return_type (72)
+    à esquerda: 25 26, à direita: 24
+formal_params_list (73)
+    à esquerda: 27 28, à direita: 30 34
+formal_params_list_aux (74)
+    à esquerda: 29 30, à direita: 27 28
+id_list_comma (75)
+    à esquerda: 31 32, à direita: 27 28 32
+formal_params_list_opt (76)
+    à esquerda: 33 34, à direita: 24
+var_decl_id (77)
+    à esquerda: 35, à direita: 13 17
+var_init (78)
+    à esquerda: 36 37 38, à direita: 15 39 41
+array_init (79)
+    à esquerda: 39, à direita: 37
+var_init_list_comma (80)
+    à esquerda: 40 41, à direita: 39 41
+array_creation_expr (81)
+    à esquerda: 42, à direita: 38
+array_dim_decl (82)
+    à esquerda: 43, à direita: 42 45
+array_dim_decl_list (83)
+    à esquerda: 44 45, à direita: 42 45
+block (84)
+    à esquerda: 46, à direita: 24
+stmt_list (85)
+    à esquerda: 47, à direita: 46 69 73 74 78 80 83
+stmt_list_semicolon (86)
+    à esquerda: 48 49, à direita: 47 49
+stmt (87)
+    à esquerda: 50 51 52 53 54 55 56 57, à direita: 47 49
+var_start_stmt (88)
+    à esquerda: 58 59, à direita: 50
+assign_stmt (89)
+    à esquerda: 60, à direita: 58 75
+method_call_stmt (90)
+    à esquerda: 61, à direita: 59 108
+actual_params_list (91)
+    à esquerda: 62 63, à direita: 61
+expr_list_comma (92)
+    à esquerda: 64 65, à direita: 63 65 112
+return_stmt (93)
+    à esquerda: 66, à direita: 51
+expr_opt (94)
+    à esquerda: 67 68, à direita: 66
+if_stmt (95)
+    à esquerda: 69, à direita: 52 72
+else_part (96)
+    à esquerda: 70 71, à direita: 69
+if_stmt_aux (97)
+    à esquerda: 72 73, à direita: 71
+for_stmt (98)
+    à esquerda: 74, à direita: 54
+for_init_expr (99)
+    à esquerda: 75, à direita: 74
+step_opt (100)
+    à esquerda: 76 77, à direita: 74
+while_stmt (101)
+    à esquerda: 78, à direita: 53
+switch_stmt (102)
+    à esquerda: 79, à direita: 55
+case (103)
+    à esquerda: 80, à direita: 79 82
+case_list (104)
+    à esquerda: 81 82 83, à direita: 79 82
+print_stmt (105)
+    à esquerda: 84, à direita: 56
+read_stmt (106)
+    à esquerda: 85, à direita: 57
+expr (107)
+    à esquerda: 86 87 88 89 90 91 92, à direita: 36 43 60 63 65 68
+    69 74 77 78 79 80 84 103 112
+al_expr (108)
+    à esquerda: 93 94 95 96 97 98 99 100 101 102 103 104 105 106,
+    à direita: 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102
+method_call_opt (109)
+    à esquerda: 107 108, à direita: 106
+var (110)
+    à esquerda: 109, à direita: 50 106
+var_aux (111)
+    à esquerda: 110 111 112, à direita: 109 111 112
+
+
+Estado 0
+
+    0 $accept: . program $end
+
+    TOK_PROGRAM  deslocar, e ir ao estado 1
+
+    program  ir ao estado 2
+
+
+Estado 1
+
+    1 program: TOK_PROGRAM . TOK_IDENTIFIER TOK_SEMICOLON class_decl class_decl_list
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 3
+
+
+Estado 2
+
+    0 $accept: program . $end
+
+    $end  deslocar, e ir ao estado 4
+
+
+Estado 3
+
+    1 program: TOK_PROGRAM TOK_IDENTIFIER . TOK_SEMICOLON class_decl class_decl_list
+
+    TOK_SEMICOLON  deslocar, e ir ao estado 5
+
+
+Estado 4
+
+    0 $accept: program $end .
+
+    $padrão  aceitar
+
+
+Estado 5
+
+    1 program: TOK_PROGRAM TOK_IDENTIFIER TOK_SEMICOLON . class_decl class_decl_list
+
+    TOK_CLASS  deslocar, e ir ao estado 6
+
+    class_decl  ir ao estado 7
+
+
+Estado 6
+
+    4 class_decl: TOK_CLASS . TOK_IDENTIFIER class_body
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 8
+
+
+Estado 7
+
+    1 program: TOK_PROGRAM TOK_IDENTIFIER TOK_SEMICOLON class_decl . class_decl_list
+
+    TOK_CLASS  deslocar, e ir ao estado 6
+
+    $padrão  reduzir usando a regra 2 (class_decl_list)
+
+    class_decl_list  ir ao estado 9
+    class_decl       ir ao estado 10
+
+
+Estado 8
+
+    4 class_decl: TOK_CLASS TOK_IDENTIFIER . class_body
+
+    TOK_LCURLY  deslocar, e ir ao estado 11
+
+    class_body  ir ao estado 12
+
+
+Estado 9
+
+    1 program: TOK_PROGRAM TOK_IDENTIFIER TOK_SEMICOLON class_decl class_decl_list .
+
+    $padrão  reduzir usando a regra 1 (program)
+
+
+Estado 10
+
+    3 class_decl_list: class_decl . class_decl_list
+
+    TOK_CLASS  deslocar, e ir ao estado 6
+
+    $padrão  reduzir usando a regra 2 (class_decl_list)
+
+    class_decl_list  ir ao estado 13
+    class_decl       ir ao estado 10
+
+
+Estado 11
+
+    5 class_body: TOK_LCURLY . decls_opt method_decl_list TOK_RCURLY
+
+    TOK_DECLARATIONS  deslocar, e ir ao estado 14
+
+    $padrão  reduzir usando a regra 6 (decls_opt)
+
+    decls_opt  ir ao estado 15
+    decls      ir ao estado 16
+
+
+Estado 12
+
+    4 class_decl: TOK_CLASS TOK_IDENTIFIER class_body .
+
+    $padrão  reduzir usando a regra 4 (class_decl)
+
+
+Estado 13
+
+    3 class_decl_list: class_decl class_decl_list .
+
+    $padrão  reduzir usando a regra 3 (class_decl_list)
+
+
+Estado 14
+
+    8 decls: TOK_DECLARATIONS . field_decl_list_decls TOK_ENDDECLARATIONS
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 17
+    TOK_INT         deslocar, e ir ao estado 18
+    TOK_STRING      deslocar, e ir ao estado 19
+
+    $padrão  reduzir usando a regra 11 (field_decl_list_decls)
+
+    field_decl_list_decls  ir ao estado 20
+    field_decl             ir ao estado 21
+    type                   ir ao estado 22
+    type_aux               ir ao estado 23
+
+
+Estado 15
+
+    5 class_body: TOK_LCURLY decls_opt . method_decl_list TOK_RCURLY
+
+    TOK_METHOD  deslocar, e ir ao estado 24
+
+    $padrão  reduzir usando a regra 9 (method_decl_list)
+
+    method_decl_list  ir ao estado 25
+    method_decl       ir ao estado 26
+
+
+Estado 16
+
+    7 decls_opt: decls .
+
+    $padrão  reduzir usando a regra 7 (decls_opt)
+
+
+Estado 17
+
+   19 type_aux: TOK_IDENTIFIER .
+
+    $padrão  reduzir usando a regra 19 (type_aux)
+
+
+Estado 18
+
+   20 type_aux: TOK_INT .
+
+    $padrão  reduzir usando a regra 20 (type_aux)
+
+
+Estado 19
+
+   21 type_aux: TOK_STRING .
+
+    $padrão  reduzir usando a regra 21 (type_aux)
+
+
+Estado 20
+
+    8 decls: TOK_DECLARATIONS field_decl_list_decls . TOK_ENDDECLARATIONS
+
+    TOK_ENDDECLARATIONS  deslocar, e ir ao estado 27
+
+
+Estado 21
+
+   12 field_decl_list_decls: field_decl . TOK_SEMICOLON field_decl_list_decls
+
+    TOK_SEMICOLON  deslocar, e ir ao estado 28
+
+
+Estado 22
+
+   13 field_decl: type . var_decl_id field_decl_aux1
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 29
+
+    var_decl_id  ir ao estado 30
+
+
+Estado 23
+
+   18 type: type_aux . brackets_opt
+
+    TOK_LRSQUARE  deslocar, e ir ao estado 31
+
+    $padrão  reduzir usando a regra 22 (brackets_opt)
+
+    brackets_opt  ir ao estado 32
+
+
+Estado 24
+
+   24 method_decl: TOK_METHOD . method_return_type TOK_IDENTIFIER TOK_LPAREN formal_params_list_opt TOK_RPAREN block
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 17
+    TOK_INT         deslocar, e ir ao estado 18
+    TOK_STRING      deslocar, e ir ao estado 19
+    TOK_VOID        deslocar, e ir ao estado 33
+
+    type                ir ao estado 34
+    type_aux            ir ao estado 23
+    method_return_type  ir ao estado 35
+
+
+Estado 25
+
+    5 class_body: TOK_LCURLY decls_opt method_decl_list . TOK_RCURLY
+
+    TOK_RCURLY  deslocar, e ir ao estado 36
+
+
+Estado 26
+
+   10 method_decl_list: method_decl . method_decl_list
+
+    TOK_METHOD  deslocar, e ir ao estado 24
+
+    $padrão  reduzir usando a regra 9 (method_decl_list)
+
+    method_decl_list  ir ao estado 37
+    method_decl       ir ao estado 26
+
+
+Estado 27
+
+    8 decls: TOK_DECLARATIONS field_decl_list_decls TOK_ENDDECLARATIONS .
+
+    $padrão  reduzir usando a regra 8 (decls)
+
+
+Estado 28
+
+   12 field_decl_list_decls: field_decl TOK_SEMICOLON . field_decl_list_decls
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 17
+    TOK_INT         deslocar, e ir ao estado 18
+    TOK_STRING      deslocar, e ir ao estado 19
+
+    $padrão  reduzir usando a regra 11 (field_decl_list_decls)
+
+    field_decl_list_decls  ir ao estado 38
+    field_decl             ir ao estado 21
+    type                   ir ao estado 22
+    type_aux               ir ao estado 23
+
+
+Estado 29
+
+   35 var_decl_id: TOK_IDENTIFIER . brackets_opt
+
+    TOK_LRSQUARE  deslocar, e ir ao estado 31
+
+    $padrão  reduzir usando a regra 22 (brackets_opt)
+
+    brackets_opt  ir ao estado 39
+
+
+Estado 30
+
+   13 field_decl: type var_decl_id . field_decl_aux1
+
+    TOK_EQUALS  deslocar, e ir ao estado 40
+    TOK_COMMA   deslocar, e ir ao estado 41
+
+    $padrão  reduzir usando a regra 16 (field_decl_aux2)
+
+    field_decl_aux1  ir ao estado 42
+    field_decl_aux2  ir ao estado 43
+
+
+Estado 31
+
+   23 brackets_opt: TOK_LRSQUARE . brackets_opt
+
+    TOK_LRSQUARE  deslocar, e ir ao estado 31
+
+    $padrão  reduzir usando a regra 22 (brackets_opt)
+
+    brackets_opt  ir ao estado 44
+
+
+Estado 32
+
+   18 type: type_aux brackets_opt .
+
+    $padrão  reduzir usando a regra 18 (type)
+
+
+Estado 33
+
+   25 method_return_type: TOK_VOID .
+
+    $padrão  reduzir usando a regra 25 (method_return_type)
+
+
+Estado 34
+
+   26 method_return_type: type .
+
+    $padrão  reduzir usando a regra 26 (method_return_type)
+
+
+Estado 35
+
+   24 method_decl: TOK_METHOD method_return_type . TOK_IDENTIFIER TOK_LPAREN formal_params_list_opt TOK_RPAREN block
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 45
+
+
+Estado 36
+
+    5 class_body: TOK_LCURLY decls_opt method_decl_list TOK_RCURLY .
+
+    $padrão  reduzir usando a regra 5 (class_body)
+
+
+Estado 37
+
+   10 method_decl_list: method_decl method_decl_list .
+
+    $padrão  reduzir usando a regra 10 (method_decl_list)
+
+
+Estado 38
+
+   12 field_decl_list_decls: field_decl TOK_SEMICOLON field_decl_list_decls .
+
+    $padrão  reduzir usando a regra 12 (field_decl_list_decls)
+
+
+Estado 39
+
+   35 var_decl_id: TOK_IDENTIFIER brackets_opt .
+
+    $padrão  reduzir usando a regra 35 (var_decl_id)
+
+
+Estado 40
+
+   15 field_decl_aux1: TOK_EQUALS . var_init field_decl_aux2
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LCURLY           deslocar, e ir ao estado 47
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_ARROBA           deslocar, e ir ao estado 49
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    var_init             ir ao estado 55
+    array_init           ir ao estado 56
+    array_creation_expr  ir ao estado 57
+    expr                 ir ao estado 58
+    al_expr              ir ao estado 59
+    var                  ir ao estado 60
+
+
+Estado 41
+
+   17 field_decl_aux2: TOK_COMMA . var_decl_id field_decl_aux1
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 29
+
+    var_decl_id  ir ao estado 61
+
+
+Estado 42
+
+   13 field_decl: type var_decl_id field_decl_aux1 .
+
+    $padrão  reduzir usando a regra 13 (field_decl)
+
+
+Estado 43
+
+   14 field_decl_aux1: field_decl_aux2 .
+
+    $padrão  reduzir usando a regra 14 (field_decl_aux1)
+
+
+Estado 44
+
+   23 brackets_opt: TOK_LRSQUARE brackets_opt .
+
+    $padrão  reduzir usando a regra 23 (brackets_opt)
+
+
+Estado 45
+
+   24 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER . TOK_LPAREN formal_params_list_opt TOK_RPAREN block
+
+    TOK_LPAREN  deslocar, e ir ao estado 62
+
+
+Estado 46
+
+  109 var: TOK_IDENTIFIER . var_aux
+
+    TOK_LSQUARE  deslocar, e ir ao estado 63
+    TOK_DOT      deslocar, e ir ao estado 64
+
+    $padrão  reduzir usando a regra 110 (var_aux)
+
+    var_aux  ir ao estado 65
+
+
+Estado 47
+
+   39 array_init: TOK_LCURLY . var_init var_init_list_comma TOK_RCURLY
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LCURLY           deslocar, e ir ao estado 47
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_ARROBA           deslocar, e ir ao estado 49
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    var_init             ir ao estado 66
+    array_init           ir ao estado 56
+    array_creation_expr  ir ao estado 57
+    expr                 ir ao estado 58
+    al_expr              ir ao estado 59
+    var                  ir ao estado 60
+
+
+Estado 48
+
+  103 al_expr: TOK_LPAREN . expr TOK_RPAREN
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    expr     ir ao estado 67
+    al_expr  ir ao estado 59
+    var      ir ao estado 60
+
+
+Estado 49
+
+   42 array_creation_expr: TOK_ARROBA . type array_dim_decl array_dim_decl_list
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 17
+    TOK_INT         deslocar, e ir ao estado 18
+    TOK_STRING      deslocar, e ir ao estado 19
+
+    type      ir ao estado 68
+    type_aux  ir ao estado 23
+
+
+Estado 50
+
+   93 al_expr: TOK_PLUS . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 69
+    var      ir ao estado 60
+
+
+Estado 51
+
+   94 al_expr: TOK_MINUS . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 70
+    var      ir ao estado 60
+
+
+Estado 52
+
+   95 al_expr: TOK_NOT . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 71
+    var      ir ao estado 60
+
+
+Estado 53
+
+  104 al_expr: TOK_INTEGERCONSTANT .
+
+    $padrão  reduzir usando a regra 104 (al_expr)
+
+
+Estado 54
+
+  105 al_expr: TOK_STRINGCONSTANT .
+
+    $padrão  reduzir usando a regra 105 (al_expr)
+
+
+Estado 55
+
+   15 field_decl_aux1: TOK_EQUALS var_init . field_decl_aux2
+
+    TOK_COMMA  deslocar, e ir ao estado 41
+
+    $padrão  reduzir usando a regra 16 (field_decl_aux2)
+
+    field_decl_aux2  ir ao estado 72
+
+
+Estado 56
+
+   37 var_init: array_init .
+
+    $padrão  reduzir usando a regra 37 (var_init)
+
+
+Estado 57
+
+   38 var_init: array_creation_expr .
+
+    $padrão  reduzir usando a regra 38 (var_init)
+
+
+Estado 58
+
+   36 var_init: expr .
+
+    $padrão  reduzir usando a regra 36 (var_init)
+
+
+Estado 59
+
+   86 expr: al_expr . TOK_EQEQ al_expr
+   87     | al_expr . TOK_LESS al_expr
+   88     | al_expr . TOK_LESSEQ al_expr
+   89     | al_expr . TOK_GREATEREQ al_expr
+   90     | al_expr . TOK_GREATER al_expr
+   91     | al_expr . TOK_DIFF al_expr
+   92     | al_expr .
+   96 al_expr: al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    TOK_LESS       deslocar, e ir ao estado 73
+    TOK_LESSEQ     deslocar, e ir ao estado 74
+    TOK_EQEQ       deslocar, e ir ao estado 75
+    TOK_DIFF       deslocar, e ir ao estado 76
+    TOK_GREATEREQ  deslocar, e ir ao estado 77
+    TOK_GREATER    deslocar, e ir ao estado 78
+    TOK_PLUS       deslocar, e ir ao estado 79
+    TOK_MINUS      deslocar, e ir ao estado 80
+    TOK_2PIPE      deslocar, e ir ao estado 81
+    TOK_ASTERISK   deslocar, e ir ao estado 82
+    TOK_SLASH      deslocar, e ir ao estado 83
+    TOK_AND        deslocar, e ir ao estado 84
+    TOK_MOD        deslocar, e ir ao estado 85
+
+    $padrão  reduzir usando a regra 92 (expr)
+
+
+Estado 60
+
+  106 al_expr: var . method_call_opt
+
+    TOK_LPAREN  deslocar, e ir ao estado 86
+
+    $padrão  reduzir usando a regra 107 (method_call_opt)
+
+    method_call_stmt  ir ao estado 87
+    method_call_opt   ir ao estado 88
+
+
+Estado 61
+
+   17 field_decl_aux2: TOK_COMMA var_decl_id . field_decl_aux1
+
+    TOK_EQUALS  deslocar, e ir ao estado 40
+    TOK_COMMA   deslocar, e ir ao estado 41
+
+    $padrão  reduzir usando a regra 16 (field_decl_aux2)
+
+    field_decl_aux1  ir ao estado 89
+    field_decl_aux2  ir ao estado 43
+
+
+Estado 62
+
+   24 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN . formal_params_list_opt TOK_RPAREN block
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 17
+    TOK_INT         deslocar, e ir ao estado 18
+    TOK_STRING      deslocar, e ir ao estado 19
+    TOK_VAL         deslocar, e ir ao estado 90
+
+    $padrão  reduzir usando a regra 33 (formal_params_list_opt)
+
+    type                    ir ao estado 91
+    type_aux                ir ao estado 23
+    formal_params_list      ir ao estado 92
+    formal_params_list_opt  ir ao estado 93
+
+
+Estado 63
+
+  112 var_aux: TOK_LSQUARE . expr expr_list_comma TOK_RSQUARE var_aux
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    expr     ir ao estado 94
+    al_expr  ir ao estado 59
+    var      ir ao estado 60
+
+
+Estado 64
+
+  111 var_aux: TOK_DOT . TOK_IDENTIFIER var_aux
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 95
+
+
+Estado 65
+
+  109 var: TOK_IDENTIFIER var_aux .
+
+    $padrão  reduzir usando a regra 109 (var)
+
+
+Estado 66
+
+   39 array_init: TOK_LCURLY var_init . var_init_list_comma TOK_RCURLY
+
+    TOK_COMMA  deslocar, e ir ao estado 96
+
+    $padrão  reduzir usando a regra 40 (var_init_list_comma)
+
+    var_init_list_comma  ir ao estado 97
+
+
+Estado 67
+
+  103 al_expr: TOK_LPAREN expr . TOK_RPAREN
+
+    TOK_RPAREN  deslocar, e ir ao estado 98
+
+
+Estado 68
+
+   42 array_creation_expr: TOK_ARROBA type . array_dim_decl array_dim_decl_list
+
+    TOK_LSQUARE  deslocar, e ir ao estado 99
+
+    array_dim_decl  ir ao estado 100
+
+
+Estado 69
+
+   93 al_expr: TOK_PLUS al_expr .
+   96        | al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    $padrão  reduzir usando a regra 93 (al_expr)
+
+
+Estado 70
+
+   94 al_expr: TOK_MINUS al_expr .
+   96        | al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    $padrão  reduzir usando a regra 94 (al_expr)
+
+
+Estado 71
+
+   95 al_expr: TOK_NOT al_expr .
+   96        | al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    $padrão  reduzir usando a regra 95 (al_expr)
+
+
+Estado 72
+
+   15 field_decl_aux1: TOK_EQUALS var_init field_decl_aux2 .
+
+    $padrão  reduzir usando a regra 15 (field_decl_aux1)
+
+
+Estado 73
+
+   87 expr: al_expr TOK_LESS . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 101
+    var      ir ao estado 60
+
+
+Estado 74
+
+   88 expr: al_expr TOK_LESSEQ . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 102
+    var      ir ao estado 60
+
+
+Estado 75
+
+   86 expr: al_expr TOK_EQEQ . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 103
+    var      ir ao estado 60
+
+
+Estado 76
+
+   91 expr: al_expr TOK_DIFF . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 104
+    var      ir ao estado 60
+
+
+Estado 77
+
+   89 expr: al_expr TOK_GREATEREQ . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 105
+    var      ir ao estado 60
+
+
+Estado 78
+
+   90 expr: al_expr TOK_GREATER . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 106
+    var      ir ao estado 60
+
+
+Estado 79
+
+   96 al_expr: al_expr TOK_PLUS . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 107
+    var      ir ao estado 60
+
+
+Estado 80
+
+   97 al_expr: al_expr TOK_MINUS . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 108
+    var      ir ao estado 60
+
+
+Estado 81
+
+   98 al_expr: al_expr TOK_2PIPE . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 109
+    var      ir ao estado 60
+
+
+Estado 82
+
+   99 al_expr: al_expr TOK_ASTERISK . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 110
+    var      ir ao estado 60
+
+
+Estado 83
+
+  100 al_expr: al_expr TOK_SLASH . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 111
+    var      ir ao estado 60
+
+
+Estado 84
+
+  101 al_expr: al_expr TOK_AND . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 112
+    var      ir ao estado 60
+
+
+Estado 85
+
+  102 al_expr: al_expr TOK_MOD . al_expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    al_expr  ir ao estado 113
+    var      ir ao estado 60
+
+
+Estado 86
+
+   61 method_call_stmt: TOK_LPAREN . actual_params_list TOK_RPAREN
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    $padrão  reduzir usando a regra 62 (actual_params_list)
+
+    actual_params_list  ir ao estado 114
+    expr                ir ao estado 115
+    al_expr             ir ao estado 59
+    var                 ir ao estado 60
+
+
+Estado 87
+
+  108 method_call_opt: method_call_stmt .
+
+    $padrão  reduzir usando a regra 108 (method_call_opt)
+
+
+Estado 88
+
+  106 al_expr: var method_call_opt .
+
+    $padrão  reduzir usando a regra 106 (al_expr)
+
+
+Estado 89
+
+   17 field_decl_aux2: TOK_COMMA var_decl_id field_decl_aux1 .
+
+    $padrão  reduzir usando a regra 17 (field_decl_aux2)
+
+
+Estado 90
+
+   27 formal_params_list: TOK_VAL . type TOK_IDENTIFIER id_list_comma formal_params_list_aux
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 17
+    TOK_INT         deslocar, e ir ao estado 18
+    TOK_STRING      deslocar, e ir ao estado 19
+
+    type      ir ao estado 116
+    type_aux  ir ao estado 23
+
+
+Estado 91
+
+   28 formal_params_list: type . TOK_IDENTIFIER id_list_comma formal_params_list_aux
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 117
+
+
+Estado 92
+
+   34 formal_params_list_opt: formal_params_list .
+
+    $padrão  reduzir usando a regra 34 (formal_params_list_opt)
+
+
+Estado 93
+
+   24 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN formal_params_list_opt . TOK_RPAREN block
+
+    TOK_RPAREN  deslocar, e ir ao estado 118
+
+
+Estado 94
+
+  112 var_aux: TOK_LSQUARE expr . expr_list_comma TOK_RSQUARE var_aux
+
+    TOK_COMMA  deslocar, e ir ao estado 119
+
+    $padrão  reduzir usando a regra 64 (expr_list_comma)
+
+    expr_list_comma  ir ao estado 120
+
+
+Estado 95
+
+  111 var_aux: TOK_DOT TOK_IDENTIFIER . var_aux
+
+    TOK_LSQUARE  deslocar, e ir ao estado 63
+    TOK_DOT      deslocar, e ir ao estado 64
+
+    $padrão  reduzir usando a regra 110 (var_aux)
+
+    var_aux  ir ao estado 121
+
+
+Estado 96
+
+   41 var_init_list_comma: TOK_COMMA . var_init var_init_list_comma
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LCURLY           deslocar, e ir ao estado 47
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_ARROBA           deslocar, e ir ao estado 49
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    var_init             ir ao estado 122
+    array_init           ir ao estado 56
+    array_creation_expr  ir ao estado 57
+    expr                 ir ao estado 58
+    al_expr              ir ao estado 59
+    var                  ir ao estado 60
+
+
+Estado 97
+
+   39 array_init: TOK_LCURLY var_init var_init_list_comma . TOK_RCURLY
+
+    TOK_RCURLY  deslocar, e ir ao estado 123
+
+
+Estado 98
+
+  103 al_expr: TOK_LPAREN expr TOK_RPAREN .
+
+    $padrão  reduzir usando a regra 103 (al_expr)
+
+
+Estado 99
+
+   43 array_dim_decl: TOK_LSQUARE . expr TOK_RSQUARE
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    expr     ir ao estado 124
+    al_expr  ir ao estado 59
+    var      ir ao estado 60
+
+
+Estado 100
+
+   42 array_creation_expr: TOK_ARROBA type array_dim_decl . array_dim_decl_list
+
+    TOK_LSQUARE  deslocar, e ir ao estado 99
+
+    $padrão  reduzir usando a regra 44 (array_dim_decl_list)
+
+    array_dim_decl       ir ao estado 125
+    array_dim_decl_list  ir ao estado 126
+
+
+Estado 101
+
+   87 expr: al_expr TOK_LESS al_expr .
+   96 al_expr: al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    TOK_PLUS      deslocar, e ir ao estado 79
+    TOK_MINUS     deslocar, e ir ao estado 80
+    TOK_2PIPE     deslocar, e ir ao estado 81
+    TOK_ASTERISK  deslocar, e ir ao estado 82
+    TOK_SLASH     deslocar, e ir ao estado 83
+    TOK_AND       deslocar, e ir ao estado 84
+    TOK_MOD       deslocar, e ir ao estado 85
+
+    $padrão  reduzir usando a regra 87 (expr)
+
+
+Estado 102
+
+   88 expr: al_expr TOK_LESSEQ al_expr .
+   96 al_expr: al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    TOK_PLUS      deslocar, e ir ao estado 79
+    TOK_MINUS     deslocar, e ir ao estado 80
+    TOK_2PIPE     deslocar, e ir ao estado 81
+    TOK_ASTERISK  deslocar, e ir ao estado 82
+    TOK_SLASH     deslocar, e ir ao estado 83
+    TOK_AND       deslocar, e ir ao estado 84
+    TOK_MOD       deslocar, e ir ao estado 85
+
+    $padrão  reduzir usando a regra 88 (expr)
+
+
+Estado 103
+
+   86 expr: al_expr TOK_EQEQ al_expr .
+   96 al_expr: al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    TOK_PLUS      deslocar, e ir ao estado 79
+    TOK_MINUS     deslocar, e ir ao estado 80
+    TOK_2PIPE     deslocar, e ir ao estado 81
+    TOK_ASTERISK  deslocar, e ir ao estado 82
+    TOK_SLASH     deslocar, e ir ao estado 83
+    TOK_AND       deslocar, e ir ao estado 84
+    TOK_MOD       deslocar, e ir ao estado 85
+
+    $padrão  reduzir usando a regra 86 (expr)
+
+
+Estado 104
+
+   91 expr: al_expr TOK_DIFF al_expr .
+   96 al_expr: al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    TOK_PLUS      deslocar, e ir ao estado 79
+    TOK_MINUS     deslocar, e ir ao estado 80
+    TOK_2PIPE     deslocar, e ir ao estado 81
+    TOK_ASTERISK  deslocar, e ir ao estado 82
+    TOK_SLASH     deslocar, e ir ao estado 83
+    TOK_AND       deslocar, e ir ao estado 84
+    TOK_MOD       deslocar, e ir ao estado 85
+
+    $padrão  reduzir usando a regra 91 (expr)
+
+
+Estado 105
+
+   89 expr: al_expr TOK_GREATEREQ al_expr .
+   96 al_expr: al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    TOK_PLUS      deslocar, e ir ao estado 79
+    TOK_MINUS     deslocar, e ir ao estado 80
+    TOK_2PIPE     deslocar, e ir ao estado 81
+    TOK_ASTERISK  deslocar, e ir ao estado 82
+    TOK_SLASH     deslocar, e ir ao estado 83
+    TOK_AND       deslocar, e ir ao estado 84
+    TOK_MOD       deslocar, e ir ao estado 85
+
+    $padrão  reduzir usando a regra 89 (expr)
+
+
+Estado 106
+
+   90 expr: al_expr TOK_GREATER al_expr .
+   96 al_expr: al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    TOK_PLUS      deslocar, e ir ao estado 79
+    TOK_MINUS     deslocar, e ir ao estado 80
+    TOK_2PIPE     deslocar, e ir ao estado 81
+    TOK_ASTERISK  deslocar, e ir ao estado 82
+    TOK_SLASH     deslocar, e ir ao estado 83
+    TOK_AND       deslocar, e ir ao estado 84
+    TOK_MOD       deslocar, e ir ao estado 85
+
+    $padrão  reduzir usando a regra 90 (expr)
+
+
+Estado 107
+
+   96 al_expr: al_expr . TOK_PLUS al_expr
+   96        | al_expr TOK_PLUS al_expr .
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    TOK_ASTERISK  deslocar, e ir ao estado 82
+    TOK_SLASH     deslocar, e ir ao estado 83
+    TOK_AND       deslocar, e ir ao estado 84
+    TOK_MOD       deslocar, e ir ao estado 85
+
+    $padrão  reduzir usando a regra 96 (al_expr)
+
+
+Estado 108
+
+   96 al_expr: al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   97        | al_expr TOK_MINUS al_expr .
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    TOK_ASTERISK  deslocar, e ir ao estado 82
+    TOK_SLASH     deslocar, e ir ao estado 83
+    TOK_AND       deslocar, e ir ao estado 84
+    TOK_MOD       deslocar, e ir ao estado 85
+
+    $padrão  reduzir usando a regra 97 (al_expr)
+
+
+Estado 109
+
+   96 al_expr: al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   98        | al_expr TOK_2PIPE al_expr .
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    TOK_ASTERISK  deslocar, e ir ao estado 82
+    TOK_SLASH     deslocar, e ir ao estado 83
+    TOK_AND       deslocar, e ir ao estado 84
+    TOK_MOD       deslocar, e ir ao estado 85
+
+    $padrão  reduzir usando a regra 98 (al_expr)
+
+
+Estado 110
+
+   96 al_expr: al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+   99        | al_expr TOK_ASTERISK al_expr .
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    $padrão  reduzir usando a regra 99 (al_expr)
+
+
+Estado 111
+
+   96 al_expr: al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  100        | al_expr TOK_SLASH al_expr .
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+
+    $padrão  reduzir usando a regra 100 (al_expr)
+
+
+Estado 112
+
+   96 al_expr: al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  101        | al_expr TOK_AND al_expr .
+  102        | al_expr . TOK_MOD al_expr
+
+    $padrão  reduzir usando a regra 101 (al_expr)
+
+
+Estado 113
+
+   96 al_expr: al_expr . TOK_PLUS al_expr
+   97        | al_expr . TOK_MINUS al_expr
+   98        | al_expr . TOK_2PIPE al_expr
+   99        | al_expr . TOK_ASTERISK al_expr
+  100        | al_expr . TOK_SLASH al_expr
+  101        | al_expr . TOK_AND al_expr
+  102        | al_expr . TOK_MOD al_expr
+  102        | al_expr TOK_MOD al_expr .
+
+    $padrão  reduzir usando a regra 102 (al_expr)
+
+
+Estado 114
+
+   61 method_call_stmt: TOK_LPAREN actual_params_list . TOK_RPAREN
+
+    TOK_RPAREN  deslocar, e ir ao estado 127
+
+
+Estado 115
+
+   63 actual_params_list: expr . expr_list_comma
+
+    TOK_COMMA  deslocar, e ir ao estado 119
+
+    $padrão  reduzir usando a regra 64 (expr_list_comma)
+
+    expr_list_comma  ir ao estado 128
+
+
+Estado 116
+
+   27 formal_params_list: TOK_VAL type . TOK_IDENTIFIER id_list_comma formal_params_list_aux
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 129
+
+
+Estado 117
+
+   28 formal_params_list: type TOK_IDENTIFIER . id_list_comma formal_params_list_aux
+
+    TOK_COMMA  deslocar, e ir ao estado 130
+
+    $padrão  reduzir usando a regra 31 (id_list_comma)
+
+    id_list_comma  ir ao estado 131
+
+
+Estado 118
+
+   24 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN formal_params_list_opt TOK_RPAREN . block
+
+    TOK_DECLARATIONS  deslocar, e ir ao estado 14
+
+    $padrão  reduzir usando a regra 6 (decls_opt)
+
+    decls_opt  ir ao estado 132
+    decls      ir ao estado 16
+    block      ir ao estado 133
+
+
+Estado 119
+
+   65 expr_list_comma: TOK_COMMA . expr expr_list_comma
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    expr     ir ao estado 134
+    al_expr  ir ao estado 59
+    var      ir ao estado 60
+
+
+Estado 120
+
+  112 var_aux: TOK_LSQUARE expr expr_list_comma . TOK_RSQUARE var_aux
+
+    TOK_RSQUARE  deslocar, e ir ao estado 135
+
+
+Estado 121
+
+  111 var_aux: TOK_DOT TOK_IDENTIFIER var_aux .
+
+    $padrão  reduzir usando a regra 111 (var_aux)
+
+
+Estado 122
+
+   41 var_init_list_comma: TOK_COMMA var_init . var_init_list_comma
+
+    TOK_COMMA  deslocar, e ir ao estado 96
+
+    $padrão  reduzir usando a regra 40 (var_init_list_comma)
+
+    var_init_list_comma  ir ao estado 136
+
+
+Estado 123
+
+   39 array_init: TOK_LCURLY var_init var_init_list_comma TOK_RCURLY .
+
+    $padrão  reduzir usando a regra 39 (array_init)
+
+
+Estado 124
+
+   43 array_dim_decl: TOK_LSQUARE expr . TOK_RSQUARE
+
+    TOK_RSQUARE  deslocar, e ir ao estado 137
+
+
+Estado 125
+
+   45 array_dim_decl_list: array_dim_decl . array_dim_decl_list
+
+    TOK_LSQUARE  deslocar, e ir ao estado 99
+
+    $padrão  reduzir usando a regra 44 (array_dim_decl_list)
+
+    array_dim_decl       ir ao estado 125
+    array_dim_decl_list  ir ao estado 138
+
+
+Estado 126
+
+   42 array_creation_expr: TOK_ARROBA type array_dim_decl array_dim_decl_list .
+
+    $padrão  reduzir usando a regra 42 (array_creation_expr)
+
+
+Estado 127
+
+   61 method_call_stmt: TOK_LPAREN actual_params_list TOK_RPAREN .
+
+    $padrão  reduzir usando a regra 61 (method_call_stmt)
+
+
+Estado 128
+
+   63 actual_params_list: expr expr_list_comma .
+
+    $padrão  reduzir usando a regra 63 (actual_params_list)
+
+
+Estado 129
+
+   27 formal_params_list: TOK_VAL type TOK_IDENTIFIER . id_list_comma formal_params_list_aux
+
+    TOK_COMMA  deslocar, e ir ao estado 130
+
+    $padrão  reduzir usando a regra 31 (id_list_comma)
+
+    id_list_comma  ir ao estado 139
+
+
+Estado 130
+
+   32 id_list_comma: TOK_COMMA . TOK_IDENTIFIER id_list_comma
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 140
+
+
+Estado 131
+
+   28 formal_params_list: type TOK_IDENTIFIER id_list_comma . formal_params_list_aux
+
+    TOK_SEMICOLON  deslocar, e ir ao estado 141
+
+    $padrão  reduzir usando a regra 29 (formal_params_list_aux)
+
+    formal_params_list_aux  ir ao estado 142
+
+
+Estado 132
+
+   46 block: decls_opt . stmt_list
+
+    TOK_LCURLY  deslocar, e ir ao estado 143
+
+    stmt_list  ir ao estado 144
+
+
+Estado 133
+
+   24 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN formal_params_list_opt TOK_RPAREN block .
+
+    $padrão  reduzir usando a regra 24 (method_decl)
+
+
+Estado 134
+
+   65 expr_list_comma: TOK_COMMA expr . expr_list_comma
+
+    TOK_COMMA  deslocar, e ir ao estado 119
+
+    $padrão  reduzir usando a regra 64 (expr_list_comma)
+
+    expr_list_comma  ir ao estado 145
+
+
+Estado 135
+
+  112 var_aux: TOK_LSQUARE expr expr_list_comma TOK_RSQUARE . var_aux
+
+    TOK_LSQUARE  deslocar, e ir ao estado 63
+    TOK_DOT      deslocar, e ir ao estado 64
+
+    $padrão  reduzir usando a regra 110 (var_aux)
+
+    var_aux  ir ao estado 146
+
+
+Estado 136
+
+   41 var_init_list_comma: TOK_COMMA var_init var_init_list_comma .
+
+    $padrão  reduzir usando a regra 41 (var_init_list_comma)
+
+
+Estado 137
+
+   43 array_dim_decl: TOK_LSQUARE expr TOK_RSQUARE .
+
+    $padrão  reduzir usando a regra 43 (array_dim_decl)
+
+
+Estado 138
+
+   45 array_dim_decl_list: array_dim_decl array_dim_decl_list .
+
+    $padrão  reduzir usando a regra 45 (array_dim_decl_list)
+
+
+Estado 139
+
+   27 formal_params_list: TOK_VAL type TOK_IDENTIFIER id_list_comma . formal_params_list_aux
+
+    TOK_SEMICOLON  deslocar, e ir ao estado 141
+
+    $padrão  reduzir usando a regra 29 (formal_params_list_aux)
+
+    formal_params_list_aux  ir ao estado 147
+
+
+Estado 140
+
+   32 id_list_comma: TOK_COMMA TOK_IDENTIFIER . id_list_comma
+
+    TOK_COMMA  deslocar, e ir ao estado 130
+
+    $padrão  reduzir usando a regra 31 (id_list_comma)
+
+    id_list_comma  ir ao estado 148
+
+
+Estado 141
+
+   30 formal_params_list_aux: TOK_SEMICOLON . formal_params_list
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 17
+    TOK_INT         deslocar, e ir ao estado 18
+    TOK_STRING      deslocar, e ir ao estado 19
+    TOK_VAL         deslocar, e ir ao estado 90
+
+    type                ir ao estado 91
+    type_aux            ir ao estado 23
+    formal_params_list  ir ao estado 149
+
+
+Estado 142
+
+   28 formal_params_list: type TOK_IDENTIFIER id_list_comma formal_params_list_aux .
+
+    $padrão  reduzir usando a regra 28 (formal_params_list)
+
+
+Estado 143
+
+   47 stmt_list: TOK_LCURLY . stmt stmt_list_semicolon TOK_RCURLY
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 46
+    TOK_RETURN      deslocar, e ir ao estado 150
+    TOK_IF          deslocar, e ir ao estado 151
+    TOK_FOR         deslocar, e ir ao estado 152
+    TOK_WHILE       deslocar, e ir ao estado 153
+    TOK_SWITCH      deslocar, e ir ao estado 154
+    TOK_PRINT       deslocar, e ir ao estado 155
+    TOK_READ        deslocar, e ir ao estado 156
+
+    stmt         ir ao estado 157
+    return_stmt  ir ao estado 158
+    if_stmt      ir ao estado 159
+    for_stmt     ir ao estado 160
+    while_stmt   ir ao estado 161
+    switch_stmt  ir ao estado 162
+    print_stmt   ir ao estado 163
+    read_stmt    ir ao estado 164
+    var          ir ao estado 165
+
+
+Estado 144
+
+   46 block: decls_opt stmt_list .
+
+    $padrão  reduzir usando a regra 46 (block)
+
+
+Estado 145
+
+   65 expr_list_comma: TOK_COMMA expr expr_list_comma .
+
+    $padrão  reduzir usando a regra 65 (expr_list_comma)
+
+
+Estado 146
+
+  112 var_aux: TOK_LSQUARE expr expr_list_comma TOK_RSQUARE var_aux .
+
+    $padrão  reduzir usando a regra 112 (var_aux)
+
+
+Estado 147
+
+   27 formal_params_list: TOK_VAL type TOK_IDENTIFIER id_list_comma formal_params_list_aux .
+
+    $padrão  reduzir usando a regra 27 (formal_params_list)
+
+
+Estado 148
+
+   32 id_list_comma: TOK_COMMA TOK_IDENTIFIER id_list_comma .
+
+    $padrão  reduzir usando a regra 32 (id_list_comma)
+
+
+Estado 149
+
+   30 formal_params_list_aux: TOK_SEMICOLON formal_params_list .
+
+    $padrão  reduzir usando a regra 30 (formal_params_list_aux)
+
+
+Estado 150
+
+   66 return_stmt: TOK_RETURN . expr_opt
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    $padrão  reduzir usando a regra 67 (expr_opt)
+
+    expr_opt  ir ao estado 166
+    expr      ir ao estado 167
+    al_expr   ir ao estado 59
+    var       ir ao estado 60
+
+
+Estado 151
+
+   69 if_stmt: TOK_IF . expr stmt_list else_part
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    expr     ir ao estado 168
+    al_expr  ir ao estado 59
+    var      ir ao estado 60
+
+
+Estado 152
+
+   74 for_stmt: TOK_FOR . for_init_expr TOK_TO expr step_opt stmt_list
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 169
+
+    for_init_expr  ir ao estado 170
+
+
+Estado 153
+
+   78 while_stmt: TOK_WHILE . expr stmt_list
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    expr     ir ao estado 171
+    al_expr  ir ao estado 59
+    var      ir ao estado 60
+
+
+Estado 154
+
+   79 switch_stmt: TOK_SWITCH . expr TOK_LCURLY case case_list TOK_RCURLY
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    expr     ir ao estado 172
+    al_expr  ir ao estado 59
+    var      ir ao estado 60
+
+
+Estado 155
+
+   84 print_stmt: TOK_PRINT . expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    expr     ir ao estado 173
+    al_expr  ir ao estado 59
+    var      ir ao estado 60
+
+
+Estado 156
+
+   85 read_stmt: TOK_READ . TOK_IDENTIFIER
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 174
+
+
+Estado 157
+
+   47 stmt_list: TOK_LCURLY stmt . stmt_list_semicolon TOK_RCURLY
+
+    TOK_SEMICOLON  deslocar, e ir ao estado 175
+
+    $padrão  reduzir usando a regra 48 (stmt_list_semicolon)
+
+    stmt_list_semicolon  ir ao estado 176
+
+
+Estado 158
+
+   51 stmt: return_stmt .
+
+    $padrão  reduzir usando a regra 51 (stmt)
+
+
+Estado 159
+
+   52 stmt: if_stmt .
+
+    $padrão  reduzir usando a regra 52 (stmt)
+
+
+Estado 160
+
+   54 stmt: for_stmt .
+
+    $padrão  reduzir usando a regra 54 (stmt)
+
+
+Estado 161
+
+   53 stmt: while_stmt .
+
+    $padrão  reduzir usando a regra 53 (stmt)
+
+
+Estado 162
+
+   55 stmt: switch_stmt .
+
+    $padrão  reduzir usando a regra 55 (stmt)
+
+
+Estado 163
+
+   56 stmt: print_stmt .
+
+    $padrão  reduzir usando a regra 56 (stmt)
+
+
+Estado 164
+
+   57 stmt: read_stmt .
+
+    $padrão  reduzir usando a regra 57 (stmt)
+
+
+Estado 165
+
+   50 stmt: var . var_start_stmt
+
+    TOK_LPAREN  deslocar, e ir ao estado 86
+    TOK_ASSIGN  deslocar, e ir ao estado 177
+
+    var_start_stmt    ir ao estado 178
+    assign_stmt       ir ao estado 179
+    method_call_stmt  ir ao estado 180
+
+
+Estado 166
+
+   66 return_stmt: TOK_RETURN expr_opt .
+
+    $padrão  reduzir usando a regra 66 (return_stmt)
+
+
+Estado 167
+
+   68 expr_opt: expr .
+
+    $padrão  reduzir usando a regra 68 (expr_opt)
+
+
+Estado 168
+
+   69 if_stmt: TOK_IF expr . stmt_list else_part
+
+    TOK_LCURLY  deslocar, e ir ao estado 143
+
+    stmt_list  ir ao estado 181
+
+
+Estado 169
+
+   75 for_init_expr: TOK_IDENTIFIER . assign_stmt
+
+    TOK_ASSIGN  deslocar, e ir ao estado 177
+
+    assign_stmt  ir ao estado 182
+
+
+Estado 170
+
+   74 for_stmt: TOK_FOR for_init_expr . TOK_TO expr step_opt stmt_list
+
+    TOK_TO  deslocar, e ir ao estado 183
+
+
+Estado 171
+
+   78 while_stmt: TOK_WHILE expr . stmt_list
+
+    TOK_LCURLY  deslocar, e ir ao estado 143
+
+    stmt_list  ir ao estado 184
+
+
+Estado 172
+
+   79 switch_stmt: TOK_SWITCH expr . TOK_LCURLY case case_list TOK_RCURLY
+
+    TOK_LCURLY  deslocar, e ir ao estado 185
+
+
+Estado 173
+
+   84 print_stmt: TOK_PRINT expr .
+
+    $padrão  reduzir usando a regra 84 (print_stmt)
+
+
+Estado 174
+
+   85 read_stmt: TOK_READ TOK_IDENTIFIER .
+
+    $padrão  reduzir usando a regra 85 (read_stmt)
+
+
+Estado 175
+
+   49 stmt_list_semicolon: TOK_SEMICOLON . stmt stmt_list_semicolon
+
+    TOK_IDENTIFIER  deslocar, e ir ao estado 46
+    TOK_RETURN      deslocar, e ir ao estado 150
+    TOK_IF          deslocar, e ir ao estado 151
+    TOK_FOR         deslocar, e ir ao estado 152
+    TOK_WHILE       deslocar, e ir ao estado 153
+    TOK_SWITCH      deslocar, e ir ao estado 154
+    TOK_PRINT       deslocar, e ir ao estado 155
+    TOK_READ        deslocar, e ir ao estado 156
+
+    stmt         ir ao estado 186
+    return_stmt  ir ao estado 158
+    if_stmt      ir ao estado 159
+    for_stmt     ir ao estado 160
+    while_stmt   ir ao estado 161
+    switch_stmt  ir ao estado 162
+    print_stmt   ir ao estado 163
+    read_stmt    ir ao estado 164
+    var          ir ao estado 165
+
+
+Estado 176
+
+   47 stmt_list: TOK_LCURLY stmt stmt_list_semicolon . TOK_RCURLY
+
+    TOK_RCURLY  deslocar, e ir ao estado 187
+
+
+Estado 177
+
+   60 assign_stmt: TOK_ASSIGN . expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    expr     ir ao estado 188
+    al_expr  ir ao estado 59
+    var      ir ao estado 60
+
+
+Estado 178
+
+   50 stmt: var var_start_stmt .
+
+    $padrão  reduzir usando a regra 50 (stmt)
+
+
+Estado 179
+
+   58 var_start_stmt: assign_stmt .
+
+    $padrão  reduzir usando a regra 58 (var_start_stmt)
+
+
+Estado 180
+
+   59 var_start_stmt: method_call_stmt .
+
+    $padrão  reduzir usando a regra 59 (var_start_stmt)
+
+
+Estado 181
+
+   69 if_stmt: TOK_IF expr stmt_list . else_part
+
+    TOK_ELSE  deslocar, e ir ao estado 189
+
+    $padrão  reduzir usando a regra 70 (else_part)
+
+    else_part  ir ao estado 190
+
+
+Estado 182
+
+   75 for_init_expr: TOK_IDENTIFIER assign_stmt .
+
+    $padrão  reduzir usando a regra 75 (for_init_expr)
+
+
+Estado 183
+
+   74 for_stmt: TOK_FOR for_init_expr TOK_TO . expr step_opt stmt_list
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    expr     ir ao estado 191
+    al_expr  ir ao estado 59
+    var      ir ao estado 60
+
+
+Estado 184
+
+   78 while_stmt: TOK_WHILE expr stmt_list .
+
+    $padrão  reduzir usando a regra 78 (while_stmt)
+
+
+Estado 185
+
+   79 switch_stmt: TOK_SWITCH expr TOK_LCURLY . case case_list TOK_RCURLY
+
+    TOK_CASE  deslocar, e ir ao estado 192
+
+    case  ir ao estado 193
+
+
+Estado 186
+
+   49 stmt_list_semicolon: TOK_SEMICOLON stmt . stmt_list_semicolon
+
+    TOK_SEMICOLON  deslocar, e ir ao estado 175
+
+    $padrão  reduzir usando a regra 48 (stmt_list_semicolon)
+
+    stmt_list_semicolon  ir ao estado 194
+
+
+Estado 187
+
+   47 stmt_list: TOK_LCURLY stmt stmt_list_semicolon TOK_RCURLY .
+
+    $padrão  reduzir usando a regra 47 (stmt_list)
+
+
+Estado 188
+
+   60 assign_stmt: TOK_ASSIGN expr .
+
+    $padrão  reduzir usando a regra 60 (assign_stmt)
+
+
+Estado 189
+
+   71 else_part: TOK_ELSE . if_stmt_aux
+
+    TOK_LCURLY  deslocar, e ir ao estado 143
+    TOK_IF      deslocar, e ir ao estado 151
+
+    stmt_list    ir ao estado 195
+    if_stmt      ir ao estado 196
+    if_stmt_aux  ir ao estado 197
+
+
+Estado 190
+
+   69 if_stmt: TOK_IF expr stmt_list else_part .
+
+    $padrão  reduzir usando a regra 69 (if_stmt)
+
+
+Estado 191
+
+   74 for_stmt: TOK_FOR for_init_expr TOK_TO expr . step_opt stmt_list
+
+    TOK_STEP  deslocar, e ir ao estado 198
+
+    $padrão  reduzir usando a regra 76 (step_opt)
+
+    step_opt  ir ao estado 199
+
+
+Estado 192
+
+   80 case: TOK_CASE . expr stmt_list
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    expr     ir ao estado 200
+    al_expr  ir ao estado 59
+    var      ir ao estado 60
+
+
+Estado 193
+
+   79 switch_stmt: TOK_SWITCH expr TOK_LCURLY case . case_list TOK_RCURLY
+
+    TOK_CASE     deslocar, e ir ao estado 192
+    TOK_DEFAULT  deslocar, e ir ao estado 201
+
+    $padrão  reduzir usando a regra 81 (case_list)
+
+    case       ir ao estado 202
+    case_list  ir ao estado 203
+
+
+Estado 194
+
+   49 stmt_list_semicolon: TOK_SEMICOLON stmt stmt_list_semicolon .
+
+    $padrão  reduzir usando a regra 49 (stmt_list_semicolon)
+
+
+Estado 195
+
+   73 if_stmt_aux: stmt_list .
+
+    $padrão  reduzir usando a regra 73 (if_stmt_aux)
+
+
+Estado 196
+
+   72 if_stmt_aux: if_stmt .
+
+    $padrão  reduzir usando a regra 72 (if_stmt_aux)
+
+
+Estado 197
+
+   71 else_part: TOK_ELSE if_stmt_aux .
+
+    $padrão  reduzir usando a regra 71 (else_part)
+
+
+Estado 198
+
+   77 step_opt: TOK_STEP . expr
+
+    TOK_IDENTIFIER       deslocar, e ir ao estado 46
+    TOK_LPAREN           deslocar, e ir ao estado 48
+    TOK_PLUS             deslocar, e ir ao estado 50
+    TOK_MINUS            deslocar, e ir ao estado 51
+    TOK_NOT              deslocar, e ir ao estado 52
+    TOK_INTEGERCONSTANT  deslocar, e ir ao estado 53
+    TOK_STRINGCONSTANT   deslocar, e ir ao estado 54
+
+    expr     ir ao estado 204
+    al_expr  ir ao estado 59
+    var      ir ao estado 60
+
+
+Estado 199
+
+   74 for_stmt: TOK_FOR for_init_expr TOK_TO expr step_opt . stmt_list
+
+    TOK_LCURLY  deslocar, e ir ao estado 143
+
+    stmt_list  ir ao estado 205
+
+
+Estado 200
+
+   80 case: TOK_CASE expr . stmt_list
+
+    TOK_LCURLY  deslocar, e ir ao estado 143
+
+    stmt_list  ir ao estado 206
+
+
+Estado 201
+
+   83 case_list: TOK_DEFAULT . stmt_list
+
+    TOK_LCURLY  deslocar, e ir ao estado 143
+
+    stmt_list  ir ao estado 207
+
+
+Estado 202
+
+   82 case_list: case . case_list
+
+    TOK_CASE     deslocar, e ir ao estado 192
+    TOK_DEFAULT  deslocar, e ir ao estado 201
+
+    $padrão  reduzir usando a regra 81 (case_list)
+
+    case       ir ao estado 202
+    case_list  ir ao estado 208
+
+
+Estado 203
+
+   79 switch_stmt: TOK_SWITCH expr TOK_LCURLY case case_list . TOK_RCURLY
+
+    TOK_RCURLY  deslocar, e ir ao estado 209
+
+
+Estado 204
+
+   77 step_opt: TOK_STEP expr .
+
+    $padrão  reduzir usando a regra 77 (step_opt)
+
+
+Estado 205
+
+   74 for_stmt: TOK_FOR for_init_expr TOK_TO expr step_opt stmt_list .
+
+    $padrão  reduzir usando a regra 74 (for_stmt)
+
+
+Estado 206
+
+   80 case: TOK_CASE expr stmt_list .
+
+    $padrão  reduzir usando a regra 80 (case)
+
+
+Estado 207
+
+   83 case_list: TOK_DEFAULT stmt_list .
+
+    $padrão  reduzir usando a regra 83 (case_list)
+
+
+Estado 208
+
+   82 case_list: case case_list .
+
+    $padrão  reduzir usando a regra 82 (case_list)
+
+
+Estado 209
+
+   79 switch_stmt: TOK_SWITCH expr TOK_LCURLY case case_list TOK_RCURLY .
+
+    $padrão  reduzir usando a regra 79 (switch_stmt)
