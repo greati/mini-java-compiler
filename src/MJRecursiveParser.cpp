@@ -724,7 +724,7 @@ void MJRecursiveParser::program() {
         expect(TOK_SEMICOLON);
         class_decl();
         class_decl_list();
-        expect(END_OF_FILE);       
+        //expect(END_OF_FILE);       
     } else {
         parse_error(PROGRAM);
     }

@@ -1,17 +1,76 @@
 %{
 
 #include <stdio.h>
+#include "MJMessage.h"
+#include "MJToken.h"
+#include <string>
 
-extern current_line;
-extern offset;
+extern int current_line;
+extern int offset;
 extern char * yytext;
-extern yychar;
+extern int yychar;
+extern int yylex();
 
 void yyerror(char *s);
 
 %}
 
-%token TOK_PROGRAM TOK_IDENTIFIER TOK_SEMICOLON TOK_CLASS TOK_LCURLY TOK_RCURLY TOK_DECLARATIONS TOK_ENDDECLARATIONS TOK_EQUALS TOK_COMMA TOK_INT TOK_STRING TOK_LRSQUARE TOK_METHOD TOK_LPAREN TOK_RPAREN TOK_VOID TOK_VAL TOK_ARROBA TOK_LSQUARE TOK_RSQUARE TOK_ASSIGN TOK_RETURN TOK_IF TOK_ELSE TOK_FOR TOK_TO TOK_STEP TOK_WHILE TOK_SWITCH TOK_CASE TOK_DEFAULT TOK_PRINT TOK_READ TOK_LESS TOK_LESSEQ TOK_EQEQ TOK_DIFF TOK_GREATEREQ TOK_GREATER TOK_PLUS TOK_UPLUS TOK_MINUS TOK_UMINUS TOK_NOT TOK_2PIPE TOK_ASTERISK TOK_SLASH TOK_AND TOK_MOD TOK_INTEGERCONSTANT TOK_STRINGCONSTANT TOK_DOT
+%token 
+TOK_PROGRAM 1 
+TOK_IDENTIFIER 2
+TOK_SEMICOLON 3
+TOK_CLASS 4
+TOK_LCURLY 5
+TOK_RCURLY 6
+TOK_DECLARATIONS 7
+TOK_ENDDECLARATIONS 8
+TOK_EQUALS 9
+TOK_COMMA 10
+TOK_INT 11
+TOK_STRING 12
+TOK_LRSQUARE 13
+TOK_METHOD 14
+TOK_LPAREN 15
+TOK_RPAREN 16
+TOK_VOID 17
+TOK_VAL 18
+TOK_ARROBA 19
+TOK_LSQUARE 20
+TOK_RSQUARE 21
+TOK_ASSIGN 22
+TOK_RETURN 23
+TOK_IF 24
+TOK_ELSE 25
+TOK_FOR 26
+TOK_TO 27
+TOK_STEP 28
+TOK_WHILE 29
+TOK_SWITCH 30
+TOK_CASE 31
+TOK_DEFAULT 32
+TOK_PRINT 33
+TOK_READ 34
+TOK_LESS 35
+TOK_LESSEQ 36
+TOK_EQEQ 37
+TOK_DIFF 38
+TOK_GREATEREQ 39
+TOK_GREATER 40
+TOK_PLUS 41
+TOK_UPLUS 42
+TOK_MINUS 43
+TOK_UMINUS 44
+TOK_NOT 45
+TOK_2PIPE 46
+TOK_ASTERISK 47
+TOK_SLASH 48
+TOK_AND 49
+TOK_MOD 50
+TOK_INTEGERCONSTANT 51
+TOK_STRINGCONSTANT 52
+TOK_DOT 53
+END_OF_FILE 54
+LAMBDA 55
 
 %start program
 
@@ -113,13 +172,14 @@ var_aux                 : /* empty */ | TOK_DOT TOK_IDENTIFIER var_aux
 %%
 
 void yyerror(char *s) { 
-    printf("[mjc error] (%d, %d) parse error, unexpected token %d, lexeme %s\n", current_line, offset, yychar, yytext); 
+    std::string parse_error = "parse error near " + get_token_name(yychar) + ", lexeme " + std::string(yytext);
+    MJMessage::print(MJMessage::Type::ERROR, parse_error, Lexer::Position {current_line, offset});
 }
 
-main() {
+int main() {
     return (yyparse());
 }
 
-yywrap() {
+int yywrap() {
     return 1;
 }

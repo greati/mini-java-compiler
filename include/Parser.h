@@ -36,7 +36,7 @@ class Parser {
          */
         Parser(std::shared_ptr<Lexer> _lexer) : lexer {_lexer} {} 
 
-	virtual ~Parser() {}
+        virtual ~Parser() {}
 
         /**
          * Parse a program, reseting the lexer.

@@ -2,11 +2,14 @@
 #define __TOKEN__
 
 #include <string>
+#include "y.tab.h"
+
+typedef int MJToken;
 
 /**
  * Tokens of the Mini-Java language. 
  */
-enum MJToken {
+/*enum MJToken {
     TOK_PROGRAM = 0,
     TOK_IDENTIFIER,
     TOK_SEMICOLON,
@@ -61,7 +64,7 @@ enum MJToken {
     END_OF_FILE,
     LAMBDA,
     UNDEFINED
-};
+};*/
 
 /**
  * Gives the string representation of a token.
@@ -69,6 +72,6 @@ enum MJToken {
  * @param token The token
  * @return The string representation of token
  */
-std::string get_token_name(enum MJToken token);
+std::string get_token_name(MJToken token);
 
 #endif

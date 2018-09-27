@@ -31,8 +31,6 @@ id                  ({alpha}|_)({alpha}|{digit}|_)*
 invalid_id          {digit}+({alpha}|_)+
 
 %%
-
-<<EOF>>                 { offset = 2; return END_OF_FILE; }
 {ignore}                ;                                           // Ignore spaces and tabs
 \n                      { current_line += 1; offset = 1; }          // Reset counters
 {string}                { return TOK_STRINGCONSTANT; }
