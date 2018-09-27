@@ -1,7 +1,7 @@
 #include "MJToken.h"
 #include <string>
 
-std::string get_token_name(enum MJToken token) {
+std::string get_token_name(MJToken token) {
     switch (token) {
         case TOK_PROGRAM: return "program";
         case TOK_IDENTIFIER: return "identifier";

@@ -3,7 +3,6 @@
 
 %{
 
-#include "MJToken.h"
 #include <string>
 #include "MJMessage.h"
 #include "Lexer.h"
@@ -31,7 +30,6 @@ id                  ({alpha}|_)({alpha}|{digit}|_)*
 invalid_id          {digit}+({alpha}|_)+
 
 %%
-
 <<EOF>>                 { offset = 2; return END_OF_FILE; }
 {ignore}                ;                                           // Ignore spaces and tabs
 \n                      { current_line += 1; offset = 1; }          // Reset counters
@@ -116,7 +114,7 @@ void tearDownBuffer(void* buffer)
  * 
  * @param token The token to be printed
  */
-void print_token(enum MJToken token, FILE* output_file, int std_output) {
+void print_token(MJToken token, FILE* output_file, int std_output) {
     
     std::string token_name = get_token_name(token);
 
@@ -147,7 +145,7 @@ int main(int argc, char *argv[]) {
     if (argc > 2)
         std_output = strtoul(argv[2], NULL, 10);
 
-    enum MJToken token = UNDEFINED;
+    MJToken token = END_OF_FILE;
 
     while ((token = (MJToken) yylex()) != END_OF_FILE)
         print_token(token, output_file, std_output);

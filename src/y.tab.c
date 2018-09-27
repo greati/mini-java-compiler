@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.2.  */
+/* A Bison parser, made by GNU Bison 3.0.4.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "3.0.2"
+#define YYBISON_VERSION "3.0.4"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -66,16 +66,20 @@
 
 
 #include <stdio.h>
+#include "MJMessage.h"
+#include "MJToken.h"
+#include <string>
 
-extern current_line;
-extern offset;
+extern int current_line;
+extern int offset;
 extern char * yytext;
-extern yychar;
+extern int yychar;
+extern int yylex();
 
 void yyerror(char *s);
 
 
-#line 79 "src/y.tab.c" /* yacc.c:339  */
+#line 83 "src/y.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -95,8 +99,8 @@ void yyerror(char *s);
 
 /* In a future release of Bison, this section will be replaced
    by #include "y.tab.h".  */
-#ifndef YY_YY_SRC_Y_TAB_H_INCLUDED
-# define YY_YY_SRC_Y_TAB_H_INCLUDED
+#ifndef YY_YY_INCLUDE_Y_TAB_H_INCLUDED
+# define YY_YY_INCLUDE_Y_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -110,115 +114,119 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    TOK_PROGRAM = 258,
-    TOK_IDENTIFIER = 259,
-    TOK_SEMICOLON = 260,
-    TOK_CLASS = 261,
-    TOK_LCURLY = 262,
-    TOK_RCURLY = 263,
-    TOK_DECLARATIONS = 264,
-    TOK_ENDDECLARATIONS = 265,
-    TOK_EQUALS = 266,
-    TOK_COMMA = 267,
-    TOK_INT = 268,
-    TOK_STRING = 269,
-    TOK_LRSQUARE = 270,
-    TOK_METHOD = 271,
-    TOK_LPAREN = 272,
-    TOK_RPAREN = 273,
-    TOK_VOID = 274,
-    TOK_VAL = 275,
-    TOK_ARROBA = 276,
-    TOK_LSQUARE = 277,
-    TOK_RSQUARE = 278,
-    TOK_ASSIGN = 279,
-    TOK_RETURN = 280,
-    TOK_IF = 281,
-    TOK_ELSE = 282,
-    TOK_FOR = 283,
-    TOK_TO = 284,
-    TOK_STEP = 285,
-    TOK_WHILE = 286,
-    TOK_SWITCH = 287,
-    TOK_CASE = 288,
-    TOK_DEFAULT = 289,
-    TOK_PRINT = 290,
-    TOK_READ = 291,
-    TOK_LESS = 292,
-    TOK_LESSEQ = 293,
-    TOK_EQEQ = 294,
-    TOK_DIFF = 295,
-    TOK_GREATEREQ = 296,
-    TOK_GREATER = 297,
-    TOK_PLUS = 298,
-    TOK_UPLUS = 299,
-    TOK_MINUS = 300,
-    TOK_UMINUS = 301,
-    TOK_NOT = 302,
-    TOK_2PIPE = 303,
-    TOK_ASTERISK = 304,
-    TOK_SLASH = 305,
-    TOK_AND = 306,
-    TOK_MOD = 307,
-    TOK_INTEGERCONSTANT = 308,
-    TOK_STRINGCONSTANT = 309,
-    TOK_DOT = 310
+    END_OF_FILE = 0,
+    TOK_PROGRAM = 1,
+    TOK_IDENTIFIER = 2,
+    TOK_SEMICOLON = 3,
+    TOK_CLASS = 4,
+    TOK_LCURLY = 5,
+    TOK_RCURLY = 6,
+    TOK_DECLARATIONS = 7,
+    TOK_ENDDECLARATIONS = 8,
+    TOK_EQUALS = 9,
+    TOK_COMMA = 10,
+    TOK_INT = 11,
+    TOK_STRING = 12,
+    TOK_LRSQUARE = 13,
+    TOK_METHOD = 14,
+    TOK_LPAREN = 15,
+    TOK_RPAREN = 16,
+    TOK_VOID = 17,
+    TOK_VAL = 18,
+    TOK_ARROBA = 19,
+    TOK_LSQUARE = 20,
+    TOK_RSQUARE = 21,
+    TOK_ASSIGN = 22,
+    TOK_RETURN = 23,
+    TOK_IF = 24,
+    TOK_ELSE = 25,
+    TOK_FOR = 26,
+    TOK_TO = 27,
+    TOK_STEP = 28,
+    TOK_WHILE = 29,
+    TOK_SWITCH = 30,
+    TOK_CASE = 31,
+    TOK_DEFAULT = 32,
+    TOK_PRINT = 33,
+    TOK_READ = 34,
+    TOK_LESS = 35,
+    TOK_LESSEQ = 36,
+    TOK_EQEQ = 37,
+    TOK_DIFF = 38,
+    TOK_GREATEREQ = 39,
+    TOK_GREATER = 40,
+    TOK_PLUS = 41,
+    TOK_UPLUS = 42,
+    TOK_MINUS = 43,
+    TOK_UMINUS = 44,
+    TOK_NOT = 45,
+    TOK_2PIPE = 46,
+    TOK_ASTERISK = 47,
+    TOK_SLASH = 48,
+    TOK_AND = 49,
+    TOK_MOD = 50,
+    TOK_INTEGERCONSTANT = 51,
+    TOK_STRINGCONSTANT = 52,
+    TOK_DOT = 53,
+    LAMBDA = 55
   };
 #endif
 /* Tokens.  */
-#define TOK_PROGRAM 258
-#define TOK_IDENTIFIER 259
-#define TOK_SEMICOLON 260
-#define TOK_CLASS 261
-#define TOK_LCURLY 262
-#define TOK_RCURLY 263
-#define TOK_DECLARATIONS 264
-#define TOK_ENDDECLARATIONS 265
-#define TOK_EQUALS 266
-#define TOK_COMMA 267
-#define TOK_INT 268
-#define TOK_STRING 269
-#define TOK_LRSQUARE 270
-#define TOK_METHOD 271
-#define TOK_LPAREN 272
-#define TOK_RPAREN 273
-#define TOK_VOID 274
-#define TOK_VAL 275
-#define TOK_ARROBA 276
-#define TOK_LSQUARE 277
-#define TOK_RSQUARE 278
-#define TOK_ASSIGN 279
-#define TOK_RETURN 280
-#define TOK_IF 281
-#define TOK_ELSE 282
-#define TOK_FOR 283
-#define TOK_TO 284
-#define TOK_STEP 285
-#define TOK_WHILE 286
-#define TOK_SWITCH 287
-#define TOK_CASE 288
-#define TOK_DEFAULT 289
-#define TOK_PRINT 290
-#define TOK_READ 291
-#define TOK_LESS 292
-#define TOK_LESSEQ 293
-#define TOK_EQEQ 294
-#define TOK_DIFF 295
-#define TOK_GREATEREQ 296
-#define TOK_GREATER 297
-#define TOK_PLUS 298
-#define TOK_UPLUS 299
-#define TOK_MINUS 300
-#define TOK_UMINUS 301
-#define TOK_NOT 302
-#define TOK_2PIPE 303
-#define TOK_ASTERISK 304
-#define TOK_SLASH 305
-#define TOK_AND 306
-#define TOK_MOD 307
-#define TOK_INTEGERCONSTANT 308
-#define TOK_STRINGCONSTANT 309
-#define TOK_DOT 310
+#define END_OF_FILE 0
+#define TOK_PROGRAM 1
+#define TOK_IDENTIFIER 2
+#define TOK_SEMICOLON 3
+#define TOK_CLASS 4
+#define TOK_LCURLY 5
+#define TOK_RCURLY 6
+#define TOK_DECLARATIONS 7
+#define TOK_ENDDECLARATIONS 8
+#define TOK_EQUALS 9
+#define TOK_COMMA 10
+#define TOK_INT 11
+#define TOK_STRING 12
+#define TOK_LRSQUARE 13
+#define TOK_METHOD 14
+#define TOK_LPAREN 15
+#define TOK_RPAREN 16
+#define TOK_VOID 17
+#define TOK_VAL 18
+#define TOK_ARROBA 19
+#define TOK_LSQUARE 20
+#define TOK_RSQUARE 21
+#define TOK_ASSIGN 22
+#define TOK_RETURN 23
+#define TOK_IF 24
+#define TOK_ELSE 25
+#define TOK_FOR 26
+#define TOK_TO 27
+#define TOK_STEP 28
+#define TOK_WHILE 29
+#define TOK_SWITCH 30
+#define TOK_CASE 31
+#define TOK_DEFAULT 32
+#define TOK_PRINT 33
+#define TOK_READ 34
+#define TOK_LESS 35
+#define TOK_LESSEQ 36
+#define TOK_EQEQ 37
+#define TOK_DIFF 38
+#define TOK_GREATEREQ 39
+#define TOK_GREATER 40
+#define TOK_PLUS 41
+#define TOK_UPLUS 42
+#define TOK_MINUS 43
+#define TOK_UMINUS 44
+#define TOK_NOT 45
+#define TOK_2PIPE 46
+#define TOK_ASTERISK 47
+#define TOK_SLASH 48
+#define TOK_AND 49
+#define TOK_MOD 50
+#define TOK_INTEGERCONSTANT 51
+#define TOK_STRINGCONSTANT 52
+#define TOK_DOT 53
+#define LAMBDA 55
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -232,11 +240,11 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_SRC_Y_TAB_H_INCLUDED  */
+#endif /* !YY_YY_INCLUDE_Y_TAB_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
-#line 240 "src/y.tab.c" /* yacc.c:358  */
+#line 248 "src/y.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -481,7 +489,7 @@ union yyalloc
 #define YYLAST   267
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  56
+#define YYNTOKENS  57
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  56
 /* YYNRULES -- Number of rules.  */
@@ -492,7 +500,7 @@ union yyalloc
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   310
+#define YYMAXUTOK   257
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -501,7 +509,12 @@ union yyalloc
    as returned by yylex, without out-of-bounds checking.  */
 static const yytype_uint8 yytranslate[] =
 {
-       0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       0,     3,     4,     5,     6,     7,     8,     9,    10,    11,
+      12,    13,    14,    15,    16,    17,    18,    19,    20,    21,
+      22,    23,    24,    25,    26,    27,    28,    29,    30,    31,
+      32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
+      42,    43,    44,    45,    46,    47,    48,    49,    50,    51,
+      52,    53,    54,    55,     2,    56,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -521,37 +534,26 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
-      45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
-      55
+       2,     2,     2,     2,     2,     2,     1,     2
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    24,    24,    25,    25,    26,    27,    28,    29,    30,
-      30,    31,    32,    33,    33,    34,    34,    35,    36,    36,
-      37,    37,    38,    39,    39,    39,    40,    40,    41,    42,
-      43,    43,    44,    45,    46,    46,    47,    47,    48,    48,
-      49,    50,    50,    50,    51,    52,    53,    53,    54,    55,
-      56,    56,    57,    58,    59,    60,    60,    61,    61,    61,
-      62,    62,    62,    62,    63,    64,    64,    65,    66,    67,
-      68,    68,    69,    69,    70,    71,    71,    72,    73,    73,
-      74,    74,    75,    76,    77,    77,    78,    79,    80,    81,
-      82,    83,    84,    84,    84,    85,    86,    87,    88,    89,
-      90,    91,    92,    93,    94,    95,    96,    97,    98,    99,
-     100,   101,   102,   103,   104,   105,   106,   107,   108,   109,
-     109,   110,   111,   111,   112
+       0,    83,    83,    84,    84,    85,    86,    87,    88,    89,
+      89,    90,    91,    92,    92,    93,    93,    94,    95,    95,
+      96,    96,    97,    98,    98,    98,    99,    99,   100,   101,
+     102,   102,   103,   104,   105,   105,   106,   106,   107,   107,
+     108,   109,   109,   109,   110,   111,   112,   112,   113,   114,
+     115,   115,   116,   117,   118,   119,   119,   120,   120,   120,
+     121,   121,   121,   121,   122,   123,   123,   124,   125,   126,
+     127,   127,   128,   128,   129,   130,   130,   131,   132,   132,
+     133,   133,   134,   135,   136,   136,   137,   138,   139,   140,
+     141,   142,   143,   143,   143,   144,   145,   146,   147,   148,
+     149,   150,   151,   152,   153,   154,   155,   156,   157,   158,
+     159,   160,   161,   162,   163,   164,   165,   166,   167,   168,
+     168,   169,   170,   170,   171
 };
 #endif
 
@@ -560,7 +562,7 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "TOK_PROGRAM", "TOK_IDENTIFIER",
+  "END_OF_FILE", "error", "$undefined", "TOK_PROGRAM", "TOK_IDENTIFIER",
   "TOK_SEMICOLON", "TOK_CLASS", "TOK_LCURLY", "TOK_RCURLY",
   "TOK_DECLARATIONS", "TOK_ENDDECLARATIONS", "TOK_EQUALS", "TOK_COMMA",
   "TOK_INT", "TOK_STRING", "TOK_LRSQUARE", "TOK_METHOD", "TOK_LPAREN",
@@ -571,20 +573,20 @@ static const char *const yytname[] =
   "TOK_EQEQ", "TOK_DIFF", "TOK_GREATEREQ", "TOK_GREATER", "TOK_PLUS",
   "TOK_UPLUS", "TOK_MINUS", "TOK_UMINUS", "TOK_NOT", "TOK_2PIPE",
   "TOK_ASTERISK", "TOK_SLASH", "TOK_AND", "TOK_MOD", "TOK_INTEGERCONSTANT",
-  "TOK_STRINGCONSTANT", "TOK_DOT", "$accept", "program", "class_decl_list",
-  "class_decl", "class_body", "decls_opt", "decls", "method_decl_list",
-  "field_decl_list_decls", "field_decl", "field_decl_aux1",
-  "field_decl_aux2", "type", "type_aux", "brackets_opt", "method_decl",
-  "method_return_type", "formal_params_list", "formal_params_list_aux",
-  "id_list_comma", "formal_params_list_opt", "var_decl_id", "var_init",
-  "array_init", "var_init_list_comma", "array_creation_expr",
-  "array_dim_decl", "array_dim_decl_list", "block", "stmt_list",
-  "stmt_list_semicolon", "stmt", "var_start_stmt", "assign_stmt",
-  "method_call_stmt", "actual_params_list", "expr_list_comma",
-  "return_stmt", "expr_opt", "if_stmt", "else_part", "if_stmt_aux",
-  "for_stmt", "for_init_expr", "step_opt", "while_stmt", "switch_stmt",
-  "case", "case_list", "print_stmt", "read_stmt", "expr", "al_expr",
-  "method_call_opt", "var", "var_aux", YY_NULLPTR
+  "TOK_STRINGCONSTANT", "TOK_DOT", "LAMBDA", "$accept", "program",
+  "class_decl_list", "class_decl", "class_body", "decls_opt", "decls",
+  "method_decl_list", "field_decl_list_decls", "field_decl",
+  "field_decl_aux1", "field_decl_aux2", "type", "type_aux", "brackets_opt",
+  "method_decl", "method_return_type", "formal_params_list",
+  "formal_params_list_aux", "id_list_comma", "formal_params_list_opt",
+  "var_decl_id", "var_init", "array_init", "var_init_list_comma",
+  "array_creation_expr", "array_dim_decl", "array_dim_decl_list", "block",
+  "stmt_list", "stmt_list_semicolon", "stmt", "var_start_stmt",
+  "assign_stmt", "method_call_stmt", "actual_params_list",
+  "expr_list_comma", "return_stmt", "expr_opt", "if_stmt", "else_part",
+  "if_stmt_aux", "for_stmt", "for_init_expr", "step_opt", "while_stmt",
+  "switch_stmt", "case", "case_list", "print_stmt", "read_stmt", "expr",
+  "al_expr", "method_call_opt", "var", "var_aux", YY_NULLPTR
 };
 #endif
 
@@ -593,12 +595,12 @@ static const char *const yytname[] =
    (internal) symbol number NUM (which must be that of a token).  */
 static const yytype_uint16 yytoknum[] =
 {
-       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
-     285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
-     295,   296,   297,   298,   299,   300,   301,   302,   303,   304,
-     305,   306,   307,   308,   309,   310
+       0,   256,   257,     1,     2,     3,     4,     5,     6,     7,
+       8,     9,    10,    11,    12,    13,    14,    15,    16,    17,
+      18,    19,    20,    21,    22,    23,    24,    25,    26,    27,
+      28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,    42,    43,    44,    45,    46,    47,
+      48,    49,    50,    51,    52,    53,    55
 };
 # endif
 
@@ -764,48 +766,48 @@ static const yytype_uint8 yycheck[] =
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,    57,     4,     0,     5,     6,    59,     1,     4,
-      58,    59,     7,    60,    60,    58,     1,     9,    61,    62,
-       8,     1,     4,    13,    14,    64,    65,    68,    69,    16,
-      63,    71,    10,    10,     5,     4,    77,    15,    70,    19,
-      68,    72,     8,    63,    64,    70,    11,    12,    66,    67,
-      70,     4,     4,     7,    17,    21,    43,    45,    47,    53,
-      54,    78,    79,    81,   107,   108,   110,    77,    17,    22,
-      55,   111,     1,    78,     1,   107,    68,   108,   108,   108,
-      67,    37,    38,    39,    40,    41,    42,    43,    45,    48,
-      49,    50,    51,    52,    17,    90,   109,    66,     1,    20,
-      68,    73,    76,   107,     4,     8,    12,    80,    18,    18,
-      22,    82,   108,   108,   108,   108,   108,   108,   108,   108,
-     108,   108,   108,   108,   108,     1,    91,   107,    18,    68,
-       4,    18,    12,    92,   111,    78,     8,   107,    82,    83,
-      18,    18,    92,    61,    84,     4,    12,    75,    84,   107,
-      23,    80,    23,    83,     7,    85,    75,     4,     5,    74,
-      92,   111,     1,    25,    26,    28,    31,    32,    35,    36,
-      87,    93,    95,    98,   101,   102,   105,   106,   110,    74,
-      75,    73,     8,    94,   107,   107,     4,    99,   107,     1,
-     107,   107,     4,     5,    86,    24,    88,    89,    90,    85,
-      89,    29,    85,     7,     7,    87,     8,   107,    27,    96,
-     107,     1,    33,   103,    86,    85,    95,    97,    30,   100,
-       8,     1,   107,    34,   103,   104,   107,    85,    85,    85,
-      85,   104,     8
+       0,     3,    58,     4,     0,     5,     6,    60,     1,     4,
+      59,    60,     7,    61,    61,    59,     1,     9,    62,    63,
+       8,     1,     4,    13,    14,    65,    66,    69,    70,    16,
+      64,    72,    10,    10,     5,     4,    78,    15,    71,    19,
+      69,    73,     8,    64,    65,    71,    11,    12,    67,    68,
+      71,     4,     4,     7,    17,    21,    43,    45,    47,    53,
+      54,    79,    80,    82,   108,   109,   111,    78,    17,    22,
+      55,   112,     1,    79,     1,   108,    69,   109,   109,   109,
+      68,    37,    38,    39,    40,    41,    42,    43,    45,    48,
+      49,    50,    51,    52,    17,    91,   110,    67,     1,    20,
+      69,    74,    77,   108,     4,     8,    12,    81,    18,    18,
+      22,    83,   109,   109,   109,   109,   109,   109,   109,   109,
+     109,   109,   109,   109,   109,     1,    92,   108,    18,    69,
+       4,    18,    12,    93,   112,    79,     8,   108,    83,    84,
+      18,    18,    93,    62,    85,     4,    12,    76,    85,   108,
+      23,    81,    23,    84,     7,    86,    76,     4,     5,    75,
+      93,   112,     1,    25,    26,    28,    31,    32,    35,    36,
+      88,    94,    96,    99,   102,   103,   106,   107,   111,    75,
+      76,    74,     8,    95,   108,   108,     4,   100,   108,     1,
+     108,   108,     4,     5,    87,    24,    89,    90,    91,    86,
+      90,    29,    86,     7,     7,    88,     8,   108,    27,    97,
+     108,     1,    33,   104,    87,    86,    96,    98,    30,   101,
+       8,     1,   108,    34,   104,   105,   108,    86,    86,    86,
+      86,   105,     8
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    56,    57,    58,    58,    59,    59,    60,    60,    61,
-      61,    62,    62,    63,    63,    64,    64,    65,    66,    66,
-      67,    67,    68,    69,    69,    69,    70,    70,    71,    71,
-      72,    72,    73,    73,    74,    74,    75,    75,    76,    76,
-      77,    78,    78,    78,    79,    79,    80,    80,    81,    82,
-      83,    83,    84,    85,    85,    86,    86,    87,    87,    87,
-      87,    87,    87,    87,    87,    88,    88,    89,    90,    90,
-      91,    91,    92,    92,    93,    94,    94,    95,    96,    96,
-      97,    97,    98,    99,   100,   100,   101,   102,   102,   102,
-     103,   103,   104,   104,   104,   105,   106,   107,   107,   107,
-     107,   107,   107,   107,   108,   108,   108,   108,   108,   108,
-     108,   108,   108,   108,   108,   108,   108,   108,   108,   109,
-     109,   110,   111,   111,   111
+       0,    57,    58,    59,    59,    60,    60,    61,    61,    62,
+      62,    63,    63,    64,    64,    65,    65,    66,    67,    67,
+      68,    68,    69,    70,    70,    70,    71,    71,    72,    72,
+      73,    73,    74,    74,    75,    75,    76,    76,    77,    77,
+      78,    79,    79,    79,    80,    80,    81,    81,    82,    83,
+      84,    84,    85,    86,    86,    87,    87,    88,    88,    88,
+      88,    88,    88,    88,    88,    89,    89,    90,    91,    91,
+      92,    92,    93,    93,    94,    95,    95,    96,    97,    97,
+      98,    98,    99,   100,   101,   101,   102,   103,   103,   103,
+     104,   104,   105,   105,   105,   106,   107,   108,   108,   108,
+     108,   108,   108,   108,   109,   109,   109,   109,   109,   109,
+     109,   109,   109,   109,   109,   109,   109,   109,   109,   110,
+     110,   111,   112,   112,   112
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
@@ -1500,7 +1502,7 @@ yyreduce:
   switch (yyn)
     {
       
-#line 1504 "src/y.tab.c" /* yacc.c:1646  */
+#line 1506 "src/y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1728,17 +1730,18 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 113 "src/MJLALRParser.y" /* yacc.c:1906  */
+#line 172 "src/MJLALRParser.y" /* yacc.c:1906  */
 
 
 void yyerror(char *s) { 
-    printf("[mjc error] (%d, %d) parse error, unexpected token %d, lexeme %s\n", current_line, offset, yychar, yytext); 
+    std::string parse_error = "parse error near " + get_token_name(yychar) + ", lexeme " + std::string(yytext);
+    MJMessage::print(MJMessage::Type::ERROR, parse_error, Lexer::Position {current_line, offset});
 }
 
-main() {
+int main() {
     return (yyparse());
 }
 
-yywrap() {
+int yywrap() {
     return 1;
 }

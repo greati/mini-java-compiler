@@ -55,27 +55,28 @@ ll1parser:
 	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(BINDIR)
 	$(FLEX) -o $(SRCDIR)/lex.yy.c -ll $(SRCDIR)/mjclexer.l;
+	yacc -o $(SRCDIR)/y.tab.c $(SRCDIR)/MJLALRParser.y --defines=include/y.tab.h -v
 	g++ $(SRCDIR)/MJMessage.cpp $(SRCDIR)/MJNonRecursiveParser.cpp $(SRCDIR)/MJRecursiveParser.cpp $(SRCDIR)/lex.yy.c $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJLexLexer.cpp $(SRCDIR)/ParserDriver.cpp -o $(BINDIR)/mjcll1 $(INCFLAG) -std=c++11 -Wall
 
 lalrparser:
 	@echo "Making lexer...";
 	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(BINDIR)
-	lex -o $(SRCDIR)/lex.yy.c $(SRCDIR)/mjclexeryacc.l
-	yacc -o $(SRCDIR)/y.tab.c $(SRCDIR)/MJLALRParser.y -d -v
-	gcc -o $(BINDIR)/mjclalr $(SRCDIR)/y.tab.c $(SRCDIR)/lex.yy.c 
+	lex -o $(SRCDIR)/lex.yy.c $(SRCDIR)/mjclexer.l
+	yacc -o $(SRCDIR)/y.tab.c $(SRCDIR)/MJLALRParser.y --defines=include/y.tab.h
+	g++ $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJMessage.cpp -o $(BINDIR)/mjclalr $(SRCDIR)/y.tab.c $(SRCDIR)/lex.yy.c $(INCFLAG) -std=c++11
 
 lexer:
 	@echo "Building lexer...";
 	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(BINDIR)
 	$(FLEX) -o $(BUILDDIR)/lex.yy.c $(SRCDIR)/mjclexer.l;
-	g++ $(SRCDIR)/MJMessage.cpp $(SRCDIR)/MJToken.cpp $(BUILDDIR)/lex.yy.c -D__EXECUTABLE__ -o $(LEXER) $(INCFLAG);
-	$(RM) -r $(BUILDDIR)/lex.yy.c;
+	yacc -o $(SRCDIR)/y.tab.c $(SRCDIR)/MJLALRParser.y --defines=include/y.tab.h -v
+	g++ $(SRCDIR)/MJMessage.cpp $(SRCDIR)/MJToken.cpp $(BUILDDIR)/lex.yy.c -D__EXECUTABLE__ -o $(LEXER) $(INCFLAG) -std=c++11
 
 clean:
 	@echo "Cleaning..."
-	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
+	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -rf $(BUILDDIR) $(BINDIR)
 
 .PHONY: clean lexer
 
