@@ -1,0 +1,7 @@
+program MeuPrograma;
+
+class MinhaClasse {
+    declarations
+        int a = (a + 5 == 2);
+    enddeclarations
+}

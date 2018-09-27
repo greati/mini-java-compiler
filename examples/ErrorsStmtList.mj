@@ -1,0 +1,17 @@
+program Errors;
+
+class {
+
+    declarations
+        ijsadiasodi
+    enddeclarations
+
+    method void error() {
+        a := 2;
+        a : 3;
+        b := 3
+    }
+    method void myerror() {
+        a : 3
+    }
+}

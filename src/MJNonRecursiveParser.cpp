@@ -30,7 +30,7 @@ bool MJNonRecursiveParser::expect(MJToken token) {
 }
 
 bool MJNonRecursiveParser::isToken(int token) {
-    return token >= 0 && token < 1000;
+    return token >= 1 && token < 1000;
 }
 
 void MJNonRecursiveParser::_parse(std::string program) {
