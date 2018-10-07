@@ -34,3 +34,14 @@ each of those parsers by following these steps:
 1. run `$ make ll1parser`
 2. run `$ ./bin/mjcll1 [R | N] < your-program.mj`, where
 `R` indicates to use the recursive parser, and `N`, the non-recursive.
+
+### Play with the LALR parser
+
+Yacc was used to generate a bottom-up parser for the Mini-Java Language.
+You can run it by following these steps:
+
+1. run `$ make lalrparser`
+2. run `$ ./bin/mjclalr < your-program.mj
+
+
+
