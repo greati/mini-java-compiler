@@ -41,7 +41,7 @@ Yacc was used to generate a bottom-up parser for the Mini-Java Language.
 You can run it by following these steps:
 
 1. run `$ make lalrparser`
-2. run `$ ./bin/mjclalr < your-program.mj
+2. run `$ ./bin/mjclalr < your-program.mj`
 
 
 
