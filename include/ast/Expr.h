@@ -3,22 +3,25 @@
 
 #include "Node.h"
 #include <memory>
+#include <vector>
 
 class Expr : public Node {
 
     public:
-        Expr(Node::Position _pos) : Node {_pos} {};
+        Expr(Position _pos) : Node {_pos} {};
+
+};
+
+class AlExpr : public Expr {
+
+    public:
+        AlExpr(Position _pos) : Expr {_pos} {};
 
 };
 
 class RelExpr : public Expr {
 
-    protected:
-
-        RelOp op;
-        std::shared_ptr<AlExpr> lhs;
-        std::shared_ptr<AlExpr> rhs;
-
+ 
     public:
 
         enum class RelOp {
@@ -30,25 +33,20 @@ class RelExpr : public Expr {
             DIFF
         };
 
-        RelExpr(Node::Position _pos, RelOp _op, std::shared_ptr<AlExpr> _lhs, std::shared_ptr<AlExpr> _rhs) 
+   protected:
+
+        RelOp op;
+        std::shared_ptr<AlExpr> lhs;
+        std::shared_ptr<AlExpr> rhs;
+
+    public:
+        RelExpr(Position _pos, RelOp _op, std::shared_ptr<AlExpr> _lhs, std::shared_ptr<AlExpr> _rhs) 
             : Expr {_pos}, op{_op}, lhs{_lhs}, rhs{_rhs} {}
 
 };
 
-class AlExpr : public Expr {
-
-    public:
-        AlExpr(Node::Position _pos) : Expr {_pos} {};
-
-};
 
 class AlBinExpr : public AlExpr {
-
-    protected:
-
-        AlBinOp op;
-        std::shared_ptr<AlExpr> lhs;
-        std::shared_ptr<AlExpr> rhs;
 
     public:
 
@@ -62,17 +60,19 @@ class AlBinExpr : public AlExpr {
             OR            
         };
 
-        AlExpr(Node::Position _pos, AlBinOp _op, std::shared_ptr<AlExpr> _lhs, std::shared_ptr<AlExpr> _rhs) 
+    protected:
+
+        AlBinOp op;
+        std::shared_ptr<AlExpr> lhs;
+        std::shared_ptr<AlExpr> rhs;
+
+    public:
+        AlBinExpr(Position _pos, AlBinOp _op, std::shared_ptr<AlExpr> _lhs, std::shared_ptr<AlExpr> _rhs) 
             : AlExpr {_pos}, op{_op}, lhs{_lhs}, rhs{_rhs} {}
 };
 
 class AlUnExpr : public AlExpr {
     
-    protected:
-        
-        AlUnOp op;
-        std::shared_ptr<AlExpr> alexpr;
-        
     public:
         
         enum class AlUnOp {
@@ -81,7 +81,13 @@ class AlUnExpr : public AlExpr {
             NOT
         };
 
-        AlUnExpr(Node::Position _pos, AlUnOp _op, std::shared_ptr<AlExpr> _alexpr) 
+    protected:
+        
+        AlUnOp op;
+        std::shared_ptr<AlExpr> alexpr;
+
+    public:
+        AlUnExpr(Position _pos, AlUnOp _op, std::shared_ptr<AlExpr> _alexpr) 
             : AlExpr{_pos}, op{_op}, alexpr{_alexpr} {};
 };
 
@@ -92,13 +98,13 @@ class LitExpr : public AlExpr {
         T val;
 
     public:
-        LitExpr(Node::Position _pos, T _val) : AlExpr{_pos}, val {_val} {}
+        LitExpr(Position _pos, T _val) : AlExpr{_pos}, val {_val} {}
 };
 
 class AccessOperation : public Node {
     public:
-        AccessOperation(Node::Position _pos) : Node {_pos} {};
-}
+        AccessOperation(Position _pos) : Node {_pos} {};
+};
 
 class BracketAccess : public AccessOperation {
     
@@ -108,8 +114,8 @@ class BracketAccess : public AccessOperation {
 
     public:
         BracketAccess(
-                Node::Position _pos, 
-                std::vector _expressionList,
+                Position _pos, 
+                std::vector<Expr> _expressionList,
                 std::shared_ptr<AccessOperation> _accessOperation) 
             : AccessOperation{_pos}, expressionList{_expressionList}, accessOperation{_accessOperation} {}
 };
@@ -120,7 +126,7 @@ class DotAccess : public AccessOperation {
         std::shared_ptr<AccessOperation> accessOperation;
     public:
         DotAccess(
-                Node::Position _pos, 
+                Position _pos, 
                 std::string _id,
                 std::shared_ptr<AccessOperation> _accessOperation) 
             : AccessOperation{_pos}, id{_id}, accessOperation{_accessOperation} {}
@@ -132,11 +138,13 @@ class Var : public AlExpr {
         std::shared_ptr<AccessOperation> accessOperation;
     public:
         Var(
-                Node::Position _pos, 
+                Position _pos, 
                 std::string _id,
                 std::shared_ptr<AccessOperation> _accessOperation) 
-            : AccessOperation{_pos}, id{_id}, accessOperation{_accessOperation} {}
+            : AlExpr{_pos}, id{_id}, accessOperation{_accessOperation} {}
 };
+
+class ActualParamsList : public Node {}; //TODO
 
 class FunctionCallExpr : public AlExpr {
     protected:
@@ -144,15 +152,16 @@ class FunctionCallExpr : public AlExpr {
         ActualParamsList actualParams;
     public:
         FunctionCallExpr(
-                Node::Position _pos,
+                Position _pos,
                 Var _var,
                 ActualParamsList _actualParams) 
         : AlExpr{_pos}, var{_var}, actualParams{_actualParams}{}
 };
 
+
 class Stmt : public Node {
     public:
-        Stmt(Node::Position _pos) : Node {_pos} {};
+        Stmt(Position _pos) : Node {_pos} {};
 };
 
 

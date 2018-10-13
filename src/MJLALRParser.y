@@ -4,6 +4,7 @@
 #include "MJMessage.h"
 #include "MJToken.h"
 #include <string>
+#include "ast/Expr.h"
 
 extern int current_line;
 extern int offset;

@@ -69,6 +69,7 @@
 #include "MJMessage.h"
 #include "MJToken.h"
 #include <string>
+#include "ast/Expr.h"
 
 extern int current_line;
 extern int offset;
@@ -79,7 +80,7 @@ extern int yylex();
 void yyerror(char *s);
 
 
-#line 83 "src/y.tab.c" /* yacc.c:339  */
+#line 84 "src/y.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -244,7 +245,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 248 "src/y.tab.c" /* yacc.c:358  */
+#line 249 "src/y.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -541,19 +542,19 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    83,    83,    84,    84,    85,    86,    87,    88,    89,
-      89,    90,    91,    92,    92,    93,    93,    94,    95,    95,
-      96,    96,    97,    98,    98,    98,    99,    99,   100,   101,
-     102,   102,   103,   104,   105,   105,   106,   106,   107,   107,
-     108,   109,   109,   109,   110,   111,   112,   112,   113,   114,
-     115,   115,   116,   117,   118,   119,   119,   120,   121,   122,
-     123,   124,   125,   126,   127,   128,   129,   130,   130,   131,
-     131,   132,   133,   133,   134,   135,   135,   136,   136,   137,
-     138,   139,   139,   140,   141,   142,   143,   144,   145,   146,
-     146,   146,   147,   148,   149,   150,   151,   152,   153,   154,
-     155,   156,   157,   158,   159,   160,   161,   162,   163,   164,
-     165,   166,   167,   168,   169,   170,   171,   172,   173,   174,
-     174,   175
+       0,    84,    84,    85,    85,    86,    87,    88,    89,    90,
+      90,    91,    92,    93,    93,    94,    94,    95,    96,    96,
+      97,    97,    98,    99,    99,    99,   100,   100,   101,   102,
+     103,   103,   104,   105,   106,   106,   107,   107,   108,   108,
+     109,   110,   110,   110,   111,   112,   113,   113,   114,   115,
+     116,   116,   117,   118,   119,   120,   120,   121,   122,   123,
+     124,   125,   126,   127,   128,   129,   130,   131,   131,   132,
+     132,   133,   134,   134,   135,   136,   136,   137,   137,   138,
+     139,   140,   140,   141,   142,   143,   144,   145,   146,   147,
+     147,   147,   148,   149,   150,   151,   152,   153,   154,   155,
+     156,   157,   158,   159,   160,   161,   162,   163,   164,   165,
+     166,   167,   168,   169,   170,   171,   172,   173,   174,   175,
+     175,   176
 };
 #endif
 
@@ -1504,7 +1505,7 @@ yyreduce:
   switch (yyn)
     {
       
-#line 1508 "src/y.tab.c" /* yacc.c:1648  */
+#line 1509 "src/y.tab.c" /* yacc.c:1648  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1732,7 +1733,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 176 "src/MJLALRParser.y" /* yacc.c:1907  */
+#line 177 "src/MJLALRParser.y" /* yacc.c:1907  */
 
 
 void yyerror(char *s) { 

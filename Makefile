@@ -66,6 +66,14 @@ lalrparser:
 	yacc -o $(SRCDIR)/y.tab.c $(SRCDIR)/MJLALRParser.y --defines=include/y.tab.h
 	g++ $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJMessage.cpp -o $(BINDIR)/mjclalr $(SRCDIR)/y.tab.c $(SRCDIR)/lex.yy.c $(INCFLAG) -std=c++11
 
+lalrparserast:
+	@echo "Making lexer...";
+	@mkdir -p $(BUILDDIR)
+	@mkdir -p $(BINDIR)
+	lex -o $(SRCDIR)/lex.yy.c $(SRCDIR)/mjclexer.l
+	yacc -o $(SRCDIR)/y.tab.c $(SRCDIR)/MJLALRParser.y --defines=include/y.tab.h
+	g++ $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJMessage.cpp -o $(BINDIR)/mjclalr $(SRCDIR)/y.tab.c $(SRCDIR)/lex.yy.c $(INCFLAG) -std=c++11
+
 lexer:
 	@echo "Building lexer...";
 	@mkdir -p $(BUILDDIR)
