@@ -4,6 +4,7 @@
 #include "Node.h"
 #include <memory>
 #include <vector>
+#include <exception>
 
 class Expr : public Node {
 
@@ -164,5 +165,87 @@ class Stmt : public Node {
         Stmt(Position _pos) : Node {_pos} {};
 };
 
+class ReadStmt : public Stmt {
+    protected:
+        std::string id;
+    public:
+        ReadStmt(Position _pos, std::string _id) : Stmt {_pos}, id{_id} {}
+};
+
+class PrintStmt : public Stmt {
+    protected:
+        Expr expr;
+    public:
+        PrintStmt(Position _pos, Expr _expr) : Stmt {_pos}, expr{_expr} {}
+};
+
+class Case : public Node {
+    protected:
+        Expr expr;
+        std::vector<Stmt> stmts;
+    public:
+        Case(
+                Position _pos,
+                Expr _expr,
+                std::vector<Stmt> _stmts)
+            : Node {_pos}, expr {_expr}, stmts {_stmts} {}
+};
+
+class SwitchStmt : public Stmt {
+    protected:
+        Expr expr;
+        std::vector<Case> caseList;
+    public:
+        SwitchStmt(
+                Position _pos,
+                Expr _expr,
+                std::vector<Case> _caseList) 
+        : Stmt{_pos}, expr {_expr} {
+
+            if (_caseList.empty()) 
+                throw std::invalid_argument("case list can't be empty in a switch");
+            else
+                this->caseList = _caseList;
+
+        }
+};
+
+class WhileStmt : public Stmt {
+    protected:
+        Expr expr;
+        std::vector<Stmt> stmts;
+    public:
+        WhileStmt(
+                Position _pos,
+                Expr _expr,
+                std::vector<Stmt> _stmts)
+            : Stmt {_pos}, expr {_expr}, stmts {_stmts} {}
+};
+
+class ForInit : public Node {
+    protected:
+        std::string id;
+        Expr expr;
+};
+
+class ForStep : public Node {
+
+};
+
+class ForStmt : public Stmt {
+    protected:
+        ForInit init;
+        std::shared_ptr<ForStep> step;
+    public:
+        ForStmt(
+                Position _pos,
+                ForInit _init,
+                std::shared_ptr<ForStep> _step)
+            : Stmt {_pos}, init {_init}, step {_step} {}
+};
+
+class IfStmt : public Stmt {};
+class ElsePart : public Node {};
+class ReturnStmt : public Stmt {};
 
 #endif
