@@ -1,0 +1,2854 @@
+Terminals unused in grammar
+
+   LAMBDA
+
+
+Grammar
+
+    0 $accept: program END_OF_FILE
+
+    1 program: TOK_PROGRAM TOK_IDENTIFIER TOK_SEMICOLON class_decl class_decl_list
+
+    2 class_decl_list: %empty
+    3                | class_decl class_decl_list
+
+    4 class_decl: TOK_CLASS TOK_IDENTIFIER class_body
+    5           | TOK_CLASS error class_body
+
+    6 class_body: TOK_LCURLY decls_opt method_decl_list TOK_RCURLY
+    7           | TOK_LCURLY error TOK_RCURLY
+
+    8 decls_opt: %empty
+    9          | decls
+
+   10 decls: TOK_DECLARATIONS field_decl_list_decls TOK_ENDDECLARATIONS
+   11      | TOK_DECLARATIONS error TOK_ENDDECLARATIONS
+
+   12 method_decl_list: %empty
+   13                 | method_decl method_decl_list
+
+   14 field_decl_list_decls: %empty
+   15                      | field_decl TOK_SEMICOLON field_decl_list_decls
+
+   16 field_decl: type var_decl_id field_decl_aux1
+
+   17 field_decl_aux1: field_decl_aux2
+   18                | TOK_EQUALS var_init field_decl_aux2
+
+   19 field_decl_aux2: %empty
+   20                | TOK_COMMA var_decl_id field_decl_aux1
+
+   21 type: type_aux brackets_opt
+
+   22 type_aux: TOK_IDENTIFIER
+   23         | TOK_INT
+   24         | TOK_STRING
+
+   25 brackets_opt: %empty
+   26             | TOK_LRSQUARE brackets_opt
+
+   27 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN formal_params_list_opt TOK_RPAREN block
+   28            | TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN error TOK_RPAREN block
+
+   29 method_return_type: TOK_VOID
+   30                   | type
+
+   31 formal_params_list: TOK_VAL type TOK_IDENTIFIER id_list_comma formal_params_list_aux
+   32                   | type TOK_IDENTIFIER id_list_comma formal_params_list_aux
+
+   33 formal_params_list_aux: %empty
+   34                       | TOK_SEMICOLON formal_params_list
+
+   35 id_list_comma: %empty
+   36              | TOK_COMMA TOK_IDENTIFIER id_list_comma
+
+   37 formal_params_list_opt: %empty
+   38                       | formal_params_list
+
+   39 var_decl_id: TOK_IDENTIFIER brackets_opt
+
+   40 var_init: expr
+   41         | array_init
+   42         | array_creation_expr
+
+   43 array_init: TOK_LCURLY var_init var_init_list_comma TOK_RCURLY
+   44           | TOK_LCURLY error TOK_RCURLY
+
+   45 var_init_list_comma: %empty
+   46                    | TOK_COMMA var_init var_init_list_comma
+
+   47 array_creation_expr: TOK_ARROBA type array_dim_decl array_dim_decl_list
+
+   48 array_dim_decl: TOK_LSQUARE expr TOK_RSQUARE
+
+   49 array_dim_decl_list: %empty
+   50                    | array_dim_decl array_dim_decl_list
+
+   51 block: decls_opt stmt_list
+
+   52 stmt_list: TOK_LCURLY stmt stmt_list_semicolon TOK_RCURLY
+   53          | TOK_LCURLY error TOK_RCURLY
+
+   54 stmt_list_semicolon: %empty
+   55                    | TOK_SEMICOLON stmt stmt_list_semicolon
+
+   56 stmt: var var_start_stmt
+   57     | return_stmt
+   58     | if_stmt
+   59     | while_stmt
+   60     | for_stmt
+   61     | switch_stmt
+   62     | print_stmt
+   63     | read_stmt
+
+   64 var_start_stmt: assign_stmt
+   65               | method_call_stmt
+
+   66 assign_stmt: TOK_ASSIGN expr
+
+   67 method_call_stmt: TOK_LPAREN actual_params_list TOK_RPAREN
+   68                 | TOK_LPAREN error TOK_RPAREN
+
+   69 actual_params_list: %empty
+   70                   | expr expr_list_comma
+
+   71 expr_list_comma: %empty
+   72                | TOK_COMMA expr expr_list_comma
+
+   73 return_stmt: TOK_RETURN expr_opt
+
+   74 expr_opt: %empty
+   75         | expr
+
+   76 if_stmt: TOK_IF expr stmt_list else_part
+
+   77 else_part: %empty
+   78          | TOK_ELSE if_stmt_aux
+
+   79 if_stmt_aux: if_stmt
+   80            | stmt_list
+
+   81 for_stmt: TOK_FOR for_init_expr TOK_TO expr step_opt stmt_list
+
+   82 for_init_expr: TOK_IDENTIFIER assign_stmt
+
+   83 step_opt: %empty
+   84         | TOK_STEP expr
+
+   85 while_stmt: TOK_WHILE expr stmt_list
+
+   86 switch_stmt: TOK_SWITCH expr TOK_LCURLY case case_list TOK_RCURLY
+   87            | TOK_SWITCH error TOK_LCURLY
+   88            | TOK_SWITCH expr TOK_LCURLY error TOK_RCURLY
+
+   89 case: TOK_CASE expr stmt_list
+   90     | TOK_CASE error stmt_list
+
+   91 case_list: %empty
+   92          | case case_list
+   93          | TOK_DEFAULT stmt_list
+
+   94 print_stmt: TOK_PRINT expr
+
+   95 read_stmt: TOK_READ TOK_IDENTIFIER
+
+   96 expr: al_expr TOK_EQEQ al_expr
+   97     | al_expr TOK_LESS al_expr
+   98     | al_expr TOK_LESSEQ al_expr
+   99     | al_expr TOK_GREATEREQ al_expr
+  100     | al_expr TOK_GREATER al_expr
+  101     | al_expr TOK_DIFF al_expr
+  102     | al_expr
+
+  103 al_expr: TOK_PLUS al_expr
+  104        | TOK_MINUS al_expr
+  105        | TOK_NOT al_expr
+  106        | al_expr TOK_PLUS al_expr
+  107        | al_expr TOK_MINUS al_expr
+  108        | al_expr TOK_2PIPE al_expr
+  109        | al_expr TOK_ASTERISK al_expr
+  110        | al_expr TOK_SLASH al_expr
+  111        | al_expr TOK_AND al_expr
+  112        | al_expr TOK_MOD al_expr
+  113        | TOK_LPAREN expr TOK_RPAREN
+  114        | TOK_LPAREN error TOK_RPAREN
+  115        | TOK_INTEGERCONSTANT
+  116        | TOK_STRINGCONSTANT
+  117        | var method_call_opt
+
+  118 method_call_opt: %empty
+  119                | method_call_stmt
+
+  120 var: TOK_IDENTIFIER var_aux
+
+  121 var_aux: %empty
+  122        | TOK_DOT TOK_IDENTIFIER var_aux
+  123        | TOK_LSQUARE expr expr_list_comma TOK_RSQUARE var_aux
+
+
+Terminals, with rules where they appear
+
+END_OF_FILE (0) 0
+TOK_PROGRAM (1) 1
+TOK_IDENTIFIER (2) 1 4 22 27 28 31 32 36 39 82 95 120 122
+TOK_SEMICOLON (3) 1 15 34 55
+TOK_CLASS (4) 4 5
+TOK_LCURLY (5) 6 7 43 44 52 53 86 87 88
+TOK_RCURLY (6) 6 7 43 44 52 53 86 88
+TOK_DECLARATIONS (7) 10 11
+TOK_ENDDECLARATIONS (8) 10 11
+TOK_EQUALS (9) 18
+TOK_COMMA (10) 20 36 46 72
+TOK_INT (11) 23
+TOK_STRING (12) 24
+TOK_LRSQUARE (13) 26
+TOK_METHOD (14) 27 28
+TOK_LPAREN (15) 27 28 67 68 113 114
+TOK_RPAREN (16) 27 28 67 68 113 114
+TOK_VOID (17) 29
+TOK_VAL (18) 31
+TOK_ARROBA (19) 47
+TOK_LSQUARE (20) 48 123
+TOK_RSQUARE (21) 48 123
+TOK_ASSIGN (22) 66
+TOK_RETURN (23) 73
+TOK_IF (24) 76
+TOK_ELSE (25) 78
+TOK_FOR (26) 81
+TOK_TO (27) 81
+TOK_STEP (28) 84
+TOK_WHILE (29) 85
+TOK_SWITCH (30) 86 87 88
+TOK_CASE (31) 89 90
+TOK_DEFAULT (32) 93
+TOK_PRINT (33) 94
+TOK_READ (34) 95
+TOK_LESS (35) 97
+TOK_LESSEQ (36) 98
+TOK_EQEQ (37) 96
+TOK_DIFF (38) 101
+TOK_GREATEREQ (39) 99
+TOK_GREATER (40) 100
+TOK_PLUS (41) 103 106
+TOK_UPLUS (42)
+TOK_MINUS (43) 104 107
+TOK_UMINUS (44)
+TOK_NOT (45) 105
+TOK_2PIPE (46) 108
+TOK_ASTERISK (47) 109
+TOK_SLASH (48) 110
+TOK_AND (49) 111
+TOK_MOD (50) 112
+TOK_INTEGERCONSTANT (51) 115
+TOK_STRINGCONSTANT (52) 116
+TOK_DOT (53) 122
+LAMBDA (55)
+error (256) 5 7 11 28 44 53 68 87 88 90 114
+
+
+Nonterminals, with rules where they appear
+
+$accept (57)
+    on left: 0
+program (58)
+    on left: 1, on right: 0
+class_decl_list (59)
+    on left: 2 3, on right: 1 3
+class_decl (60)
+    on left: 4 5, on right: 1 3
+class_body (61)
+    on left: 6 7, on right: 4 5
+decls_opt (62)
+    on left: 8 9, on right: 6 51
+decls (63)
+    on left: 10 11, on right: 9
+method_decl_list (64)
+    on left: 12 13, on right: 6 13
+field_decl_list_decls (65)
+    on left: 14 15, on right: 10 15
+field_decl (66)
+    on left: 16, on right: 15
+field_decl_aux1 (67)
+    on left: 17 18, on right: 16 20
+field_decl_aux2 (68)
+    on left: 19 20, on right: 17 18
+type (69)
+    on left: 21, on right: 16 30 31 32 47
+type_aux (70)
+    on left: 22 23 24, on right: 21
+brackets_opt (71)
+    on left: 25 26, on right: 21 26 39
+method_decl (72)
+    on left: 27 28, on right: 13
+method_return_type (73)
+    on left: 29 30, on right: 27 28
+formal_params_list (74)
+    on left: 31 32, on right: 34 38
+formal_params_list_aux (75)
+    on left: 33 34, on right: 31 32
+id_list_comma (76)
+    on left: 35 36, on right: 31 32 36
+formal_params_list_opt (77)
+    on left: 37 38, on right: 27
+var_decl_id (78)
+    on left: 39, on right: 16 20
+var_init (79)
+    on left: 40 41 42, on right: 18 43 46
+array_init (80)
+    on left: 43 44, on right: 41
+var_init_list_comma (81)
+    on left: 45 46, on right: 43 46
+array_creation_expr (82)
+    on left: 47, on right: 42
+array_dim_decl (83)
+    on left: 48, on right: 47 50
+array_dim_decl_list (84)
+    on left: 49 50, on right: 47 50
+block (85)
+    on left: 51, on right: 27 28
+stmt_list (86)
+    on left: 52 53, on right: 51 76 80 81 85 89 90 93
+stmt_list_semicolon (87)
+    on left: 54 55, on right: 52 55
+stmt (88)
+    on left: 56 57 58 59 60 61 62 63, on right: 52 55
+var_start_stmt (89)
+    on left: 64 65, on right: 56
+assign_stmt (90)
+    on left: 66, on right: 64 82
+method_call_stmt (91)
+    on left: 67 68, on right: 65 119
+actual_params_list (92)
+    on left: 69 70, on right: 67
+expr_list_comma (93)
+    on left: 71 72, on right: 70 72 123
+return_stmt (94)
+    on left: 73, on right: 57
+expr_opt (95)
+    on left: 74 75, on right: 73
+if_stmt (96)
+    on left: 76, on right: 58 79
+else_part (97)
+    on left: 77 78, on right: 76
+if_stmt_aux (98)
+    on left: 79 80, on right: 78
+for_stmt (99)
+    on left: 81, on right: 60
+for_init_expr (100)
+    on left: 82, on right: 81
+step_opt (101)
+    on left: 83 84, on right: 81
+while_stmt (102)
+    on left: 85, on right: 59
+switch_stmt (103)
+    on left: 86 87 88, on right: 61
+case (104)
+    on left: 89 90, on right: 86 92
+case_list (105)
+    on left: 91 92 93, on right: 86 92
+print_stmt (106)
+    on left: 94, on right: 62
+read_stmt (107)
+    on left: 95, on right: 63
+expr (108)
+    on left: 96 97 98 99 100 101 102, on right: 40 48 66 70 72 75 76
+    81 84 85 86 88 89 94 113 123
+al_expr (109)
+    on left: 103 104 105 106 107 108 109 110 111 112 113 114 115 116
+    117, on right: 96 97 98 99 100 101 102 103 104 105 106 107 108
+    109 110 111 112
+method_call_opt (110)
+    on left: 118 119, on right: 117
+var (111)
+    on left: 120, on right: 56 117
+var_aux (112)
+    on left: 121 122 123, on right: 120 122 123
+
+
+State 0
+
+    0 $accept: . program END_OF_FILE
+
+    TOK_PROGRAM  shift, and go to state 1
+
+    program  go to state 2
+
+
+State 1
+
+    1 program: TOK_PROGRAM . TOK_IDENTIFIER TOK_SEMICOLON class_decl class_decl_list
+
+    TOK_IDENTIFIER  shift, and go to state 3
+
+
+State 2
+
+    0 $accept: program . END_OF_FILE
+
+    END_OF_FILE  shift, and go to state 4
+
+
+State 3
+
+    1 program: TOK_PROGRAM TOK_IDENTIFIER . TOK_SEMICOLON class_decl class_decl_list
+
+    TOK_SEMICOLON  shift, and go to state 5
+
+
+State 4
+
+    0 $accept: program END_OF_FILE .
+
+    $default  accept
+
+
+State 5
+
+    1 program: TOK_PROGRAM TOK_IDENTIFIER TOK_SEMICOLON . class_decl class_decl_list
+
+    TOK_CLASS  shift, and go to state 6
+
+    class_decl  go to state 7
+
+
+State 6
+
+    4 class_decl: TOK_CLASS . TOK_IDENTIFIER class_body
+    5           | TOK_CLASS . error class_body
+
+    error           shift, and go to state 8
+    TOK_IDENTIFIER  shift, and go to state 9
+
+
+State 7
+
+    1 program: TOK_PROGRAM TOK_IDENTIFIER TOK_SEMICOLON class_decl . class_decl_list
+
+    TOK_CLASS  shift, and go to state 6
+
+    $default  reduce using rule 2 (class_decl_list)
+
+    class_decl_list  go to state 10
+    class_decl       go to state 11
+
+
+State 8
+
+    5 class_decl: TOK_CLASS error . class_body
+
+    TOK_LCURLY  shift, and go to state 12
+
+    class_body  go to state 13
+
+
+State 9
+
+    4 class_decl: TOK_CLASS TOK_IDENTIFIER . class_body
+
+    TOK_LCURLY  shift, and go to state 12
+
+    class_body  go to state 14
+
+
+State 10
+
+    1 program: TOK_PROGRAM TOK_IDENTIFIER TOK_SEMICOLON class_decl class_decl_list .
+
+    $default  reduce using rule 1 (program)
+
+
+State 11
+
+    3 class_decl_list: class_decl . class_decl_list
+
+    TOK_CLASS  shift, and go to state 6
+
+    $default  reduce using rule 2 (class_decl_list)
+
+    class_decl_list  go to state 15
+    class_decl       go to state 11
+
+
+State 12
+
+    6 class_body: TOK_LCURLY . decls_opt method_decl_list TOK_RCURLY
+    7           | TOK_LCURLY . error TOK_RCURLY
+
+    error             shift, and go to state 16
+    TOK_DECLARATIONS  shift, and go to state 17
+
+    TOK_RCURLY  reduce using rule 8 (decls_opt)
+    TOK_METHOD  reduce using rule 8 (decls_opt)
+
+    decls_opt  go to state 18
+    decls      go to state 19
+
+
+State 13
+
+    5 class_decl: TOK_CLASS error class_body .
+
+    $default  reduce using rule 5 (class_decl)
+
+
+State 14
+
+    4 class_decl: TOK_CLASS TOK_IDENTIFIER class_body .
+
+    $default  reduce using rule 4 (class_decl)
+
+
+State 15
+
+    3 class_decl_list: class_decl class_decl_list .
+
+    $default  reduce using rule 3 (class_decl_list)
+
+
+State 16
+
+    7 class_body: TOK_LCURLY error . TOK_RCURLY
+
+    TOK_RCURLY  shift, and go to state 20
+
+
+State 17
+
+   10 decls: TOK_DECLARATIONS . field_decl_list_decls TOK_ENDDECLARATIONS
+   11      | TOK_DECLARATIONS . error TOK_ENDDECLARATIONS
+
+    error           shift, and go to state 21
+    TOK_IDENTIFIER  shift, and go to state 22
+    TOK_INT         shift, and go to state 23
+    TOK_STRING      shift, and go to state 24
+
+    TOK_ENDDECLARATIONS  reduce using rule 14 (field_decl_list_decls)
+
+    field_decl_list_decls  go to state 25
+    field_decl             go to state 26
+    type                   go to state 27
+    type_aux               go to state 28
+
+
+State 18
+
+    6 class_body: TOK_LCURLY decls_opt . method_decl_list TOK_RCURLY
+
+    TOK_METHOD  shift, and go to state 29
+
+    $default  reduce using rule 12 (method_decl_list)
+
+    method_decl_list  go to state 30
+    method_decl       go to state 31
+
+
+State 19
+
+    9 decls_opt: decls .
+
+    $default  reduce using rule 9 (decls_opt)
+
+
+State 20
+
+    7 class_body: TOK_LCURLY error TOK_RCURLY .
+
+    $default  reduce using rule 7 (class_body)
+
+
+State 21
+
+   11 decls: TOK_DECLARATIONS error . TOK_ENDDECLARATIONS
+
+    TOK_ENDDECLARATIONS  shift, and go to state 32
+
+
+State 22
+
+   22 type_aux: TOK_IDENTIFIER .
+
+    $default  reduce using rule 22 (type_aux)
+
+
+State 23
+
+   23 type_aux: TOK_INT .
+
+    $default  reduce using rule 23 (type_aux)
+
+
+State 24
+
+   24 type_aux: TOK_STRING .
+
+    $default  reduce using rule 24 (type_aux)
+
+
+State 25
+
+   10 decls: TOK_DECLARATIONS field_decl_list_decls . TOK_ENDDECLARATIONS
+
+    TOK_ENDDECLARATIONS  shift, and go to state 33
+
+
+State 26
+
+   15 field_decl_list_decls: field_decl . TOK_SEMICOLON field_decl_list_decls
+
+    TOK_SEMICOLON  shift, and go to state 34
+
+
+State 27
+
+   16 field_decl: type . var_decl_id field_decl_aux1
+
+    TOK_IDENTIFIER  shift, and go to state 35
+
+    var_decl_id  go to state 36
+
+
+State 28
+
+   21 type: type_aux . brackets_opt
+
+    TOK_LRSQUARE  shift, and go to state 37
+
+    $default  reduce using rule 25 (brackets_opt)
+
+    brackets_opt  go to state 38
+
+
+State 29
+
+   27 method_decl: TOK_METHOD . method_return_type TOK_IDENTIFIER TOK_LPAREN formal_params_list_opt TOK_RPAREN block
+   28            | TOK_METHOD . method_return_type TOK_IDENTIFIER TOK_LPAREN error TOK_RPAREN block
+
+    TOK_IDENTIFIER  shift, and go to state 22
+    TOK_INT         shift, and go to state 23
+    TOK_STRING      shift, and go to state 24
+    TOK_VOID        shift, and go to state 39
+
+    type                go to state 40
+    type_aux            go to state 28
+    method_return_type  go to state 41
+
+
+State 30
+
+    6 class_body: TOK_LCURLY decls_opt method_decl_list . TOK_RCURLY
+
+    TOK_RCURLY  shift, and go to state 42
+
+
+State 31
+
+   13 method_decl_list: method_decl . method_decl_list
+
+    TOK_METHOD  shift, and go to state 29
+
+    $default  reduce using rule 12 (method_decl_list)
+
+    method_decl_list  go to state 43
+    method_decl       go to state 31
+
+
+State 32
+
+   11 decls: TOK_DECLARATIONS error TOK_ENDDECLARATIONS .
+
+    $default  reduce using rule 11 (decls)
+
+
+State 33
+
+   10 decls: TOK_DECLARATIONS field_decl_list_decls TOK_ENDDECLARATIONS .
+
+    $default  reduce using rule 10 (decls)
+
+
+State 34
+
+   15 field_decl_list_decls: field_decl TOK_SEMICOLON . field_decl_list_decls
+
+    TOK_IDENTIFIER  shift, and go to state 22
+    TOK_INT         shift, and go to state 23
+    TOK_STRING      shift, and go to state 24
+
+    $default  reduce using rule 14 (field_decl_list_decls)
+
+    field_decl_list_decls  go to state 44
+    field_decl             go to state 26
+    type                   go to state 27
+    type_aux               go to state 28
+
+
+State 35
+
+   39 var_decl_id: TOK_IDENTIFIER . brackets_opt
+
+    TOK_LRSQUARE  shift, and go to state 37
+
+    $default  reduce using rule 25 (brackets_opt)
+
+    brackets_opt  go to state 45
+
+
+State 36
+
+   16 field_decl: type var_decl_id . field_decl_aux1
+
+    TOK_EQUALS  shift, and go to state 46
+    TOK_COMMA   shift, and go to state 47
+
+    $default  reduce using rule 19 (field_decl_aux2)
+
+    field_decl_aux1  go to state 48
+    field_decl_aux2  go to state 49
+
+
+State 37
+
+   26 brackets_opt: TOK_LRSQUARE . brackets_opt
+
+    TOK_LRSQUARE  shift, and go to state 37
+
+    $default  reduce using rule 25 (brackets_opt)
+
+    brackets_opt  go to state 50
+
+
+State 38
+
+   21 type: type_aux brackets_opt .
+
+    $default  reduce using rule 21 (type)
+
+
+State 39
+
+   29 method_return_type: TOK_VOID .
+
+    $default  reduce using rule 29 (method_return_type)
+
+
+State 40
+
+   30 method_return_type: type .
+
+    $default  reduce using rule 30 (method_return_type)
+
+
+State 41
+
+   27 method_decl: TOK_METHOD method_return_type . TOK_IDENTIFIER TOK_LPAREN formal_params_list_opt TOK_RPAREN block
+   28            | TOK_METHOD method_return_type . TOK_IDENTIFIER TOK_LPAREN error TOK_RPAREN block
+
+    TOK_IDENTIFIER  shift, and go to state 51
+
+
+State 42
+
+    6 class_body: TOK_LCURLY decls_opt method_decl_list TOK_RCURLY .
+
+    $default  reduce using rule 6 (class_body)
+
+
+State 43
+
+   13 method_decl_list: method_decl method_decl_list .
+
+    $default  reduce using rule 13 (method_decl_list)
+
+
+State 44
+
+   15 field_decl_list_decls: field_decl TOK_SEMICOLON field_decl_list_decls .
+
+    $default  reduce using rule 15 (field_decl_list_decls)
+
+
+State 45
+
+   39 var_decl_id: TOK_IDENTIFIER brackets_opt .
+
+    $default  reduce using rule 39 (var_decl_id)
+
+
+State 46
+
+   18 field_decl_aux1: TOK_EQUALS . var_init field_decl_aux2
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LCURLY           shift, and go to state 53
+    TOK_LPAREN           shift, and go to state 54
+    TOK_ARROBA           shift, and go to state 55
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    var_init             go to state 61
+    array_init           go to state 62
+    array_creation_expr  go to state 63
+    expr                 go to state 64
+    al_expr              go to state 65
+    var                  go to state 66
+
+
+State 47
+
+   20 field_decl_aux2: TOK_COMMA . var_decl_id field_decl_aux1
+
+    TOK_IDENTIFIER  shift, and go to state 35
+
+    var_decl_id  go to state 67
+
+
+State 48
+
+   16 field_decl: type var_decl_id field_decl_aux1 .
+
+    $default  reduce using rule 16 (field_decl)
+
+
+State 49
+
+   17 field_decl_aux1: field_decl_aux2 .
+
+    $default  reduce using rule 17 (field_decl_aux1)
+
+
+State 50
+
+   26 brackets_opt: TOK_LRSQUARE brackets_opt .
+
+    $default  reduce using rule 26 (brackets_opt)
+
+
+State 51
+
+   27 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER . TOK_LPAREN formal_params_list_opt TOK_RPAREN block
+   28            | TOK_METHOD method_return_type TOK_IDENTIFIER . TOK_LPAREN error TOK_RPAREN block
+
+    TOK_LPAREN  shift, and go to state 68
+
+
+State 52
+
+  120 var: TOK_IDENTIFIER . var_aux
+
+    TOK_LSQUARE  shift, and go to state 69
+    TOK_DOT      shift, and go to state 70
+
+    $default  reduce using rule 121 (var_aux)
+
+    var_aux  go to state 71
+
+
+State 53
+
+   43 array_init: TOK_LCURLY . var_init var_init_list_comma TOK_RCURLY
+   44           | TOK_LCURLY . error TOK_RCURLY
+
+    error                shift, and go to state 72
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LCURLY           shift, and go to state 53
+    TOK_LPAREN           shift, and go to state 54
+    TOK_ARROBA           shift, and go to state 55
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    var_init             go to state 73
+    array_init           go to state 62
+    array_creation_expr  go to state 63
+    expr                 go to state 64
+    al_expr              go to state 65
+    var                  go to state 66
+
+
+State 54
+
+  113 al_expr: TOK_LPAREN . expr TOK_RPAREN
+  114        | TOK_LPAREN . error TOK_RPAREN
+
+    error                shift, and go to state 74
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    expr     go to state 75
+    al_expr  go to state 65
+    var      go to state 66
+
+
+State 55
+
+   47 array_creation_expr: TOK_ARROBA . type array_dim_decl array_dim_decl_list
+
+    TOK_IDENTIFIER  shift, and go to state 22
+    TOK_INT         shift, and go to state 23
+    TOK_STRING      shift, and go to state 24
+
+    type      go to state 76
+    type_aux  go to state 28
+
+
+State 56
+
+  103 al_expr: TOK_PLUS . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 77
+    var      go to state 66
+
+
+State 57
+
+  104 al_expr: TOK_MINUS . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 78
+    var      go to state 66
+
+
+State 58
+
+  105 al_expr: TOK_NOT . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 79
+    var      go to state 66
+
+
+State 59
+
+  115 al_expr: TOK_INTEGERCONSTANT .
+
+    $default  reduce using rule 115 (al_expr)
+
+
+State 60
+
+  116 al_expr: TOK_STRINGCONSTANT .
+
+    $default  reduce using rule 116 (al_expr)
+
+
+State 61
+
+   18 field_decl_aux1: TOK_EQUALS var_init . field_decl_aux2
+
+    TOK_COMMA  shift, and go to state 47
+
+    $default  reduce using rule 19 (field_decl_aux2)
+
+    field_decl_aux2  go to state 80
+
+
+State 62
+
+   41 var_init: array_init .
+
+    $default  reduce using rule 41 (var_init)
+
+
+State 63
+
+   42 var_init: array_creation_expr .
+
+    $default  reduce using rule 42 (var_init)
+
+
+State 64
+
+   40 var_init: expr .
+
+    $default  reduce using rule 40 (var_init)
+
+
+State 65
+
+   96 expr: al_expr . TOK_EQEQ al_expr
+   97     | al_expr . TOK_LESS al_expr
+   98     | al_expr . TOK_LESSEQ al_expr
+   99     | al_expr . TOK_GREATEREQ al_expr
+  100     | al_expr . TOK_GREATER al_expr
+  101     | al_expr . TOK_DIFF al_expr
+  102     | al_expr .
+  106 al_expr: al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    TOK_LESS       shift, and go to state 81
+    TOK_LESSEQ     shift, and go to state 82
+    TOK_EQEQ       shift, and go to state 83
+    TOK_DIFF       shift, and go to state 84
+    TOK_GREATEREQ  shift, and go to state 85
+    TOK_GREATER    shift, and go to state 86
+    TOK_PLUS       shift, and go to state 87
+    TOK_MINUS      shift, and go to state 88
+    TOK_2PIPE      shift, and go to state 89
+    TOK_ASTERISK   shift, and go to state 90
+    TOK_SLASH      shift, and go to state 91
+    TOK_AND        shift, and go to state 92
+    TOK_MOD        shift, and go to state 93
+
+    $default  reduce using rule 102 (expr)
+
+
+State 66
+
+  117 al_expr: var . method_call_opt
+
+    TOK_LPAREN  shift, and go to state 94
+
+    $default  reduce using rule 118 (method_call_opt)
+
+    method_call_stmt  go to state 95
+    method_call_opt   go to state 96
+
+
+State 67
+
+   20 field_decl_aux2: TOK_COMMA var_decl_id . field_decl_aux1
+
+    TOK_EQUALS  shift, and go to state 46
+    TOK_COMMA   shift, and go to state 47
+
+    $default  reduce using rule 19 (field_decl_aux2)
+
+    field_decl_aux1  go to state 97
+    field_decl_aux2  go to state 49
+
+
+State 68
+
+   27 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN . formal_params_list_opt TOK_RPAREN block
+   28            | TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN . error TOK_RPAREN block
+
+    error           shift, and go to state 98
+    TOK_IDENTIFIER  shift, and go to state 22
+    TOK_INT         shift, and go to state 23
+    TOK_STRING      shift, and go to state 24
+    TOK_VAL         shift, and go to state 99
+
+    TOK_RPAREN  reduce using rule 37 (formal_params_list_opt)
+
+    type                    go to state 100
+    type_aux                go to state 28
+    formal_params_list      go to state 101
+    formal_params_list_opt  go to state 102
+
+
+State 69
+
+  123 var_aux: TOK_LSQUARE . expr expr_list_comma TOK_RSQUARE var_aux
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    expr     go to state 103
+    al_expr  go to state 65
+    var      go to state 66
+
+
+State 70
+
+  122 var_aux: TOK_DOT . TOK_IDENTIFIER var_aux
+
+    TOK_IDENTIFIER  shift, and go to state 104
+
+
+State 71
+
+  120 var: TOK_IDENTIFIER var_aux .
+
+    $default  reduce using rule 120 (var)
+
+
+State 72
+
+   44 array_init: TOK_LCURLY error . TOK_RCURLY
+
+    TOK_RCURLY  shift, and go to state 105
+
+
+State 73
+
+   43 array_init: TOK_LCURLY var_init . var_init_list_comma TOK_RCURLY
+
+    TOK_COMMA  shift, and go to state 106
+
+    $default  reduce using rule 45 (var_init_list_comma)
+
+    var_init_list_comma  go to state 107
+
+
+State 74
+
+  114 al_expr: TOK_LPAREN error . TOK_RPAREN
+
+    TOK_RPAREN  shift, and go to state 108
+
+
+State 75
+
+  113 al_expr: TOK_LPAREN expr . TOK_RPAREN
+
+    TOK_RPAREN  shift, and go to state 109
+
+
+State 76
+
+   47 array_creation_expr: TOK_ARROBA type . array_dim_decl array_dim_decl_list
+
+    TOK_LSQUARE  shift, and go to state 110
+
+    array_dim_decl  go to state 111
+
+
+State 77
+
+  103 al_expr: TOK_PLUS al_expr .
+  106        | al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    $default  reduce using rule 103 (al_expr)
+
+
+State 78
+
+  104 al_expr: TOK_MINUS al_expr .
+  106        | al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    $default  reduce using rule 104 (al_expr)
+
+
+State 79
+
+  105 al_expr: TOK_NOT al_expr .
+  106        | al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    $default  reduce using rule 105 (al_expr)
+
+
+State 80
+
+   18 field_decl_aux1: TOK_EQUALS var_init field_decl_aux2 .
+
+    $default  reduce using rule 18 (field_decl_aux1)
+
+
+State 81
+
+   97 expr: al_expr TOK_LESS . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 112
+    var      go to state 66
+
+
+State 82
+
+   98 expr: al_expr TOK_LESSEQ . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 113
+    var      go to state 66
+
+
+State 83
+
+   96 expr: al_expr TOK_EQEQ . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 114
+    var      go to state 66
+
+
+State 84
+
+  101 expr: al_expr TOK_DIFF . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 115
+    var      go to state 66
+
+
+State 85
+
+   99 expr: al_expr TOK_GREATEREQ . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 116
+    var      go to state 66
+
+
+State 86
+
+  100 expr: al_expr TOK_GREATER . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 117
+    var      go to state 66
+
+
+State 87
+
+  106 al_expr: al_expr TOK_PLUS . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 118
+    var      go to state 66
+
+
+State 88
+
+  107 al_expr: al_expr TOK_MINUS . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 119
+    var      go to state 66
+
+
+State 89
+
+  108 al_expr: al_expr TOK_2PIPE . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 120
+    var      go to state 66
+
+
+State 90
+
+  109 al_expr: al_expr TOK_ASTERISK . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 121
+    var      go to state 66
+
+
+State 91
+
+  110 al_expr: al_expr TOK_SLASH . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 122
+    var      go to state 66
+
+
+State 92
+
+  111 al_expr: al_expr TOK_AND . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 123
+    var      go to state 66
+
+
+State 93
+
+  112 al_expr: al_expr TOK_MOD . al_expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    al_expr  go to state 124
+    var      go to state 66
+
+
+State 94
+
+   67 method_call_stmt: TOK_LPAREN . actual_params_list TOK_RPAREN
+   68                 | TOK_LPAREN . error TOK_RPAREN
+
+    error                shift, and go to state 125
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    TOK_RPAREN  reduce using rule 69 (actual_params_list)
+
+    actual_params_list  go to state 126
+    expr                go to state 127
+    al_expr             go to state 65
+    var                 go to state 66
+
+
+State 95
+
+  119 method_call_opt: method_call_stmt .
+
+    $default  reduce using rule 119 (method_call_opt)
+
+
+State 96
+
+  117 al_expr: var method_call_opt .
+
+    $default  reduce using rule 117 (al_expr)
+
+
+State 97
+
+   20 field_decl_aux2: TOK_COMMA var_decl_id field_decl_aux1 .
+
+    $default  reduce using rule 20 (field_decl_aux2)
+
+
+State 98
+
+   28 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN error . TOK_RPAREN block
+
+    TOK_RPAREN  shift, and go to state 128
+
+
+State 99
+
+   31 formal_params_list: TOK_VAL . type TOK_IDENTIFIER id_list_comma formal_params_list_aux
+
+    TOK_IDENTIFIER  shift, and go to state 22
+    TOK_INT         shift, and go to state 23
+    TOK_STRING      shift, and go to state 24
+
+    type      go to state 129
+    type_aux  go to state 28
+
+
+State 100
+
+   32 formal_params_list: type . TOK_IDENTIFIER id_list_comma formal_params_list_aux
+
+    TOK_IDENTIFIER  shift, and go to state 130
+
+
+State 101
+
+   38 formal_params_list_opt: formal_params_list .
+
+    $default  reduce using rule 38 (formal_params_list_opt)
+
+
+State 102
+
+   27 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN formal_params_list_opt . TOK_RPAREN block
+
+    TOK_RPAREN  shift, and go to state 131
+
+
+State 103
+
+  123 var_aux: TOK_LSQUARE expr . expr_list_comma TOK_RSQUARE var_aux
+
+    TOK_COMMA  shift, and go to state 132
+
+    $default  reduce using rule 71 (expr_list_comma)
+
+    expr_list_comma  go to state 133
+
+
+State 104
+
+  122 var_aux: TOK_DOT TOK_IDENTIFIER . var_aux
+
+    TOK_LSQUARE  shift, and go to state 69
+    TOK_DOT      shift, and go to state 70
+
+    $default  reduce using rule 121 (var_aux)
+
+    var_aux  go to state 134
+
+
+State 105
+
+   44 array_init: TOK_LCURLY error TOK_RCURLY .
+
+    $default  reduce using rule 44 (array_init)
+
+
+State 106
+
+   46 var_init_list_comma: TOK_COMMA . var_init var_init_list_comma
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LCURLY           shift, and go to state 53
+    TOK_LPAREN           shift, and go to state 54
+    TOK_ARROBA           shift, and go to state 55
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    var_init             go to state 135
+    array_init           go to state 62
+    array_creation_expr  go to state 63
+    expr                 go to state 64
+    al_expr              go to state 65
+    var                  go to state 66
+
+
+State 107
+
+   43 array_init: TOK_LCURLY var_init var_init_list_comma . TOK_RCURLY
+
+    TOK_RCURLY  shift, and go to state 136
+
+
+State 108
+
+  114 al_expr: TOK_LPAREN error TOK_RPAREN .
+
+    $default  reduce using rule 114 (al_expr)
+
+
+State 109
+
+  113 al_expr: TOK_LPAREN expr TOK_RPAREN .
+
+    $default  reduce using rule 113 (al_expr)
+
+
+State 110
+
+   48 array_dim_decl: TOK_LSQUARE . expr TOK_RSQUARE
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    expr     go to state 137
+    al_expr  go to state 65
+    var      go to state 66
+
+
+State 111
+
+   47 array_creation_expr: TOK_ARROBA type array_dim_decl . array_dim_decl_list
+
+    TOK_LSQUARE  shift, and go to state 110
+
+    $default  reduce using rule 49 (array_dim_decl_list)
+
+    array_dim_decl       go to state 138
+    array_dim_decl_list  go to state 139
+
+
+State 112
+
+   97 expr: al_expr TOK_LESS al_expr .
+  106 al_expr: al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    TOK_PLUS      shift, and go to state 87
+    TOK_MINUS     shift, and go to state 88
+    TOK_2PIPE     shift, and go to state 89
+    TOK_ASTERISK  shift, and go to state 90
+    TOK_SLASH     shift, and go to state 91
+    TOK_AND       shift, and go to state 92
+    TOK_MOD       shift, and go to state 93
+
+    $default  reduce using rule 97 (expr)
+
+
+State 113
+
+   98 expr: al_expr TOK_LESSEQ al_expr .
+  106 al_expr: al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    TOK_PLUS      shift, and go to state 87
+    TOK_MINUS     shift, and go to state 88
+    TOK_2PIPE     shift, and go to state 89
+    TOK_ASTERISK  shift, and go to state 90
+    TOK_SLASH     shift, and go to state 91
+    TOK_AND       shift, and go to state 92
+    TOK_MOD       shift, and go to state 93
+
+    $default  reduce using rule 98 (expr)
+
+
+State 114
+
+   96 expr: al_expr TOK_EQEQ al_expr .
+  106 al_expr: al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    TOK_PLUS      shift, and go to state 87
+    TOK_MINUS     shift, and go to state 88
+    TOK_2PIPE     shift, and go to state 89
+    TOK_ASTERISK  shift, and go to state 90
+    TOK_SLASH     shift, and go to state 91
+    TOK_AND       shift, and go to state 92
+    TOK_MOD       shift, and go to state 93
+
+    $default  reduce using rule 96 (expr)
+
+
+State 115
+
+  101 expr: al_expr TOK_DIFF al_expr .
+  106 al_expr: al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    TOK_PLUS      shift, and go to state 87
+    TOK_MINUS     shift, and go to state 88
+    TOK_2PIPE     shift, and go to state 89
+    TOK_ASTERISK  shift, and go to state 90
+    TOK_SLASH     shift, and go to state 91
+    TOK_AND       shift, and go to state 92
+    TOK_MOD       shift, and go to state 93
+
+    $default  reduce using rule 101 (expr)
+
+
+State 116
+
+   99 expr: al_expr TOK_GREATEREQ al_expr .
+  106 al_expr: al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    TOK_PLUS      shift, and go to state 87
+    TOK_MINUS     shift, and go to state 88
+    TOK_2PIPE     shift, and go to state 89
+    TOK_ASTERISK  shift, and go to state 90
+    TOK_SLASH     shift, and go to state 91
+    TOK_AND       shift, and go to state 92
+    TOK_MOD       shift, and go to state 93
+
+    $default  reduce using rule 99 (expr)
+
+
+State 117
+
+  100 expr: al_expr TOK_GREATER al_expr .
+  106 al_expr: al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    TOK_PLUS      shift, and go to state 87
+    TOK_MINUS     shift, and go to state 88
+    TOK_2PIPE     shift, and go to state 89
+    TOK_ASTERISK  shift, and go to state 90
+    TOK_SLASH     shift, and go to state 91
+    TOK_AND       shift, and go to state 92
+    TOK_MOD       shift, and go to state 93
+
+    $default  reduce using rule 100 (expr)
+
+
+State 118
+
+  106 al_expr: al_expr . TOK_PLUS al_expr
+  106        | al_expr TOK_PLUS al_expr .
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    TOK_ASTERISK  shift, and go to state 90
+    TOK_SLASH     shift, and go to state 91
+    TOK_AND       shift, and go to state 92
+    TOK_MOD       shift, and go to state 93
+
+    $default  reduce using rule 106 (al_expr)
+
+
+State 119
+
+  106 al_expr: al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  107        | al_expr TOK_MINUS al_expr .
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    TOK_ASTERISK  shift, and go to state 90
+    TOK_SLASH     shift, and go to state 91
+    TOK_AND       shift, and go to state 92
+    TOK_MOD       shift, and go to state 93
+
+    $default  reduce using rule 107 (al_expr)
+
+
+State 120
+
+  106 al_expr: al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  108        | al_expr TOK_2PIPE al_expr .
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    TOK_ASTERISK  shift, and go to state 90
+    TOK_SLASH     shift, and go to state 91
+    TOK_AND       shift, and go to state 92
+    TOK_MOD       shift, and go to state 93
+
+    $default  reduce using rule 108 (al_expr)
+
+
+State 121
+
+  106 al_expr: al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  109        | al_expr TOK_ASTERISK al_expr .
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    $default  reduce using rule 109 (al_expr)
+
+
+State 122
+
+  106 al_expr: al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  110        | al_expr TOK_SLASH al_expr .
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+
+    $default  reduce using rule 110 (al_expr)
+
+
+State 123
+
+  106 al_expr: al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  111        | al_expr TOK_AND al_expr .
+  112        | al_expr . TOK_MOD al_expr
+
+    $default  reduce using rule 111 (al_expr)
+
+
+State 124
+
+  106 al_expr: al_expr . TOK_PLUS al_expr
+  107        | al_expr . TOK_MINUS al_expr
+  108        | al_expr . TOK_2PIPE al_expr
+  109        | al_expr . TOK_ASTERISK al_expr
+  110        | al_expr . TOK_SLASH al_expr
+  111        | al_expr . TOK_AND al_expr
+  112        | al_expr . TOK_MOD al_expr
+  112        | al_expr TOK_MOD al_expr .
+
+    $default  reduce using rule 112 (al_expr)
+
+
+State 125
+
+   68 method_call_stmt: TOK_LPAREN error . TOK_RPAREN
+
+    TOK_RPAREN  shift, and go to state 140
+
+
+State 126
+
+   67 method_call_stmt: TOK_LPAREN actual_params_list . TOK_RPAREN
+
+    TOK_RPAREN  shift, and go to state 141
+
+
+State 127
+
+   70 actual_params_list: expr . expr_list_comma
+
+    TOK_COMMA  shift, and go to state 132
+
+    $default  reduce using rule 71 (expr_list_comma)
+
+    expr_list_comma  go to state 142
+
+
+State 128
+
+   28 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN error TOK_RPAREN . block
+
+    TOK_DECLARATIONS  shift, and go to state 17
+
+    $default  reduce using rule 8 (decls_opt)
+
+    decls_opt  go to state 143
+    decls      go to state 19
+    block      go to state 144
+
+
+State 129
+
+   31 formal_params_list: TOK_VAL type . TOK_IDENTIFIER id_list_comma formal_params_list_aux
+
+    TOK_IDENTIFIER  shift, and go to state 145
+
+
+State 130
+
+   32 formal_params_list: type TOK_IDENTIFIER . id_list_comma formal_params_list_aux
+
+    TOK_COMMA  shift, and go to state 146
+
+    $default  reduce using rule 35 (id_list_comma)
+
+    id_list_comma  go to state 147
+
+
+State 131
+
+   27 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN formal_params_list_opt TOK_RPAREN . block
+
+    TOK_DECLARATIONS  shift, and go to state 17
+
+    $default  reduce using rule 8 (decls_opt)
+
+    decls_opt  go to state 143
+    decls      go to state 19
+    block      go to state 148
+
+
+State 132
+
+   72 expr_list_comma: TOK_COMMA . expr expr_list_comma
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    expr     go to state 149
+    al_expr  go to state 65
+    var      go to state 66
+
+
+State 133
+
+  123 var_aux: TOK_LSQUARE expr expr_list_comma . TOK_RSQUARE var_aux
+
+    TOK_RSQUARE  shift, and go to state 150
+
+
+State 134
+
+  122 var_aux: TOK_DOT TOK_IDENTIFIER var_aux .
+
+    $default  reduce using rule 122 (var_aux)
+
+
+State 135
+
+   46 var_init_list_comma: TOK_COMMA var_init . var_init_list_comma
+
+    TOK_COMMA  shift, and go to state 106
+
+    $default  reduce using rule 45 (var_init_list_comma)
+
+    var_init_list_comma  go to state 151
+
+
+State 136
+
+   43 array_init: TOK_LCURLY var_init var_init_list_comma TOK_RCURLY .
+
+    $default  reduce using rule 43 (array_init)
+
+
+State 137
+
+   48 array_dim_decl: TOK_LSQUARE expr . TOK_RSQUARE
+
+    TOK_RSQUARE  shift, and go to state 152
+
+
+State 138
+
+   50 array_dim_decl_list: array_dim_decl . array_dim_decl_list
+
+    TOK_LSQUARE  shift, and go to state 110
+
+    $default  reduce using rule 49 (array_dim_decl_list)
+
+    array_dim_decl       go to state 138
+    array_dim_decl_list  go to state 153
+
+
+State 139
+
+   47 array_creation_expr: TOK_ARROBA type array_dim_decl array_dim_decl_list .
+
+    $default  reduce using rule 47 (array_creation_expr)
+
+
+State 140
+
+   68 method_call_stmt: TOK_LPAREN error TOK_RPAREN .
+
+    $default  reduce using rule 68 (method_call_stmt)
+
+
+State 141
+
+   67 method_call_stmt: TOK_LPAREN actual_params_list TOK_RPAREN .
+
+    $default  reduce using rule 67 (method_call_stmt)
+
+
+State 142
+
+   70 actual_params_list: expr expr_list_comma .
+
+    $default  reduce using rule 70 (actual_params_list)
+
+
+State 143
+
+   51 block: decls_opt . stmt_list
+
+    TOK_LCURLY  shift, and go to state 154
+
+    stmt_list  go to state 155
+
+
+State 144
+
+   28 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN error TOK_RPAREN block .
+
+    $default  reduce using rule 28 (method_decl)
+
+
+State 145
+
+   31 formal_params_list: TOK_VAL type TOK_IDENTIFIER . id_list_comma formal_params_list_aux
+
+    TOK_COMMA  shift, and go to state 146
+
+    $default  reduce using rule 35 (id_list_comma)
+
+    id_list_comma  go to state 156
+
+
+State 146
+
+   36 id_list_comma: TOK_COMMA . TOK_IDENTIFIER id_list_comma
+
+    TOK_IDENTIFIER  shift, and go to state 157
+
+
+State 147
+
+   32 formal_params_list: type TOK_IDENTIFIER id_list_comma . formal_params_list_aux
+
+    TOK_SEMICOLON  shift, and go to state 158
+
+    $default  reduce using rule 33 (formal_params_list_aux)
+
+    formal_params_list_aux  go to state 159
+
+
+State 148
+
+   27 method_decl: TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN formal_params_list_opt TOK_RPAREN block .
+
+    $default  reduce using rule 27 (method_decl)
+
+
+State 149
+
+   72 expr_list_comma: TOK_COMMA expr . expr_list_comma
+
+    TOK_COMMA  shift, and go to state 132
+
+    $default  reduce using rule 71 (expr_list_comma)
+
+    expr_list_comma  go to state 160
+
+
+State 150
+
+  123 var_aux: TOK_LSQUARE expr expr_list_comma TOK_RSQUARE . var_aux
+
+    TOK_LSQUARE  shift, and go to state 69
+    TOK_DOT      shift, and go to state 70
+
+    $default  reduce using rule 121 (var_aux)
+
+    var_aux  go to state 161
+
+
+State 151
+
+   46 var_init_list_comma: TOK_COMMA var_init var_init_list_comma .
+
+    $default  reduce using rule 46 (var_init_list_comma)
+
+
+State 152
+
+   48 array_dim_decl: TOK_LSQUARE expr TOK_RSQUARE .
+
+    $default  reduce using rule 48 (array_dim_decl)
+
+
+State 153
+
+   50 array_dim_decl_list: array_dim_decl array_dim_decl_list .
+
+    $default  reduce using rule 50 (array_dim_decl_list)
+
+
+State 154
+
+   52 stmt_list: TOK_LCURLY . stmt stmt_list_semicolon TOK_RCURLY
+   53          | TOK_LCURLY . error TOK_RCURLY
+
+    error           shift, and go to state 162
+    TOK_IDENTIFIER  shift, and go to state 52
+    TOK_RETURN      shift, and go to state 163
+    TOK_IF          shift, and go to state 164
+    TOK_FOR         shift, and go to state 165
+    TOK_WHILE       shift, and go to state 166
+    TOK_SWITCH      shift, and go to state 167
+    TOK_PRINT       shift, and go to state 168
+    TOK_READ        shift, and go to state 169
+
+    stmt         go to state 170
+    return_stmt  go to state 171
+    if_stmt      go to state 172
+    for_stmt     go to state 173
+    while_stmt   go to state 174
+    switch_stmt  go to state 175
+    print_stmt   go to state 176
+    read_stmt    go to state 177
+    var          go to state 178
+
+
+State 155
+
+   51 block: decls_opt stmt_list .
+
+    $default  reduce using rule 51 (block)
+
+
+State 156
+
+   31 formal_params_list: TOK_VAL type TOK_IDENTIFIER id_list_comma . formal_params_list_aux
+
+    TOK_SEMICOLON  shift, and go to state 158
+
+    $default  reduce using rule 33 (formal_params_list_aux)
+
+    formal_params_list_aux  go to state 179
+
+
+State 157
+
+   36 id_list_comma: TOK_COMMA TOK_IDENTIFIER . id_list_comma
+
+    TOK_COMMA  shift, and go to state 146
+
+    $default  reduce using rule 35 (id_list_comma)
+
+    id_list_comma  go to state 180
+
+
+State 158
+
+   34 formal_params_list_aux: TOK_SEMICOLON . formal_params_list
+
+    TOK_IDENTIFIER  shift, and go to state 22
+    TOK_INT         shift, and go to state 23
+    TOK_STRING      shift, and go to state 24
+    TOK_VAL         shift, and go to state 99
+
+    type                go to state 100
+    type_aux            go to state 28
+    formal_params_list  go to state 181
+
+
+State 159
+
+   32 formal_params_list: type TOK_IDENTIFIER id_list_comma formal_params_list_aux .
+
+    $default  reduce using rule 32 (formal_params_list)
+
+
+State 160
+
+   72 expr_list_comma: TOK_COMMA expr expr_list_comma .
+
+    $default  reduce using rule 72 (expr_list_comma)
+
+
+State 161
+
+  123 var_aux: TOK_LSQUARE expr expr_list_comma TOK_RSQUARE var_aux .
+
+    $default  reduce using rule 123 (var_aux)
+
+
+State 162
+
+   53 stmt_list: TOK_LCURLY error . TOK_RCURLY
+
+    TOK_RCURLY  shift, and go to state 182
+
+
+State 163
+
+   73 return_stmt: TOK_RETURN . expr_opt
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    $default  reduce using rule 74 (expr_opt)
+
+    expr_opt  go to state 183
+    expr      go to state 184
+    al_expr   go to state 65
+    var       go to state 66
+
+
+State 164
+
+   76 if_stmt: TOK_IF . expr stmt_list else_part
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    expr     go to state 185
+    al_expr  go to state 65
+    var      go to state 66
+
+
+State 165
+
+   81 for_stmt: TOK_FOR . for_init_expr TOK_TO expr step_opt stmt_list
+
+    TOK_IDENTIFIER  shift, and go to state 186
+
+    for_init_expr  go to state 187
+
+
+State 166
+
+   85 while_stmt: TOK_WHILE . expr stmt_list
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    expr     go to state 188
+    al_expr  go to state 65
+    var      go to state 66
+
+
+State 167
+
+   86 switch_stmt: TOK_SWITCH . expr TOK_LCURLY case case_list TOK_RCURLY
+   87            | TOK_SWITCH . error TOK_LCURLY
+   88            | TOK_SWITCH . expr TOK_LCURLY error TOK_RCURLY
+
+    error                shift, and go to state 189
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    expr     go to state 190
+    al_expr  go to state 65
+    var      go to state 66
+
+
+State 168
+
+   94 print_stmt: TOK_PRINT . expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    expr     go to state 191
+    al_expr  go to state 65
+    var      go to state 66
+
+
+State 169
+
+   95 read_stmt: TOK_READ . TOK_IDENTIFIER
+
+    TOK_IDENTIFIER  shift, and go to state 192
+
+
+State 170
+
+   52 stmt_list: TOK_LCURLY stmt . stmt_list_semicolon TOK_RCURLY
+
+    TOK_SEMICOLON  shift, and go to state 193
+
+    $default  reduce using rule 54 (stmt_list_semicolon)
+
+    stmt_list_semicolon  go to state 194
+
+
+State 171
+
+   57 stmt: return_stmt .
+
+    $default  reduce using rule 57 (stmt)
+
+
+State 172
+
+   58 stmt: if_stmt .
+
+    $default  reduce using rule 58 (stmt)
+
+
+State 173
+
+   60 stmt: for_stmt .
+
+    $default  reduce using rule 60 (stmt)
+
+
+State 174
+
+   59 stmt: while_stmt .
+
+    $default  reduce using rule 59 (stmt)
+
+
+State 175
+
+   61 stmt: switch_stmt .
+
+    $default  reduce using rule 61 (stmt)
+
+
+State 176
+
+   62 stmt: print_stmt .
+
+    $default  reduce using rule 62 (stmt)
+
+
+State 177
+
+   63 stmt: read_stmt .
+
+    $default  reduce using rule 63 (stmt)
+
+
+State 178
+
+   56 stmt: var . var_start_stmt
+
+    TOK_LPAREN  shift, and go to state 94
+    TOK_ASSIGN  shift, and go to state 195
+
+    var_start_stmt    go to state 196
+    assign_stmt       go to state 197
+    method_call_stmt  go to state 198
+
+
+State 179
+
+   31 formal_params_list: TOK_VAL type TOK_IDENTIFIER id_list_comma formal_params_list_aux .
+
+    $default  reduce using rule 31 (formal_params_list)
+
+
+State 180
+
+   36 id_list_comma: TOK_COMMA TOK_IDENTIFIER id_list_comma .
+
+    $default  reduce using rule 36 (id_list_comma)
+
+
+State 181
+
+   34 formal_params_list_aux: TOK_SEMICOLON formal_params_list .
+
+    $default  reduce using rule 34 (formal_params_list_aux)
+
+
+State 182
+
+   53 stmt_list: TOK_LCURLY error TOK_RCURLY .
+
+    $default  reduce using rule 53 (stmt_list)
+
+
+State 183
+
+   73 return_stmt: TOK_RETURN expr_opt .
+
+    $default  reduce using rule 73 (return_stmt)
+
+
+State 184
+
+   75 expr_opt: expr .
+
+    $default  reduce using rule 75 (expr_opt)
+
+
+State 185
+
+   76 if_stmt: TOK_IF expr . stmt_list else_part
+
+    TOK_LCURLY  shift, and go to state 154
+
+    stmt_list  go to state 199
+
+
+State 186
+
+   82 for_init_expr: TOK_IDENTIFIER . assign_stmt
+
+    TOK_ASSIGN  shift, and go to state 195
+
+    assign_stmt  go to state 200
+
+
+State 187
+
+   81 for_stmt: TOK_FOR for_init_expr . TOK_TO expr step_opt stmt_list
+
+    TOK_TO  shift, and go to state 201
+
+
+State 188
+
+   85 while_stmt: TOK_WHILE expr . stmt_list
+
+    TOK_LCURLY  shift, and go to state 154
+
+    stmt_list  go to state 202
+
+
+State 189
+
+   87 switch_stmt: TOK_SWITCH error . TOK_LCURLY
+
+    TOK_LCURLY  shift, and go to state 203
+
+
+State 190
+
+   86 switch_stmt: TOK_SWITCH expr . TOK_LCURLY case case_list TOK_RCURLY
+   88            | TOK_SWITCH expr . TOK_LCURLY error TOK_RCURLY
+
+    TOK_LCURLY  shift, and go to state 204
+
+
+State 191
+
+   94 print_stmt: TOK_PRINT expr .
+
+    $default  reduce using rule 94 (print_stmt)
+
+
+State 192
+
+   95 read_stmt: TOK_READ TOK_IDENTIFIER .
+
+    $default  reduce using rule 95 (read_stmt)
+
+
+State 193
+
+   55 stmt_list_semicolon: TOK_SEMICOLON . stmt stmt_list_semicolon
+
+    TOK_IDENTIFIER  shift, and go to state 52
+    TOK_RETURN      shift, and go to state 163
+    TOK_IF          shift, and go to state 164
+    TOK_FOR         shift, and go to state 165
+    TOK_WHILE       shift, and go to state 166
+    TOK_SWITCH      shift, and go to state 167
+    TOK_PRINT       shift, and go to state 168
+    TOK_READ        shift, and go to state 169
+
+    stmt         go to state 205
+    return_stmt  go to state 171
+    if_stmt      go to state 172
+    for_stmt     go to state 173
+    while_stmt   go to state 174
+    switch_stmt  go to state 175
+    print_stmt   go to state 176
+    read_stmt    go to state 177
+    var          go to state 178
+
+
+State 194
+
+   52 stmt_list: TOK_LCURLY stmt stmt_list_semicolon . TOK_RCURLY
+
+    TOK_RCURLY  shift, and go to state 206
+
+
+State 195
+
+   66 assign_stmt: TOK_ASSIGN . expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    expr     go to state 207
+    al_expr  go to state 65
+    var      go to state 66
+
+
+State 196
+
+   56 stmt: var var_start_stmt .
+
+    $default  reduce using rule 56 (stmt)
+
+
+State 197
+
+   64 var_start_stmt: assign_stmt .
+
+    $default  reduce using rule 64 (var_start_stmt)
+
+
+State 198
+
+   65 var_start_stmt: method_call_stmt .
+
+    $default  reduce using rule 65 (var_start_stmt)
+
+
+State 199
+
+   76 if_stmt: TOK_IF expr stmt_list . else_part
+
+    TOK_ELSE  shift, and go to state 208
+
+    $default  reduce using rule 77 (else_part)
+
+    else_part  go to state 209
+
+
+State 200
+
+   82 for_init_expr: TOK_IDENTIFIER assign_stmt .
+
+    $default  reduce using rule 82 (for_init_expr)
+
+
+State 201
+
+   81 for_stmt: TOK_FOR for_init_expr TOK_TO . expr step_opt stmt_list
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    expr     go to state 210
+    al_expr  go to state 65
+    var      go to state 66
+
+
+State 202
+
+   85 while_stmt: TOK_WHILE expr stmt_list .
+
+    $default  reduce using rule 85 (while_stmt)
+
+
+State 203
+
+   87 switch_stmt: TOK_SWITCH error TOK_LCURLY .
+
+    $default  reduce using rule 87 (switch_stmt)
+
+
+State 204
+
+   86 switch_stmt: TOK_SWITCH expr TOK_LCURLY . case case_list TOK_RCURLY
+   88            | TOK_SWITCH expr TOK_LCURLY . error TOK_RCURLY
+
+    error     shift, and go to state 211
+    TOK_CASE  shift, and go to state 212
+
+    case  go to state 213
+
+
+State 205
+
+   55 stmt_list_semicolon: TOK_SEMICOLON stmt . stmt_list_semicolon
+
+    TOK_SEMICOLON  shift, and go to state 193
+
+    $default  reduce using rule 54 (stmt_list_semicolon)
+
+    stmt_list_semicolon  go to state 214
+
+
+State 206
+
+   52 stmt_list: TOK_LCURLY stmt stmt_list_semicolon TOK_RCURLY .
+
+    $default  reduce using rule 52 (stmt_list)
+
+
+State 207
+
+   66 assign_stmt: TOK_ASSIGN expr .
+
+    $default  reduce using rule 66 (assign_stmt)
+
+
+State 208
+
+   78 else_part: TOK_ELSE . if_stmt_aux
+
+    TOK_LCURLY  shift, and go to state 154
+    TOK_IF      shift, and go to state 164
+
+    stmt_list    go to state 215
+    if_stmt      go to state 216
+    if_stmt_aux  go to state 217
+
+
+State 209
+
+   76 if_stmt: TOK_IF expr stmt_list else_part .
+
+    $default  reduce using rule 76 (if_stmt)
+
+
+State 210
+
+   81 for_stmt: TOK_FOR for_init_expr TOK_TO expr . step_opt stmt_list
+
+    TOK_STEP  shift, and go to state 218
+
+    $default  reduce using rule 83 (step_opt)
+
+    step_opt  go to state 219
+
+
+State 211
+
+   88 switch_stmt: TOK_SWITCH expr TOK_LCURLY error . TOK_RCURLY
+
+    TOK_RCURLY  shift, and go to state 220
+
+
+State 212
+
+   89 case: TOK_CASE . expr stmt_list
+   90     | TOK_CASE . error stmt_list
+
+    error                shift, and go to state 221
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    expr     go to state 222
+    al_expr  go to state 65
+    var      go to state 66
+
+
+State 213
+
+   86 switch_stmt: TOK_SWITCH expr TOK_LCURLY case . case_list TOK_RCURLY
+
+    TOK_CASE     shift, and go to state 212
+    TOK_DEFAULT  shift, and go to state 223
+
+    $default  reduce using rule 91 (case_list)
+
+    case       go to state 224
+    case_list  go to state 225
+
+
+State 214
+
+   55 stmt_list_semicolon: TOK_SEMICOLON stmt stmt_list_semicolon .
+
+    $default  reduce using rule 55 (stmt_list_semicolon)
+
+
+State 215
+
+   80 if_stmt_aux: stmt_list .
+
+    $default  reduce using rule 80 (if_stmt_aux)
+
+
+State 216
+
+   79 if_stmt_aux: if_stmt .
+
+    $default  reduce using rule 79 (if_stmt_aux)
+
+
+State 217
+
+   78 else_part: TOK_ELSE if_stmt_aux .
+
+    $default  reduce using rule 78 (else_part)
+
+
+State 218
+
+   84 step_opt: TOK_STEP . expr
+
+    TOK_IDENTIFIER       shift, and go to state 52
+    TOK_LPAREN           shift, and go to state 54
+    TOK_PLUS             shift, and go to state 56
+    TOK_MINUS            shift, and go to state 57
+    TOK_NOT              shift, and go to state 58
+    TOK_INTEGERCONSTANT  shift, and go to state 59
+    TOK_STRINGCONSTANT   shift, and go to state 60
+
+    expr     go to state 226
+    al_expr  go to state 65
+    var      go to state 66
+
+
+State 219
+
+   81 for_stmt: TOK_FOR for_init_expr TOK_TO expr step_opt . stmt_list
+
+    TOK_LCURLY  shift, and go to state 154
+
+    stmt_list  go to state 227
+
+
+State 220
+
+   88 switch_stmt: TOK_SWITCH expr TOK_LCURLY error TOK_RCURLY .
+
+    $default  reduce using rule 88 (switch_stmt)
+
+
+State 221
+
+   90 case: TOK_CASE error . stmt_list
+
+    TOK_LCURLY  shift, and go to state 154
+
+    stmt_list  go to state 228
+
+
+State 222
+
+   89 case: TOK_CASE expr . stmt_list
+
+    TOK_LCURLY  shift, and go to state 154
+
+    stmt_list  go to state 229
+
+
+State 223
+
+   93 case_list: TOK_DEFAULT . stmt_list
+
+    TOK_LCURLY  shift, and go to state 154
+
+    stmt_list  go to state 230
+
+
+State 224
+
+   92 case_list: case . case_list
+
+    TOK_CASE     shift, and go to state 212
+    TOK_DEFAULT  shift, and go to state 223
+
+    $default  reduce using rule 91 (case_list)
+
+    case       go to state 224
+    case_list  go to state 231
+
+
+State 225
+
+   86 switch_stmt: TOK_SWITCH expr TOK_LCURLY case case_list . TOK_RCURLY
+
+    TOK_RCURLY  shift, and go to state 232
+
+
+State 226
+
+   84 step_opt: TOK_STEP expr .
+
+    $default  reduce using rule 84 (step_opt)
+
+
+State 227
+
+   81 for_stmt: TOK_FOR for_init_expr TOK_TO expr step_opt stmt_list .
+
+    $default  reduce using rule 81 (for_stmt)
+
+
+State 228
+
+   90 case: TOK_CASE error stmt_list .
+
+    $default  reduce using rule 90 (case)
+
+
+State 229
+
+   89 case: TOK_CASE expr stmt_list .
+
+    $default  reduce using rule 89 (case)
+
+
+State 230
+
+   93 case_list: TOK_DEFAULT stmt_list .
+
+    $default  reduce using rule 93 (case_list)
+
+
+State 231
+
+   92 case_list: case case_list .
+
+    $default  reduce using rule 92 (case_list)
+
+
+State 232
+
+   86 switch_stmt: TOK_SWITCH expr TOK_LCURLY case case_list TOK_RCURLY .
+
+    $default  reduce using rule 86 (switch_stmt)

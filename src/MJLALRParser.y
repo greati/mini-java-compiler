@@ -117,13 +117,16 @@ block                   : decls_opt stmt_list
 stmt_list               : TOK_LCURLY stmt stmt_list_semicolon TOK_RCURLY
                         | TOK_LCURLY error TOK_RCURLY
 stmt_list_semicolon     : /* empty */ | TOK_SEMICOLON stmt stmt_list_semicolon
-stmt                    : var var_start_stmt | return_stmt| if_stmt
-                        | while_stmt | for_stmt | switch_stmt | print_stmt
+stmt                    : var TOK_ASSIGN expr
+                        | var TOK_LPAREN actual_params_list TOK_RPAREN
+                        | var TOK_LPAREN error TOK_RPAREN
+                        | return_stmt
+                        | if_stmt
+                        | while_stmt 
+                        | for_stmt 
+                        | switch_stmt 
+                        | print_stmt
                         | read_stmt
-var_start_stmt          : assign_stmt | method_call_stmt
-assign_stmt             : TOK_ASSIGN expr
-method_call_stmt        : TOK_LPAREN actual_params_list TOK_RPAREN
-                        | TOK_LPAREN error TOK_RPAREN
 actual_params_list      : /* empty */ | expr expr_list_comma
 expr_list_comma         : /* empty */ | TOK_COMMA expr expr_list_comma		    
 return_stmt             : TOK_RETURN expr_opt
@@ -132,7 +135,7 @@ if_stmt                 : TOK_IF expr stmt_list else_part
 else_part               : /* empty */ | TOK_ELSE if_stmt_aux	     
 if_stmt_aux             : if_stmt | stmt_list
 for_stmt                : TOK_FOR for_init_expr TOK_TO expr step_opt stmt_list
-for_init_expr               : TOK_IDENTIFIER assign_stmt
+for_init_expr           : TOK_IDENTIFIER TOK_ASSIGN expr
 step_opt                : /* empty */ | TOK_STEP expr
 while_stmt              : TOK_WHILE expr stmt_list
 switch_stmt             : TOK_SWITCH expr TOK_LCURLY case case_list TOK_RCURLY
@@ -164,8 +167,9 @@ al_expr                 : TOK_PLUS al_expr %prec TOK_UPLUS
                         | TOK_LPAREN error TOK_RPAREN
                         | TOK_INTEGERCONSTANT 
                         | TOK_STRINGCONSTANT
-                        | var method_call_opt
-method_call_opt         : /* empty */ | method_call_stmt
+                        | var
+                        | var TOK_LPAREN actual_params_list TOK_RPAREN
+                        | var TOK_LPAREN error TOK_RPAREN
 var                     : TOK_IDENTIFIER var_aux
 var_aux                 : /* empty */ | TOK_DOT TOK_IDENTIFIER var_aux
                         | TOK_LSQUARE expr expr_list_comma TOK_RSQUARE var_aux	     

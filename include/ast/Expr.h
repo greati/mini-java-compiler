@@ -95,13 +95,64 @@ class LitExpr : public AlExpr {
         LitExpr(Node::Position _pos, T _val) : AlExpr{_pos}, val {_val} {}
 };
 
-class IdExpr : public AlExpr {
+class AccessOperation : public Node {
+    public:
+        AccessOperation(Node::Position _pos) : Node {_pos} {};
+}
+
+class BracketAccess : public AccessOperation {
     
     protected:
-        std::string id;
+        std::vector<Expr> expressionList;
+        std::shared_ptr<AccessOperation> accessOperation;
 
     public:
-        IdExpr(Node::Position _pos, std::string _id) : AlExpr{_pos}, id{_id} {}
+        BracketAccess(
+                Node::Position _pos, 
+                std::vector _expressionList,
+                std::shared_ptr<AccessOperation> _accessOperation) 
+            : AccessOperation{_pos}, expressionList{_expressionList}, accessOperation{_accessOperation} {}
+};
+
+class DotAccess : public AccessOperation {
+    protected:
+        std::string id;
+        std::shared_ptr<AccessOperation> accessOperation;
+    public:
+        DotAccess(
+                Node::Position _pos, 
+                std::string _id,
+                std::shared_ptr<AccessOperation> _accessOperation) 
+            : AccessOperation{_pos}, id{_id}, accessOperation{_accessOperation} {}
+};
+
+class Var : public AlExpr {
+    protected:
+        std::string id;
+        std::shared_ptr<AccessOperation> accessOperation;
+    public:
+        Var(
+                Node::Position _pos, 
+                std::string _id,
+                std::shared_ptr<AccessOperation> _accessOperation) 
+            : AccessOperation{_pos}, id{_id}, accessOperation{_accessOperation} {}
+};
+
+class FunctionCallExpr : public AlExpr {
+    protected:
+        Var var;
+        ActualParamsList actualParams;
+    public:
+        FunctionCallExpr(
+                Node::Position _pos,
+                Var _var,
+                ActualParamsList _actualParams) 
+        : AlExpr{_pos}, var{_var}, actualParams{_actualParams}{}
+};
+
+class Stmt : public Node {
+    public:
+        Stmt(Node::Position _pos) : Node {_pos} {};
 };
 
 
