@@ -195,12 +195,14 @@ class SwitchStmt : public Stmt {
     protected:
         Expr expr;
         std::vector<Case> caseList;
+        std::vector<Stmt> defaultStmts;
     public:
         SwitchStmt(
                 Position _pos,
                 Expr _expr,
-                std::vector<Case> _caseList) 
-        : Stmt{_pos}, expr {_expr} {
+                std::vector<Case> _caseList,
+                std::vector<Stmt> _defaultsStmts) 
+        : Stmt{_pos}, expr {_expr}, defaultStmts {_defaultsStmts} {
 
             if (_caseList.empty()) 
                 throw std::invalid_argument("case list can't be empty in a switch");
@@ -222,30 +224,65 @@ class WhileStmt : public Stmt {
             : Stmt {_pos}, expr {_expr}, stmts {_stmts} {}
 };
 
-class ForInit : public Node {
-    protected:
-        std::string id;
-        Expr expr;
-};
-
-class ForStep : public Node {
-
-};
-
 class ForStmt : public Stmt {
     protected:
-        ForInit init;
-        std::shared_ptr<ForStep> step;
+        std::string id;
+        Expr assignExpr;
+        Expr toExpr;
+        std::shared_ptr<Expr> stepExpr;
+        std::vector<Stmt> stmts;
     public:
         ForStmt(
                 Position _pos,
-                ForInit _init,
-                std::shared_ptr<ForStep> _step)
-            : Stmt {_pos}, init {_init}, step {_step} {}
+                std::string _id,
+                Expr _assignExpr,
+                Expr _toExpr,
+                std::shared_ptr<Expr> _stepExpr,
+                std::vector<Stmt> _stmts)
+            : Stmt {_pos}, id {_id}, assignExpr {_assignExpr}, 
+            toExpr{_toExpr}, stepExpr{_stepExpr}, stmts {_stmts} {}
 };
 
-class IfStmt : public Stmt {};
-class ElsePart : public Node {};
-class ReturnStmt : public Stmt {};
+class ElsePart : public Node {
+    public:
+        ElsePart(Position _pos) : Node {_pos} {}
+};
+
+class Else : public ElsePart {
+    protected:
+        std::vector<Stmt> stmts;
+    public:
+        Else (
+                Position _pos,
+                std::vector<Stmt> _stmts) 
+            : ElsePart {_pos}, stmts {_stmts} {}
+};
+
+class IfStmt : public Stmt {
+    protected:
+        Expr expr;
+        std::vector<Stmt> stmts;
+        ElsePart elsePart;
+};
+
+class ElseIf : public ElsePart {
+    protected:
+        IfStmt ifStmt;
+    public:
+        ElseIf(
+                Position _pos,
+                IfStmt _ifStmt) 
+            : ElsePart {_pos}, ifStmt {_ifStmt} {}
+};
+
+class ReturnStmt : public Stmt {
+    protected:
+        std::shared_ptr<Expr> expr;
+    public:
+        ReturnStmt (
+                Position _pos,
+                std::shared_ptr<Expr> _expr)
+            : Stmt {_pos}, expr {_expr} {}
+};
 
 #endif

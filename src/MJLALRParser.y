@@ -130,21 +130,21 @@ stmt                    : var TOK_ASSIGN expr
                         | read_stmt
 actual_params_list      : /* empty */ | expr expr_list_comma
 expr_list_comma         : /* empty */ | TOK_COMMA expr expr_list_comma		    
-return_stmt             : TOK_RETURN expr_opt
-expr_opt                : /* empty */ | expr
-if_stmt                 : TOK_IF expr stmt_list else_part
-else_part               : /* empty */ | TOK_ELSE if_stmt_aux	     
-if_stmt_aux             : if_stmt | stmt_list
-for_stmt                : TOK_FOR for_init_expr TOK_TO expr step_opt stmt_list
-for_init_expr           : TOK_IDENTIFIER TOK_ASSIGN expr
-step_opt                : /* empty */ | TOK_STEP expr
+return_stmt             : TOK_RETURN
+                        | TOK_RETURN expr
+if_stmt                 : TOK_IF expr stmt_list
+                        | TOK_IF expr stmt_list TOK_ELSE if_stmt    
+                        | TOK_IF expr stmt_list TOK_ELSE stmt_list
+for_stmt                : TOK_FOR TOK_IDENTIFIER TOK_ASSIGN expr TOK_TO expr TOK_STEP expr stmt_list
+                        | TOK_FOR TOK_IDENTIFIER TOK_ASSIGN expr TOK_TO expr stmt_list
 while_stmt              : TOK_WHILE expr stmt_list
-switch_stmt             : TOK_SWITCH expr TOK_LCURLY case case_list TOK_RCURLY
+switch_stmt             : TOK_SWITCH expr TOK_LCURLY case_list TOK_RCURLY
+                        | TOK_SWITCH expr TOK_LCURLY case_list TOK_DEFAULT stmt_list TOK_RCURLY
                         | TOK_SWITCH error TOK_LCURLY
                         | TOK_SWITCH expr TOK_LCURLY error TOK_RCURLY
 case                    : TOK_CASE expr stmt_list
                         | TOK_CASE error stmt_list
-case_list               : /* empty */ | case case_list | TOK_DEFAULT stmt_list
+case_list               : case | case case_list
 print_stmt              : TOK_PRINT expr
 read_stmt               : TOK_READ TOK_IDENTIFIER	      
 expr                    : al_expr TOK_EQEQ al_expr 
@@ -172,7 +172,8 @@ al_expr                 : TOK_PLUS al_expr %prec TOK_UPLUS
                         | var TOK_LPAREN actual_params_list TOK_RPAREN
                         | var TOK_LPAREN error TOK_RPAREN
 var                     : TOK_IDENTIFIER var_aux
-var_aux                 : /* empty */ | TOK_DOT TOK_IDENTIFIER var_aux
+var_aux                 : /* empty */ 
+                        | TOK_DOT TOK_IDENTIFIER var_aux
                         | TOK_LSQUARE expr expr_list_comma TOK_RSQUARE var_aux	     
 %%
 
