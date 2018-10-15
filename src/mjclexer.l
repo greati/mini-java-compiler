@@ -4,8 +4,10 @@
 %{
 
 #include <string>
-#include "MJMessage.h"
+#include "ast/Node.h"
+#include "ast/Expr.h"
 #include "Lexer.h"
+#include "MJMessage.h"
 
 #define YY_USER_ACTION offset += yyleng;
 

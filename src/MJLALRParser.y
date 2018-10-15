@@ -1,10 +1,11 @@
 %{
 
 #include <stdio.h>
-#include "MJMessage.h"
-#include "MJToken.h"
 #include <string>
+#include "ast/Node.h"
 #include "ast/Expr.h"
+#include "MJMessage.h"
+#include "y.tab.h"
 
 extern int current_line;
 extern int offset;
@@ -14,11 +15,30 @@ extern int yylex();
 
 void yyerror(char *s);
 
+Position getPos();
+
+
 %}
+
+%union {
+    Node *node;
+    Var *var;
+    AccessOperation *accessOp;
+    NonEmptyConstructList<Expr>* nonEmptyExprList;
+    NullableConstructList<Expr>* nullableExprList;
+    AlExpr *alExpr;
+    char* id;
+}
+
+%type <var> var
+%type <accessOp> var_aux
+%type <nonEmptyExprList> expr_list_comma
+%type <nullableExprList> actual_params_list
+%type <alExpr> al_expr
 
 %token 
 TOK_PROGRAM 1 
-TOK_IDENTIFIER 2
+<id> TOK_IDENTIFIER 2
 TOK_SEMICOLON 3
 TOK_CLASS 4
 TOK_LCURLY 5
@@ -92,32 +112,46 @@ decls                   : TOK_DECLARATIONS field_decl_list_decls TOK_ENDDECLARAT
                         | TOK_DECLARATIONS error TOK_ENDDECLARATIONS
 method_decl_list        : /* empty */ | method_decl method_decl_list 
 field_decl_list_decls   : /* empty */ | field_decl TOK_SEMICOLON field_decl_list_decls
-field_decl              : type var_decl_id field_decl_aux1
-field_decl_aux1         : field_decl_aux2 | TOK_EQUALS var_init field_decl_aux2
-field_decl_aux2         : /* empty */ | TOK_COMMA var_decl_id field_decl_aux1
+field_decl              : type field_decl_aux1
+field_decl_aux1         : var_decl_id field_decl_aux2
+                        | var_decl_id TOK_EQUALS var_init field_decl_aux2
+field_decl_aux2         : /*empty*/
+                        | TOK_COMMA field_decl_aux1
 type                    : type_aux brackets_opt
-type_aux                : TOK_IDENTIFIER | TOK_INT | TOK_STRING
-brackets_opt            : /* empty */ | TOK_LRSQUARE brackets_opt
+type_aux                : TOK_IDENTIFIER 
+                        | TOK_INT 
+                        | TOK_STRING
+brackets_opt            : /* empty */ 
+                        | TOK_LRSQUARE brackets_opt
 method_decl             : TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN formal_params_list_opt TOK_RPAREN block
                         | TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN error TOK_RPAREN block
-method_return_type      : TOK_VOID | type
-formal_params_list      : TOK_VAL type TOK_IDENTIFIER id_list_comma formal_params_list_aux
-                        | type TOK_IDENTIFIER id_list_comma formal_params_list_aux
-formal_params_list_aux  : /* empty */ | TOK_SEMICOLON formal_params_list
-id_list_comma           : /* empty */ | TOK_COMMA TOK_IDENTIFIER id_list_comma
-formal_params_list_opt  : /* empty */ | formal_params_list
+method_return_type      : TOK_VOID 
+                        | type
+formal_params           : TOK_VAL type TOK_IDENTIFIER id_list_comma
+                        | type TOK_IDENTIFIER id_list_comma
+formal_params_list      : formal_params 
+                        | formal_params TOK_SEMICOLON formal_params_list
+id_list_comma           : /* empty */ 
+                        | TOK_COMMA TOK_IDENTIFIER id_list_comma
+formal_params_list_opt  : /* empty */ 
+                        | formal_params_list
 var_decl_id             : TOK_IDENTIFIER brackets_opt
-var_init                : expr | array_init | array_creation_expr
+var_init                : expr 
+                        | array_init 
+                        | array_creation_expr
 array_init              : TOK_LCURLY var_init var_init_list_comma TOK_RCURLY
                         | TOK_LCURLY error TOK_RCURLY
-var_init_list_comma     : /* empty */ | TOK_COMMA var_init var_init_list_comma 
+var_init_list_comma     : /* empty */ 
+                        | TOK_COMMA var_init var_init_list_comma 
 array_creation_expr     : TOK_ARROBA type array_dim_decl array_dim_decl_list
 array_dim_decl          : TOK_LSQUARE expr TOK_RSQUARE
-array_dim_decl_list     : /* empty */ | array_dim_decl array_dim_decl_list
+array_dim_decl_list     : /* empty */ 
+                        | array_dim_decl array_dim_decl_list
 block                   : decls_opt stmt_list
 stmt_list               : TOK_LCURLY stmt stmt_list_semicolon TOK_RCURLY
                         | TOK_LCURLY error TOK_RCURLY
-stmt_list_semicolon     : /* empty */ | TOK_SEMICOLON stmt stmt_list_semicolon
+stmt_list_semicolon     : /* empty */ 
+                        | TOK_SEMICOLON stmt stmt_list_semicolon
 stmt                    : var TOK_ASSIGN expr
                         | var TOK_LPAREN actual_params_list TOK_RPAREN
                         | var TOK_LPAREN error TOK_RPAREN
@@ -128,8 +162,8 @@ stmt                    : var TOK_ASSIGN expr
                         | switch_stmt 
                         | print_stmt
                         | read_stmt
-actual_params_list      : /* empty */ | expr expr_list_comma
-expr_list_comma         : /* empty */ | TOK_COMMA expr expr_list_comma		    
+actual_params_list      : /* empty */ | expr_list_comma
+expr_list_comma         : expr | TOK_COMMA expr expr_list_comma		    
 return_stmt             : TOK_RETURN
                         | TOK_RETURN expr
 if_stmt                 : TOK_IF expr stmt_list
@@ -168,14 +202,25 @@ al_expr                 : TOK_PLUS al_expr %prec TOK_UPLUS
                         | TOK_LPAREN error TOK_RPAREN
                         | TOK_INTEGERCONSTANT 
                         | TOK_STRINGCONSTANT
-                        | var
-                        | var TOK_LPAREN actual_params_list TOK_RPAREN
+                        | var                                                       {$$ = $1;}
+                        | var TOK_LPAREN actual_params_list TOK_RPAREN              {$$ = new FunctionCallExpr(getPos(),
+                                                                                          std::shared_ptr<Var>($1),
+                                                                                          std::shared_ptr<NullableConstructList<Expr>>($3));}
                         | var TOK_LPAREN error TOK_RPAREN
-var                     : TOK_IDENTIFIER var_aux
-var_aux                 : /* empty */ 
-                        | TOK_DOT TOK_IDENTIFIER var_aux
-                        | TOK_LSQUARE expr expr_list_comma TOK_RSQUARE var_aux	     
+var                     : TOK_IDENTIFIER var_aux                                    {$$ = new Var(getPos(), std::string($1), 
+                                                                                                        std::shared_ptr<AccessOperation>($2));}
+var_aux                 : /* empty */                                               {$$ = nullptr;} 
+                        | TOK_DOT TOK_IDENTIFIER var_aux                            {$$ = new DotAccess(getPos(), std::string($2),
+                                                                                                        std::shared_ptr<AccessOperation>($3));}
+                        | TOK_LSQUARE expr_list_comma TOK_RSQUARE var_aux	        {$$ = new BracketAccess(getPos(),
+                                                                                          std::shared_ptr<NonEmptyConstructList<Expr>>($2),
+                                                                                          std::shared_ptr<AccessOperation>($4));}
 %%
+
+
+Position getPos() {
+    return Position{current_line, offset};
+}
 
 void yyerror(char *s) { 
     std::string parse_error = "parse error near " + get_token_name(yychar) + ", lexeme " + std::string(yytext);
