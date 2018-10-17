@@ -169,12 +169,14 @@ union YYSTYPE
     Node *node;
     Var *var;
     AccessOperation *accessOp;
-    NonEmptyConstructList<Expr>* nonEmptyExprList;
-    NullableConstructList<Expr>* nullableExprList;
+    ConstructList<Expr>* constructList;
+    Expr *expr;
     AlExpr *alExpr;
     char* id;
+    char* litString;
+    int litInt;
 
-#line 178 "include/y.tab.h" /* yacc.c:1909  */
+#line 180 "include/y.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

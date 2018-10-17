@@ -24,16 +24,19 @@ Position getPos();
     Node *node;
     Var *var;
     AccessOperation *accessOp;
-    NonEmptyConstructList<Expr>* nonEmptyExprList;
-    NullableConstructList<Expr>* nullableExprList;
+    ConstructList<Expr>* constructList;
+    Expr *expr;
     AlExpr *alExpr;
     char* id;
+    char* litString;
+    int litInt;
 }
 
+%type <expr> expr
 %type <var> var
 %type <accessOp> var_aux
-%type <nonEmptyExprList> expr_list_comma
-%type <nullableExprList> actual_params_list
+%type <constructList> expr_list_comma
+%type <constructList> actual_params_list
 %type <alExpr> al_expr
 
 %token 
@@ -87,8 +90,8 @@ TOK_ASTERISK 47
 TOK_SLASH 48
 TOK_AND 49
 TOK_MOD 50
-TOK_INTEGERCONSTANT 51
-TOK_STRINGCONSTANT 52
+<litInt>TOK_INTEGERCONSTANT 51
+<litString>TOK_STRINGCONSTANT 52
 TOK_DOT 53
 END_OF_FILE 0
 LAMBDA 55
@@ -162,8 +165,14 @@ stmt                    : var TOK_ASSIGN expr
                         | switch_stmt 
                         | print_stmt
                         | read_stmt
-actual_params_list      : /* empty */ | expr_list_comma
-expr_list_comma         : expr | TOK_COMMA expr expr_list_comma		    
+actual_params_list      : /* empty */                                               {$$ = nullptr;}
+                        | expr_list_comma                                           {$$ = $1;}
+expr_list_comma         : expr                                                      {std::vector<std::shared_ptr<Expr>> exps; 
+                                                                                     exps.push_back(std::shared_ptr<Expr>($1));
+                                                                                     $$ = new ConstructList<Expr>(getPos(),
+                                                                                         exps);}
+                        | expr TOK_COMMA expr_list_comma		                    {auto lst = $3; lst->push_back(std::shared_ptr<Expr>($1));
+                                                                                    $$ = lst;}
 return_stmt             : TOK_RETURN
                         | TOK_RETURN expr
 if_stmt                 : TOK_IF expr stmt_list
@@ -178,42 +187,73 @@ switch_stmt             : TOK_SWITCH expr TOK_LCURLY case_list TOK_RCURLY
                         | TOK_SWITCH expr TOK_LCURLY error TOK_RCURLY
 case                    : TOK_CASE expr stmt_list
                         | TOK_CASE error stmt_list
-case_list               : case | case case_list
+case_list               : case 
+                        | case case_list
 print_stmt              : TOK_PRINT expr
 read_stmt               : TOK_READ TOK_IDENTIFIER	      
-expr                    : al_expr TOK_EQEQ al_expr 
-                        | al_expr TOK_LESS al_expr 
-                        | al_expr TOK_LESSEQ al_expr 
-                        | al_expr TOK_GREATEREQ al_expr 
-                        | al_expr TOK_GREATER al_expr 
-                        | al_expr TOK_DIFF al_expr 
-                        | al_expr
-al_expr                 : TOK_PLUS al_expr %prec TOK_UPLUS 
-                        | TOK_MINUS al_expr %prec TOK_UMINUS 
-                        | TOK_NOT al_expr
-                        | al_expr TOK_PLUS al_expr 
-                        | al_expr TOK_MINUS al_expr
-                        | al_expr TOK_2PIPE al_expr
-                        | al_expr TOK_ASTERISK al_expr
-                        | al_expr TOK_SLASH al_expr
-                        | al_expr TOK_AND al_expr
-                        | al_expr TOK_MOD al_expr
-                        | TOK_LPAREN expr TOK_RPAREN
-                        | TOK_LPAREN error TOK_RPAREN
-                        | TOK_INTEGERCONSTANT 
-                        | TOK_STRINGCONSTANT
+expr                    : al_expr TOK_EQEQ al_expr                                  {$$ = new RelExpr(getPos(), RelExpr::RelOp::EQEQ,
+                                                                                                        std::shared_ptr<AlExpr>($1),
+                                                                                                        std::shared_ptr<AlExpr>($3));}
+                        | al_expr TOK_LESS al_expr                                  {$$ = new RelExpr(getPos(), RelExpr::RelOp::LESS,
+                                                                                                        std::shared_ptr<AlExpr>($1),
+                                                                                                        std::shared_ptr<AlExpr>($3));}
+                        | al_expr TOK_LESSEQ al_expr                                {$$ = new RelExpr(getPos(), RelExpr::RelOp::LESS_EQ,
+                                                                                                        std::shared_ptr<AlExpr>($1),
+                                                                                                        std::shared_ptr<AlExpr>($3));}
+                        | al_expr TOK_GREATEREQ al_expr                             {$$ = new RelExpr(getPos(), RelExpr::RelOp::GREATER_EQ,
+                                                                                                        std::shared_ptr<AlExpr>($1),
+                                                                                                        std::shared_ptr<AlExpr>($3));}
+                        | al_expr TOK_GREATER al_expr                               {$$ = new RelExpr(getPos(), RelExpr::RelOp::GREATER,
+                                                                                                        std::shared_ptr<AlExpr>($1),
+                                                                                                        std::shared_ptr<AlExpr>($3));}
+                        | al_expr TOK_DIFF al_expr                                  {$$ = new RelExpr(getPos(), RelExpr::RelOp::DIFF,
+                                                                                                        std::shared_ptr<AlExpr>($1),
+                                                                                                        std::shared_ptr<AlExpr>($3));}
+                        | al_expr                                                   {$$ = $1;}
+
+al_expr                 : TOK_PLUS al_expr %prec TOK_UPLUS                          {$$ = new AlUnExpr(getPos(), AlUnExpr::AlUnOp::PLUS,
+                                                                                                        std::shared_ptr<AlExpr>($2));}
+                        | TOK_MINUS al_expr %prec TOK_UMINUS                        {$$ = new AlUnExpr(getPos(), AlUnExpr::AlUnOp::MINUS,
+                                                                                                        std::shared_ptr<AlExpr>($2));}
+                        | TOK_NOT al_expr                                           {$$ = new AlUnExpr(getPos(), AlUnExpr::AlUnOp::NOT,
+                                                                                                        std::shared_ptr<AlExpr>($2));}    
+                        | al_expr TOK_PLUS al_expr                                  {$$ = new AlBinExpr(getPos(), AlBinExpr::AlBinOp::PLUS,
+                                                                                                        std::shared_ptr<AlExpr>($1),
+                                                                                                        std::shared_ptr<AlExpr>($3));}
+                        | al_expr TOK_MINUS al_expr                                 {$$ = new AlBinExpr(getPos(), AlBinExpr::AlBinOp::MINUS,
+                                                                                                        std::shared_ptr<AlExpr>($1),
+                                                                                                        std::shared_ptr<AlExpr>($3));}
+                        | al_expr TOK_2PIPE al_expr                                 {$$ = new AlBinExpr(getPos(), AlBinExpr::AlBinOp::OR,
+                                                                                                        std::shared_ptr<AlExpr>($1),
+                                                                                                        std::shared_ptr<AlExpr>($3));}
+                        | al_expr TOK_ASTERISK al_expr                              {$$ = new AlBinExpr(getPos(), AlBinExpr::AlBinOp::TIMES,
+                                                                                                        std::shared_ptr<AlExpr>($1),
+                                                                                                        std::shared_ptr<AlExpr>($3));}
+                        | al_expr TOK_SLASH al_expr                                 {$$ = new AlBinExpr(getPos(), AlBinExpr::AlBinOp::DIV,
+                                                                                                        std::shared_ptr<AlExpr>($1),
+                                                                                                        std::shared_ptr<AlExpr>($3));}
+                        | al_expr TOK_AND al_expr                                   {$$ = new AlBinExpr(getPos(), AlBinExpr::AlBinOp::AND,
+                                                                                                        std::shared_ptr<AlExpr>($1),
+                                                                                                        std::shared_ptr<AlExpr>($3));}
+                        | al_expr TOK_MOD al_expr                                   {$$ = new AlBinExpr(getPos(), AlBinExpr::AlBinOp::MOD,
+                                                                                                        std::shared_ptr<AlExpr>($1),
+                                                                                                        std::shared_ptr<AlExpr>($3));}
+                        | TOK_LPAREN expr TOK_RPAREN                                {$$ = new ExprParen(getPos(), std::shared_ptr<Expr>($2));}
+                        | TOK_LPAREN error TOK_RPAREN                               {}
+                        | TOK_INTEGERCONSTANT                                       {$$ = new LitExpr<int>(getPos(), $1);}
+                        | TOK_STRINGCONSTANT                                        {$$ = new LitExpr<std::string>(getPos(), std::string($1));}
                         | var                                                       {$$ = $1;}
                         | var TOK_LPAREN actual_params_list TOK_RPAREN              {$$ = new FunctionCallExpr(getPos(),
                                                                                           std::shared_ptr<Var>($1),
-                                                                                          std::shared_ptr<NullableConstructList<Expr>>($3));}
-                        | var TOK_LPAREN error TOK_RPAREN
+                                                                                          std::shared_ptr<ConstructList<Expr>>($3));}
+                        | var TOK_LPAREN error TOK_RPAREN                           {}
 var                     : TOK_IDENTIFIER var_aux                                    {$$ = new Var(getPos(), std::string($1), 
                                                                                                         std::shared_ptr<AccessOperation>($2));}
 var_aux                 : /* empty */                                               {$$ = nullptr;} 
                         | TOK_DOT TOK_IDENTIFIER var_aux                            {$$ = new DotAccess(getPos(), std::string($2),
                                                                                                         std::shared_ptr<AccessOperation>($3));}
                         | TOK_LSQUARE expr_list_comma TOK_RSQUARE var_aux	        {$$ = new BracketAccess(getPos(),
-                                                                                          std::shared_ptr<NonEmptyConstructList<Expr>>($2),
+                                                                                          std::shared_ptr<ConstructList<Expr>>($2),
                                                                                           std::shared_ptr<AccessOperation>($4));}
 %%
 

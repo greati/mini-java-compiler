@@ -8,25 +8,15 @@
 
 
 template<typename T>
-class NullableConstructList : public Node {
+class ConstructList : public Node {
     protected:
-        std::vector<T> constructs;
+        std::vector<std::shared_ptr<T>> constructs;
     public:
-        NullableConstructList (Position _pos, std::vector<T> _constructs) 
+        ConstructList (Position _pos, std::vector<std::shared_ptr<T>> _constructs) 
         : Node {_pos}, constructs {_constructs} {}
-};
-
-template<typename T>
-class NonEmptyConstructList : public Node {
-    protected:
-        std::vector<T> constructs;
-    public:
-        NonEmptyConstructList (Position _pos, std::vector<T> _constructs) 
-        : Node {_pos}, constructs {_constructs} {
-            if (_constructs.empty())
-                throw std::invalid_argument("this list can't be empty");
-            else
-                this->constructs = _constructs;
+        
+        void push_back(std::shared_ptr<T> elem) {
+            this->constructs.push_back(elem);
         }
 };
 
@@ -42,6 +32,14 @@ class AlExpr : public Expr {
     public:
         AlExpr(Position _pos) : Expr {_pos} {};
 
+};
+
+class ExprParen : public AlExpr {
+    protected:
+        std::shared_ptr<Expr> expr;
+    public:
+        ExprParen(Position _pos, std::shared_ptr<Expr> _expr)
+        : AlExpr {_pos}, expr {_expr} {}
 };
 
 class RelExpr : public Expr {
@@ -136,13 +134,13 @@ class AccessOperation : public Node {
 class BracketAccess : public AccessOperation {
     
     protected:
-        std::shared_ptr<NonEmptyConstructList<Expr>> expressionList; 
+        std::shared_ptr<ConstructList<Expr>> expressionList; 
         std::shared_ptr<AccessOperation> accessOperation;
 
     public:
         BracketAccess(
                 Position _pos, 
-                std::shared_ptr<NonEmptyConstructList<Expr>> _expressionList,
+                std::shared_ptr<ConstructList<Expr>> _expressionList,
                 std::shared_ptr<AccessOperation> _accessOperation) 
             : AccessOperation{_pos}, expressionList{_expressionList}, accessOperation{_accessOperation} {}
 };
@@ -174,12 +172,12 @@ class Var : public AlExpr {
 class FunctionCallExpr : public AlExpr {
     protected:
         std::shared_ptr<Var> var;
-        std::shared_ptr<NullableConstructList<Expr>> actualParams;
+        std::shared_ptr<ConstructList<Expr>> actualParams;
     public:
         FunctionCallExpr(
                 Position _pos,
                 std::shared_ptr<Var> _var,
-                std::shared_ptr<NullableConstructList<Expr>> _actualParams) 
+                std::shared_ptr<ConstructList<Expr>> _actualParams) 
         : AlExpr{_pos}, var{_var}, actualParams{_actualParams}{}
 };
 
@@ -352,22 +350,22 @@ class FieldDeclVar : public Node {
 class FieldDecl : public Node {
     protected:
         Type type;
-        NonEmptyConstructList<FieldDeclVar> varsDecls;
+        ConstructList<FieldDeclVar> varsDecls;
     public:
         FieldDecl (
             Position _pos,
             Type _type,
-            NonEmptyConstructList<FieldDeclVar> _varDecls) 
+            ConstructList<FieldDeclVar> _varDecls) 
         : Node {_pos}, type {_type}, varsDecls {_varDecls} {} 
 };
 
 class Decls : public Node {
     protected:
-        NullableConstructList<FieldDecl> fields;
+        ConstructList<FieldDecl> fields;
     public:
         Decls(
             Position _pos,
-            NullableConstructList<FieldDecl> _fields) 
+            ConstructList<FieldDecl> _fields) 
         : Node {_pos}, fields{_fields} {}
 };
 
@@ -376,12 +374,12 @@ class FormalParams : public Node {
     protected:
         bool val;
         Type type;
-        NonEmptyConstructList<std::string> ids;
+        ConstructList<std::string> ids;
     public:
         FormalParams (
             Position _pos,
             Type _type,
-            NonEmptyConstructList<std::string> _ids) 
+            ConstructList<std::string> _ids) 
         : Node {_pos}, type {_type}, ids{_ids} {}
 
 };
@@ -412,14 +410,14 @@ class MethodDecl : public Node {
     protected:
         MethodReturnType returnType;
         std::string id;
-        NullableConstructList<FormalParams> params;
+        ConstructList<FormalParams> params;
         Block block;
     public:
         MethodDecl(
             Position _pos,
             MethodReturnType _returnType,
             std::string _id,
-            NullableConstructList<FormalParams> _params,
+            ConstructList<FormalParams> _params,
             Block _block) 
         : Node {_pos}, returnType {_returnType}, id {_id}, params {_params}, block {_block} {}
 };
@@ -427,12 +425,12 @@ class MethodDecl : public Node {
 class ClassBody : public Node {
     protected:
         std::shared_ptr<Decls> decls;
-        NullableConstructList<MethodDecl> methods;
+        ConstructList<MethodDecl> methods;
     public:
         ClassBody (
             Position _pos,
             std::shared_ptr<Decls> _decls,
-            NullableConstructList<MethodDecl> _methods) 
+            ConstructList<MethodDecl> _methods) 
         : Node {_pos}, decls {_decls}, methods {_methods} {}
 };
 
@@ -451,12 +449,12 @@ class ClassDecl : public Node {
 class Program : public Node {
     protected:
         std::string id;
-        NonEmptyConstructList<ClassDecl> classes;
+        ConstructList<ClassDecl> classes;
     public:
         Program (
             Position _pos,
             std::string _id,
-            NonEmptyConstructList<ClassDecl> _classes) 
+            ConstructList<ClassDecl> _classes) 
         : Node {_pos}, id {_id}, classes {_classes} {}
 };
 
@@ -470,21 +468,21 @@ class ExprVarInit : public VarInit {
 
 class ArrayInitVarInit : public VarInit {
     protected:
-        NullableConstructList<VarInit> arrayInit;
+        ConstructList<VarInit> arrayInit;
     public:
-        ArrayInitVarInit (Position _pos, NullableConstructList<VarInit> _arrayInit) 
+        ArrayInitVarInit (Position _pos, ConstructList<VarInit> _arrayInit) 
         : VarInit {_pos}, arrayInit {_arrayInit} {}
 };
 
 class ArrayCreation : public Node {
     protected:
         Type type;
-        NonEmptyConstructList<Expr> dims;
+        ConstructList<Expr> dims;
     public:
         ArrayCreation(
             Position _pos, 
             Type _type, 
-            NonEmptyConstructList<Expr> _dims)
+            ConstructList<Expr> _dims)
         : Node {_pos}, type {_type}, dims {_dims} {}
 };
 
