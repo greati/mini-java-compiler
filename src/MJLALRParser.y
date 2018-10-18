@@ -25,6 +25,17 @@ Position getPos();
     Var *var;
     AccessOperation *accessOp;
     ConstructList<Expr>* constructList;
+    ConstructList<Case>* caseList;
+    ConstructList<Stmt>* stmtList;
+    Stmt* stmt;
+    ReadStmt* readStmt;
+    PrintStmt* printStmt;
+    ReturnStmt* returnStmt;
+    IfStmt* ifStmt;
+    WhileStmt* whileStmt;
+    ForStmt* forStmt;
+    SwitchStmt* switchStmt;
+    Case *case_;
     Expr *expr;
     AlExpr *alExpr;
     char* id;
@@ -37,7 +48,19 @@ Position getPos();
 %type <accessOp> var_aux
 %type <constructList> expr_list_comma
 %type <constructList> actual_params_list
+%type <stmtList> stmt_list
+%type <stmtList> stmt_list_semicolon
+%type <caseList> case_list
 %type <alExpr> al_expr
+%type <case_> case
+%type <stmt> stmt
+%type <readStmt> read_stmt
+%type <printStmt> print_stmt
+%type <returnStmt> return_stmt
+%type <ifStmt> if_stmt
+%type <whileStmt> while_stmt
+%type <forStmt> for_stmt
+%type <switchStmt> switch_stmt
 
 %token 
 TOK_PROGRAM 1 
@@ -151,46 +174,75 @@ array_dim_decl          : TOK_LSQUARE expr TOK_RSQUARE
 array_dim_decl_list     : /* empty */ 
                         | array_dim_decl array_dim_decl_list
 block                   : decls_opt stmt_list
-stmt_list               : TOK_LCURLY stmt stmt_list_semicolon TOK_RCURLY
-                        | TOK_LCURLY error TOK_RCURLY
-stmt_list_semicolon     : /* empty */ 
-                        | TOK_SEMICOLON stmt stmt_list_semicolon
-stmt                    : var TOK_ASSIGN expr
-                        | var TOK_LPAREN actual_params_list TOK_RPAREN
-                        | var TOK_LPAREN error TOK_RPAREN
-                        | return_stmt
-                        | if_stmt
-                        | while_stmt 
-                        | for_stmt 
-                        | switch_stmt 
-                        | print_stmt
-                        | read_stmt
+stmt_list               : TOK_LCURLY stmt_list_semicolon TOK_RCURLY                 {$$ = $2;}
+                        | TOK_LCURLY error TOK_RCURLY                               {}
+stmt_list_semicolon     : stmt                                                      {std::vector<std::shared_ptr<Stmt>> stmts;
+			                                                             stmts.push_back(std::shared_ptr<Stmt>($1));
+                                                                                     $$ = new ConstructList<Stmt>(getPos(),stmts);}
+                        | stmt TOK_SEMICOLON stmt_list_semicolon                    {auto lst = $3; lst->push_back(std::shared_ptr<Stmt>($1));
+                                                                                     $$ = lst;}
+stmt                    : var TOK_ASSIGN expr                                       {$$ = new AssignStmt(getPos(), std::shared_ptr<Var>($1),
+			                                                                                 std::shared_ptr<Expr>($3));}
+                        | var TOK_LPAREN actual_params_list TOK_RPAREN              {$$ = new FunctionCallStmt(getPos(), std::shared_ptr<Var>($1),
+                                                                                                         std::shared_ptr<ConstructList<Expr>>($3));}
+                        | var TOK_LPAREN error TOK_RPAREN                           {}
+                        | return_stmt                                               {$$ = $1;}
+                        | if_stmt                                                   {$$ = $1;}
+                        | while_stmt                                                {$$ = $1;} 
+                        | for_stmt                                                  {$$ = $1;}
+                        | switch_stmt                                               {$$ = $1;}
+                        | print_stmt                                                {$$ = $1;}
+                        | read_stmt                                                 {$$ = $1;}
 actual_params_list      : /* empty */                                               {$$ = nullptr;}
                         | expr_list_comma                                           {$$ = $1;}
 expr_list_comma         : expr                                                      {std::vector<std::shared_ptr<Expr>> exps; 
                                                                                      exps.push_back(std::shared_ptr<Expr>($1));
-                                                                                     $$ = new ConstructList<Expr>(getPos(),
-                                                                                         exps);}
-                        | expr TOK_COMMA expr_list_comma		                    {auto lst = $3; lst->push_back(std::shared_ptr<Expr>($1));
-                                                                                    $$ = lst;}
-return_stmt             : TOK_RETURN
-                        | TOK_RETURN expr
-if_stmt                 : TOK_IF expr stmt_list
-                        | TOK_IF expr stmt_list TOK_ELSE if_stmt    
-                        | TOK_IF expr stmt_list TOK_ELSE stmt_list
+                                                                                     $$ = new ConstructList<Expr>(getPos(),exps);}
+                        | expr TOK_COMMA expr_list_comma		            {auto lst = $3; lst->push_back(std::shared_ptr<Expr>($1));
+                                                                                     $$ = lst;}
+return_stmt             : TOK_RETURN                                                {$$ = new ReturnStmt(getPos(), nullptr);}
+                        | TOK_RETURN expr                                           {$$ = new ReturnStmt(getPos(), std::shared_ptr<Expr>($2));}
+if_stmt                 : TOK_IF expr stmt_list                                     {$$ = new IfStmt(getPos(), std::shared_ptr<Expr>($2),
+			                                                                             std::shared_ptr<ConstructList<Stmt>>($3),
+                                                                                                     nullptr);}
+                        | TOK_IF expr stmt_list TOK_ELSE if_stmt                    {$$ = new IfStmt(getPos(), std::shared_ptr<Expr>($2),
+                                                                                                     std::shared_ptr<ConstructList<Stmt>>($3),
+                                                                                                     std::make_shared<ElseIf>(getPos(),
+                                                                                                                std::shared_ptr<IfStmt>($5)));}
+                        | TOK_IF expr stmt_list TOK_ELSE stmt_list                  {$$ = new IfStmt(getPos(), std::shared_ptr<Expr>($2),
+                                                                                                     std::shared_ptr<ConstructList<Stmt>>($3),
+                                                                                                     std::make_shared<Else>(getPos(),
+                                                                                                       std::shared_ptr<ConstructList<Stmt>>($5)));}
 for_stmt                : TOK_FOR TOK_IDENTIFIER TOK_ASSIGN expr TOK_TO expr TOK_STEP expr stmt_list
+			                                                            {$$ = new ForStmt(getPos(), $2, std::shared_ptr<Expr>($4),
+                                                                                                      std::shared_ptr<Expr>($6),
+                                                                                                      std::shared_ptr<Expr>($8),
+                                                                                                      std::shared_ptr<ConstructList<Stmt>>($9));}
                         | TOK_FOR TOK_IDENTIFIER TOK_ASSIGN expr TOK_TO expr stmt_list
-while_stmt              : TOK_WHILE expr stmt_list
-switch_stmt             : TOK_SWITCH expr TOK_LCURLY case_list TOK_RCURLY
+                                                                                    {$$ = new ForStmt(getPos(), $2, std::shared_ptr<Expr>($4),
+                                                                                                      std::shared_ptr<Expr>($6), nullptr,
+                                                                                                      std::shared_ptr<ConstructList<Stmt>>($7));}
+while_stmt              : TOK_WHILE expr stmt_list                                  {$$ = new WhileStmt(getPos(), std::shared_ptr<Expr>($2),
+			                                                                                std::shared_ptr<ConstructList<Stmt>>($3));}
+switch_stmt             : TOK_SWITCH expr TOK_LCURLY case_list TOK_RCURLY           {$$ = new SwitchStmt(getPos(), std::shared_ptr<Expr>($2),
+			                                                                             std::shared_ptr<ConstructList<Case>>($4),
+                                                                                                     nullptr);}
                         | TOK_SWITCH expr TOK_LCURLY case_list TOK_DEFAULT stmt_list TOK_RCURLY
-                        | TOK_SWITCH error TOK_LCURLY
-                        | TOK_SWITCH expr TOK_LCURLY error TOK_RCURLY
-case                    : TOK_CASE expr stmt_list
-                        | TOK_CASE error stmt_list
-case_list               : case 
-                        | case case_list
-print_stmt              : TOK_PRINT expr
-read_stmt               : TOK_READ TOK_IDENTIFIER	      
+                                                                                    {$$ = new SwitchStmt(getPos(), std::shared_ptr<Expr>($2),
+                                                                                                     std::shared_ptr<ConstructList<Case>>($4),
+                                                                                                     std::shared_ptr<ConstructList<Stmt>>($6));}
+                        | TOK_SWITCH error TOK_LCURLY                               {}
+                        | TOK_SWITCH expr TOK_LCURLY error TOK_RCURLY               {}
+case                    : TOK_CASE expr stmt_list                                   {$$ = new Case(getPos(), std::shared_ptr<Expr>($2),
+			                                                                           std::shared_ptr<ConstructList<Stmt>>($3));}
+                        | TOK_CASE error stmt_list                                  {}
+case_list               : case                                                      {std::vector<std::shared_ptr<Case>> cases;
+			                                                                                     cases.push_back(std::shared_ptr<Case>($1));
+                                                                                     $$ = new ConstructList<Case>(getPos(),cases);}
+                        | case case_list                                            {auto lst = $2; lst->push_back(std::shared_ptr<Case>($1));
+                                                                                     $$ = lst;}
+print_stmt              : TOK_PRINT expr                                            {$$ = new PrintStmt(getPos(), std::shared_ptr<Expr>($2));}
+read_stmt               : TOK_READ TOK_IDENTIFIER	                            {$$ = new ReadStmt(getPos(), $2);}
 expr                    : al_expr TOK_EQEQ al_expr                                  {$$ = new RelExpr(getPos(), RelExpr::RelOp::EQEQ,
                                                                                                         std::shared_ptr<AlExpr>($1),
                                                                                                         std::shared_ptr<AlExpr>($3));}
@@ -252,7 +304,7 @@ var                     : TOK_IDENTIFIER var_aux                                
 var_aux                 : /* empty */                                               {$$ = nullptr;} 
                         | TOK_DOT TOK_IDENTIFIER var_aux                            {$$ = new DotAccess(getPos(), std::string($2),
                                                                                                         std::shared_ptr<AccessOperation>($3));}
-                        | TOK_LSQUARE expr_list_comma TOK_RSQUARE var_aux	        {$$ = new BracketAccess(getPos(),
+                        | TOK_LSQUARE expr_list_comma TOK_RSQUARE var_aux	    {$$ = new BracketAccess(getPos(),
                                                                                           std::shared_ptr<ConstructList<Expr>>($2),
                                                                                           std::shared_ptr<AccessOperation>($4));}
 %%

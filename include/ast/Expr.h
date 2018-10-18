@@ -18,6 +18,8 @@ class ConstructList : public Node {
         void push_back(std::shared_ptr<T> elem) {
             this->constructs.push_back(elem);
         }
+
+	bool empty() {return constructs.empty();}
 };
 
 class Expr : public Node {
@@ -187,6 +189,32 @@ class Stmt : public Node {
         Stmt(Position _pos) : Node {_pos} {};
 };
 
+class AssignStmt : public Stmt {
+    protected:
+	std::shared_ptr<Var> var;
+	std::shared_ptr<Expr> expr;
+    public:
+        AssignStmt(
+            Position _pos,
+	    std::shared_ptr<Var> _var,
+	    std::shared_ptr<Expr> _expr)
+	: Stmt {_pos}, var {_var}, expr {_expr} {}
+};
+
+class FunctionCallStmt : public Stmt {
+    protected:
+        std::shared_ptr<Var> var;
+        std::shared_ptr<ConstructList<Expr>> actualParams;
+    public:
+        FunctionCallStmt(
+                Position _pos,
+                std::shared_ptr<Var> _var,
+                std::shared_ptr<ConstructList<Expr>> _actualParams) 
+        : Stmt{_pos}, var{_var}, actualParams{_actualParams}{}
+};
+
+
+
 class ReadStmt : public Stmt {
     protected:
         std::string id;
@@ -196,37 +224,38 @@ class ReadStmt : public Stmt {
 
 class PrintStmt : public Stmt {
     protected:
-        Expr expr;
+	std::shared_ptr<Expr> expr;
     public:
-        PrintStmt(Position _pos, Expr _expr) : Stmt {_pos}, expr{_expr} {}
+        PrintStmt(Position _pos, std::shared_ptr<Expr> _expr)
+		: Stmt {_pos}, expr{_expr} {}
 };
 
 class Case : public Node {
     protected:
-        Expr expr;
-        std::vector<Stmt> stmts;
+	std::shared_ptr<Expr> expr;
+	std::shared_ptr<ConstructList<Stmt>> stmts;
     public:
         Case(
                 Position _pos,
-                Expr _expr,
-                std::vector<Stmt> _stmts)
+                std::shared_ptr<Expr> _expr,
+                std::shared_ptr<ConstructList<Stmt>> _stmts)
             : Node {_pos}, expr {_expr}, stmts {_stmts} {}
 };
 
 class SwitchStmt : public Stmt {
     protected:
-        Expr expr;
-        std::vector<Case> caseList;
-        std::vector<Stmt> defaultStmts;
+	std::shared_ptr<Expr> expr;
+        std::shared_ptr<ConstructList<Case>> caseList;
+        std::shared_ptr<ConstructList<Stmt>> defaultStmts;
     public:
         SwitchStmt(
                 Position _pos,
-                Expr _expr,
-                std::vector<Case> _caseList,
-                std::vector<Stmt> _defaultsStmts) 
+                std::shared_ptr<Expr> _expr,
+                std::shared_ptr<ConstructList<Case>> _caseList,
+                std::shared_ptr<ConstructList<Stmt>> _defaultsStmts) 
         : Stmt{_pos}, expr {_expr}, defaultStmts {_defaultsStmts} {
 
-            if (_caseList.empty()) 
+            if (_caseList->empty()) 
                 throw std::invalid_argument("case list can't be empty in a switch");
             else
                 this->caseList = _caseList;
@@ -236,31 +265,31 @@ class SwitchStmt : public Stmt {
 
 class WhileStmt : public Stmt {
     protected:
-        Expr expr;
-        std::vector<Stmt> stmts;
+	std::shared_ptr<Expr> expr;
+        std::shared_ptr<ConstructList<Stmt>> stmts;
     public:
         WhileStmt(
                 Position _pos,
-                Expr _expr,
-                std::vector<Stmt> _stmts)
+                std::shared_ptr<Expr> _expr,
+                std::shared_ptr<ConstructList<Stmt>> _stmts)
             : Stmt {_pos}, expr {_expr}, stmts {_stmts} {}
 };
 
 class ForStmt : public Stmt {
     protected:
         std::string id;
-        Expr assignExpr;
-        Expr toExpr;
+	std::shared_ptr<Expr> assignExpr;
+	std::shared_ptr<Expr> toExpr;
         std::shared_ptr<Expr> stepExpr;
-        std::vector<Stmt> stmts;
+        std::shared_ptr<ConstructList<Stmt>> stmts;
     public:
         ForStmt(
                 Position _pos,
                 std::string _id,
-                Expr _assignExpr,
-                Expr _toExpr,
+                std::shared_ptr<Expr> _assignExpr,
+                std::shared_ptr<Expr> _toExpr,
                 std::shared_ptr<Expr> _stepExpr,
-                std::vector<Stmt> _stmts)
+                std::shared_ptr<ConstructList<Stmt>> _stmts)
             : Stmt {_pos}, id {_id}, assignExpr {_assignExpr}, 
             toExpr{_toExpr}, stepExpr{_stepExpr}, stmts {_stmts} {}
 };
@@ -272,28 +301,35 @@ class ElsePart : public Node {
 
 class Else : public ElsePart {
     protected:
-        std::vector<Stmt> stmts;
+        std::shared_ptr<ConstructList<Stmt>> stmts;
     public:
         Else (
                 Position _pos,
-                std::vector<Stmt> _stmts) 
+                std::shared_ptr<ConstructList<Stmt>> _stmts) 
             : ElsePart {_pos}, stmts {_stmts} {}
 };
 
 class IfStmt : public Stmt {
     protected:
-        Expr expr;
-        std::vector<Stmt> stmts;
-        ElsePart elsePart;
+	std::shared_ptr<Expr> expr;
+	std::shared_ptr<ConstructList<Stmt>> stmts;
+	std::shared_ptr<ElsePart> elsePart;
+    public:
+	IfStmt (
+		Position _pos,
+		std::shared_ptr<Expr> _expr,
+		std::shared_ptr<ConstructList<Stmt>> _stmts,
+		std::shared_ptr<ElsePart> _elsePart)
+	    : Stmt {_pos}, expr {_expr}, stmts {_stmts}, elsePart {_elsePart} {}
 };
 
 class ElseIf : public ElsePart {
     protected:
-        IfStmt ifStmt;
+	std::shared_ptr<IfStmt> ifStmt;
     public:
         ElseIf(
                 Position _pos,
-                IfStmt _ifStmt) 
+                std::shared_ptr<IfStmt> _ifStmt) 
             : ElsePart {_pos}, ifStmt {_ifStmt} {}
 };
 
