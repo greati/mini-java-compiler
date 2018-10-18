@@ -23,10 +23,14 @@ Position getPos();
 %union {
     Node *node;
     Var *var;
+    Type *type;
+    VarInit *varInit;
+    ArrayCreation* arrayCreation;
     AccessOperation *accessOp;
     ConstructList<Expr>* constructList;
     ConstructList<Case>* caseList;
     ConstructList<Stmt>* stmtList;
+    ConstructList<VarInit>* varInitList;
     Stmt* stmt;
     ReadStmt* readStmt;
     PrintStmt* printStmt;
@@ -48,6 +52,7 @@ Position getPos();
 %type <accessOp> var_aux
 %type <constructList> expr_list_comma
 %type <constructList> actual_params_list
+%type <constructList> array_dim_decl_list
 %type <stmtList> stmt_list
 %type <stmtList> stmt_list_semicolon
 %type <caseList> case_list
@@ -61,6 +66,10 @@ Position getPos();
 %type <whileStmt> while_stmt
 %type <forStmt> for_stmt
 %type <switchStmt> switch_stmt
+%type <arrayCreation> array_creation_expr
+%type <type> type
+%type <varInit> var_init
+%type <varInitList> var_init_list_comma
 
 %token 
 TOK_PROGRAM 1 
@@ -165,14 +174,18 @@ var_decl_id             : TOK_IDENTIFIER brackets_opt
 var_init                : expr 
                         | array_init 
                         | array_creation_expr
-array_init              : TOK_LCURLY var_init var_init_list_comma TOK_RCURLY
+array_init              : TOK_LCURLY var_init_list_comma TOK_RCURLY
                         | TOK_LCURLY error TOK_RCURLY
-var_init_list_comma     : /* empty */ 
-                        | TOK_COMMA var_init var_init_list_comma 
-array_creation_expr     : TOK_ARROBA type array_dim_decl array_dim_decl_list
-array_dim_decl          : TOK_LSQUARE expr TOK_RSQUARE
-array_dim_decl_list     : /* empty */ 
-                        | array_dim_decl array_dim_decl_list
+var_init_list_comma     : var_init                                                  {std::vector<std::shared_ptr<VarInit>> varInits;
+		                                                                     varInits.push_back(std::shared_ptr<VarInit>($1));
+                                                                                     $$ = new ConstructList<VarInit>(getPos(),varInits);}	
+                        | var_init TOK_COMMA var_init_list_comma                    {auto lst = $3; lst->push_back(std::shared_ptr<VarInit>($1));}
+array_creation_expr     : TOK_ARROBA type array_dim_decl_list                       {$$ = new ArrayCreation(getPos(), std::shared_ptr<Type>($2),
+			                                                                      std::shared_ptr<ConstructList<Expr>>($3));}
+array_dim_decl_list     : TOK_LSQUARE expr TOK_RSQUARE                              {std::vector<std::shared_ptr<Expr>> exprs;
+			                                                             exprs.push_back(std::shared_ptr<Expr>($2));
+                                                                                     $$ = new ConstructList<Expr>(getPos(),exprs);}
+                        | TOK_LSQUARE expr TOK_RSQUARE array_dim_decl_list          {auto lst = $4; lst->push_back(std::shared_ptr<Expr>($2));}
 block                   : decls_opt stmt_list
 stmt_list               : TOK_LCURLY stmt_list_semicolon TOK_RCURLY                 {$$ = $2;}
                         | TOK_LCURLY error TOK_RCURLY                               {}

@@ -168,10 +168,14 @@ union YYSTYPE
 
     Node *node;
     Var *var;
+    Type *type;
+    VarInit *varInit;
+    ArrayCreation* arrayCreation;
     AccessOperation *accessOp;
     ConstructList<Expr>* constructList;
     ConstructList<Case>* caseList;
     ConstructList<Stmt>* stmtList;
+    ConstructList<VarInit>* varInitList;
     Stmt* stmt;
     ReadStmt* readStmt;
     PrintStmt* printStmt;
@@ -187,7 +191,7 @@ union YYSTYPE
     char* litString;
     int litInt;
 
-#line 191 "include/y.tab.h" /* yacc.c:1909  */
+#line 195 "include/y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

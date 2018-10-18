@@ -512,13 +512,13 @@ class ArrayInitVarInit : public VarInit {
 
 class ArrayCreation : public Node {
     protected:
-        Type type;
-        ConstructList<Expr> dims;
+	std::shared_ptr<Type> type;
+	std::shared_ptr<ConstructList<Expr>> dims;
     public:
         ArrayCreation(
             Position _pos, 
-            Type _type, 
-            ConstructList<Expr> _dims)
+            std::shared_ptr<Type> _type, 
+            std::shared_ptr<ConstructList<Expr>> _dims)
         : Node {_pos}, type {_type}, dims {_dims} {}
 };
 
