@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <exception>
+#include <sstream>
 
 
 template<typename T>
@@ -19,7 +20,17 @@ class ConstructList : public Node {
             this->constructs.push_back(elem);
         }
 
-	bool empty() {return constructs.empty();}
+        bool empty() {return constructs.empty();}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "{" << std::endl;
+            for (auto i : this->constructs) {
+                ss << (*i) << std::endl;
+            }
+            ss << "}" << std::endl;
+            return ss.str();
+        }
 };
 
 class Expr : public Node {
@@ -27,6 +38,9 @@ class Expr : public Node {
     public:
         Expr(Position _pos) : Node {_pos} {};
 
+        std::string show() const override {
+            return "";
+        }
 };
 
 class AlExpr : public Expr {
@@ -131,6 +145,10 @@ class LitExpr : public AlExpr {
 class AccessOperation : public Node {
     public:
         AccessOperation(Position _pos) : Node {_pos} {};
+
+        std::string show() const override {
+            return "";
+        }
 };
 
 class BracketAccess : public AccessOperation {
@@ -187,6 +205,10 @@ class FunctionCallExpr : public AlExpr {
 class Stmt : public Node {
     public:
         Stmt(Position _pos) : Node {_pos} {};
+
+        std::string show() const override {
+            return "";
+        }
 };
 
 class AssignStmt : public Stmt {
@@ -240,6 +262,10 @@ class Case : public Node {
                 std::shared_ptr<Expr> _expr,
                 std::shared_ptr<ConstructList<Stmt>> _stmts)
             : Node {_pos}, expr {_expr}, stmts {_stmts} {}
+
+        std::string show() const override {
+            return "";
+        }
 };
 
 class SwitchStmt : public Stmt {
@@ -297,6 +323,10 @@ class ForStmt : public Stmt {
 class ElsePart : public Node {
     public:
         ElsePart(Position _pos) : Node {_pos} {}
+
+        std::string show() const override {
+            return "";
+        }
 };
 
 class Else : public ElsePart {
@@ -355,6 +385,10 @@ class Type : public Node {
 	    int _numBrackets,
             std::string _typeName)
         : Node {_pos}, numBrackets {_numBrackets}, typeName {_typeName} {}
+
+        std::string show() const override {
+            return "";
+        }
 };
 
 class VarDeclId : public Node {
@@ -364,12 +398,20 @@ class VarDeclId : public Node {
     public:
         VarDeclId(Position _pos, std::string _id, int _numBrackets) 
         : Node {_pos}, id {_id}, numBrackets {_numBrackets} {}
+
+        std::string show() const override {
+            return "";
+        }
 };
 
 
 class VarInit : public Node {
     public:
         VarInit(Position _pos) : Node {_pos} {}
+
+        std::string show() const override {
+            return "";
+        }
 };
 
 class FieldDeclVar : public Node {
@@ -382,6 +424,10 @@ class FieldDeclVar : public Node {
             std::shared_ptr<VarDeclId> _varDeclId,
             std::shared_ptr<VarInit> _varInit) 
         : Node {_pos}, varDeclId {_varDeclId}, varInit {_varInit} {}
+
+        std::string show() const override {
+            return "";
+        }
 };
 
 class FieldDecl : public Node {
@@ -394,6 +440,10 @@ class FieldDecl : public Node {
             std::shared_ptr<Type> _type,
             std::shared_ptr<ConstructList<FieldDeclVar>> _varDecls) 
         : Node {_pos}, type {_type}, varsDecls {_varDecls} {} 
+
+        std::string show() const override {
+            return "";
+        }
 };
 
 class Decls : public Node {
@@ -404,6 +454,10 @@ class Decls : public Node {
             Position _pos,
             std::shared_ptr<ConstructList<FieldDecl>> _fields)
         : Node {_pos}, fields{_fields} {}
+
+        std::string show() const override {
+            return "";
+        }
 };
 
 class FormalParams : public Node {
@@ -420,6 +474,10 @@ class FormalParams : public Node {
             std::shared_ptr<ConstructList<std::string>> _ids) 
         : Node {_pos}, val {_val}, type {_type}, ids{_ids} {}
 
+        std::string show() const override {
+            return "";
+        }
+
 };
 
 class Block : public Node {
@@ -433,6 +491,10 @@ class Block : public Node {
             std::shared_ptr<Decls> _decls,
             std::shared_ptr<ConstructList<Stmt>> _stmts) 
         : Node {_pos}, decls {_decls}, stmts {_stmts} {}
+
+        std::string show() const override {
+            return "";
+        }
 };
 
 class MethodReturnType : public Node {
@@ -441,6 +503,10 @@ class MethodReturnType : public Node {
     public:
         MethodReturnType(Position _pos, std::shared_ptr<Type> _type)
         : Node {_pos}, type {_type} {}
+
+        std::string show() const override {
+            return "";
+        }
     
 };
 
@@ -458,6 +524,11 @@ class MethodDecl : public Node {
             std::shared_ptr<ConstructList<FormalParams>> _params,
             std::shared_ptr<Block> _block) 
         : Node {_pos}, returnType {_returnType}, id {_id}, params {_params}, block {_block} {}
+
+        std::string show() const override {
+            return "";
+        }
+
 };
 
 class ClassBody : public Node {
@@ -470,6 +541,10 @@ class ClassBody : public Node {
             std::shared_ptr<Decls> _decls,
             std::shared_ptr<ConstructList<MethodDecl>> _methods) 
         : Node {_pos}, decls {_decls}, methods {_methods} {}
+
+        std::string show() const override {
+            return "";
+        }
 };
 
 class ClassDecl : public Node {
@@ -482,6 +557,10 @@ class ClassDecl : public Node {
             std::string _id,
             std::shared_ptr<ClassBody> _body) 
         : Node {_pos}, id {_id}, body {_body} {} 
+
+        std::string show() const override {
+            return "class " + id;
+        }
 };
 
 class Program : public Node {
@@ -494,6 +573,12 @@ class Program : public Node {
             std::string _id,
             std::shared_ptr<ConstructList<ClassDecl>> _classes) 
         : Node {_pos}, id {_id}, classes {_classes} {}
+    
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "program (" + id + ")" << std::endl << *classes;
+            return ss.str();
+        }
 };
 
 class ExprVarInit : public VarInit {

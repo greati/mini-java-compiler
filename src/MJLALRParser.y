@@ -22,7 +22,6 @@ Program *root;
 %}
 
 %union {
-    Node *node;
     Var *var;
     Type *type;
     char * typeName;
@@ -416,7 +415,9 @@ void yyerror(char *s) {
 }
 
 int main() {
-    return (yyparse());
+    auto ret = yyparse();
+    std::cout << root->print() << std::endl;
+    return ret;
 }
 
 int yywrap() {

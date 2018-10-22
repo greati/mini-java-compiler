@@ -166,7 +166,6 @@ union YYSTYPE
 {
 #line 24 "src/MJLALRParser.y" /* yacc.c:1909  */
 
-    Node *node;
     Var *var;
     Type *type;
     char * typeName;
@@ -210,7 +209,7 @@ union YYSTYPE
     ConstructList<MethodDecl>* methodDeclList;
     ConstructList<FieldDecl>* fieldDeclList;
 
-#line 214 "include/y.tab.h" /* yacc.c:1909  */
+#line 213 "include/y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
