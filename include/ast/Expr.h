@@ -352,8 +352,9 @@ class Type : public Node {
     public:
         Type(
             Position _pos,
+	    int _numBrackets,
             std::string _typeName)
-        : Node {_pos}, typeName {_typeName} {}
+        : Node {_pos}, numBrackets {_numBrackets}, typeName {_typeName} {}
 };
 
 class VarDeclId : public Node {
@@ -373,35 +374,35 @@ class VarInit : public Node {
 
 class FieldDeclVar : public Node {
     protected:
-        VarDeclId varDeclId;
+	std::shared_ptr<VarDeclId> varDeclId;
         std::shared_ptr<VarInit> varInit;
     public:
         FieldDeclVar (
             Position _pos,
-            VarDeclId _varDeclId,
+            std::shared_ptr<VarDeclId> _varDeclId,
             std::shared_ptr<VarInit> _varInit) 
         : Node {_pos}, varDeclId {_varDeclId}, varInit {_varInit} {}
 };
 
 class FieldDecl : public Node {
     protected:
-        Type type;
-        ConstructList<FieldDeclVar> varsDecls;
+	std::shared_ptr<Type> type;
+	std::shared_ptr<ConstructList<FieldDeclVar>> varsDecls;
     public:
         FieldDecl (
             Position _pos,
-            Type _type,
-            ConstructList<FieldDeclVar> _varDecls) 
+            std::shared_ptr<Type> _type,
+            std::shared_ptr<ConstructList<FieldDeclVar>> _varDecls) 
         : Node {_pos}, type {_type}, varsDecls {_varDecls} {} 
 };
 
 class Decls : public Node {
     protected:
-        ConstructList<FieldDecl> fields;
+	std::shared_ptr<ConstructList<FieldDecl>> fields;
     public:
         Decls(
             Position _pos,
-            ConstructList<FieldDecl> _fields) 
+            std::shared_ptr<ConstructList<FieldDecl>> _fields)
         : Node {_pos}, fields{_fields} {}
 };
 
@@ -409,14 +410,15 @@ class FormalParams : public Node {
 
     protected:
         bool val;
-        Type type;
-        ConstructList<std::string> ids;
+	std::shared_ptr<Type> type;
+	std::shared_ptr<ConstructList<std::string>> ids;
     public:
         FormalParams (
             Position _pos,
-            Type _type,
-            ConstructList<std::string> _ids) 
-        : Node {_pos}, type {_type}, ids{_ids} {}
+	    bool _val,
+            std::shared_ptr<Type> _type,
+            std::shared_ptr<ConstructList<std::string>> _ids) 
+        : Node {_pos}, val {_val}, type {_type}, ids{_ids} {}
 
 };
 
@@ -424,12 +426,12 @@ class Block : public Node {
 
     protected:
         std::shared_ptr<Decls> decls;
-        std::vector<Stmt> stmts;
+        std::shared_ptr<ConstructList<Stmt>> stmts;
     public:
         Block(
             Position _pos,
             std::shared_ptr<Decls> _decls,
-            std::vector<Stmt> _stmts) 
+            std::shared_ptr<ConstructList<Stmt>> _stmts) 
         : Node {_pos}, decls {_decls}, stmts {_stmts} {}
 };
 
@@ -444,73 +446,74 @@ class MethodReturnType : public Node {
 
 class MethodDecl : public Node {
     protected:
-        MethodReturnType returnType;
+	std::shared_ptr<MethodReturnType> returnType;
         std::string id;
-        ConstructList<FormalParams> params;
-        Block block;
+	std::shared_ptr<ConstructList<FormalParams>> params;
+	std::shared_ptr<Block> block;
     public:
         MethodDecl(
             Position _pos,
-            MethodReturnType _returnType,
+            std::shared_ptr<MethodReturnType> _returnType,
             std::string _id,
-            ConstructList<FormalParams> _params,
-            Block _block) 
+            std::shared_ptr<ConstructList<FormalParams>> _params,
+            std::shared_ptr<Block> _block) 
         : Node {_pos}, returnType {_returnType}, id {_id}, params {_params}, block {_block} {}
 };
 
 class ClassBody : public Node {
     protected:
         std::shared_ptr<Decls> decls;
-        ConstructList<MethodDecl> methods;
+	std::shared_ptr<ConstructList<MethodDecl>> methods;
     public:
         ClassBody (
             Position _pos,
             std::shared_ptr<Decls> _decls,
-            ConstructList<MethodDecl> _methods) 
+            std::shared_ptr<ConstructList<MethodDecl>> _methods) 
         : Node {_pos}, decls {_decls}, methods {_methods} {}
 };
 
 class ClassDecl : public Node {
     protected:
         std::string id;
-        ClassBody body;
+	std::shared_ptr<ClassBody> body;
     public:
         ClassDecl (
             Position _pos,
             std::string _id,
-            ClassBody _body) 
+            std::shared_ptr<ClassBody> _body) 
         : Node {_pos}, id {_id}, body {_body} {} 
 };
 
 class Program : public Node {
     protected:
         std::string id;
-        ConstructList<ClassDecl> classes;
+	std::shared_ptr<ConstructList<ClassDecl>> classes;
     public:
         Program (
             Position _pos,
             std::string _id,
-            ConstructList<ClassDecl> _classes) 
+            std::shared_ptr<ConstructList<ClassDecl>> _classes) 
         : Node {_pos}, id {_id}, classes {_classes} {}
 };
 
 class ExprVarInit : public VarInit {
     protected:
-        Expr expr;
+	std::shared_ptr<Expr> expr;
     public:
-        ExprVarInit (Position _pos, Expr _expr) 
+        ExprVarInit (Position _pos, std::shared_ptr<Expr> _expr) 
         : VarInit {_pos}, expr {_expr} {}
 };
 
 class ArrayInitVarInit : public VarInit {
     protected:
-        ConstructList<VarInit> arrayInit;
+	std::shared_ptr<ConstructList<VarInit>> arrayInit;
     public:
-        ArrayInitVarInit (Position _pos, ConstructList<VarInit> _arrayInit) 
+        ArrayInitVarInit (Position _pos,
+			std::shared_ptr<ConstructList<VarInit>> _arrayInit) 
         : VarInit {_pos}, arrayInit {_arrayInit} {}
 };
 
-class ArrayCreation : public Node {
+class ArrayCreation : public VarInit {
     protected:
 	std::shared_ptr<Type> type;
 	std::shared_ptr<ConstructList<Expr>> dims;
@@ -519,7 +522,7 @@ class ArrayCreation : public Node {
             Position _pos, 
             std::shared_ptr<Type> _type, 
             std::shared_ptr<ConstructList<Expr>> _dims)
-        : Node {_pos}, type {_type}, dims {_dims} {}
+        : VarInit {_pos}, type {_type}, dims {_dims} {}
 };
 
 class ArrayCreationVarInit : public VarInit {

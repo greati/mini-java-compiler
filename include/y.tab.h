@@ -169,13 +169,18 @@ union YYSTYPE
     Node *node;
     Var *var;
     Type *type;
+    FormalParams *formalParams;
     VarInit *varInit;
+    VarDeclId *varDeclId;
+    ArrayInitVarInit *arrayInit;
     ArrayCreation* arrayCreation;
     AccessOperation *accessOp;
     ConstructList<Expr>* constructList;
     ConstructList<Case>* caseList;
     ConstructList<Stmt>* stmtList;
     ConstructList<VarInit>* varInitList;
+    ConstructList<FormalParams> *formalParamsList;
+    ConstructList<FieldDeclVar> *fieldDeclVarList;
     Stmt* stmt;
     ReadStmt* readStmt;
     PrintStmt* printStmt;
@@ -190,8 +195,21 @@ union YYSTYPE
     char* id;
     char* litString;
     int litInt;
+    ConstructList<std::string>* stringList;
+    MethodReturnType* methodReturnType;
+    MethodDecl* methodDecl;
+    Block* block;
+    Decls* decls;
+    FieldDecl* fieldDecl;
+    FieldDeclVar *fieldDeclVar;
+    Program* program;
+    ClassDecl* classDecl;
+    ClassBody* classBody;
+    ConstructList<ClassDecl>* classDeclList;
+    ConstructList<MethodDecl>* methodDeclList;
+    ConstructList<FieldDecl>* fieldDeclList;
 
-#line 195 "include/y.tab.h" /* yacc.c:1909  */
+#line 213 "include/y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
