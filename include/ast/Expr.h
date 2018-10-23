@@ -56,6 +56,10 @@ class ExprParen : public AlExpr {
     public:
         ExprParen(Position _pos, std::shared_ptr<Expr> _expr)
         : AlExpr {_pos}, expr {_expr} {}
+
+        std::string show() const override {
+            return expr->show();
+        }
 };
 
 class RelExpr : public Expr {
@@ -81,6 +85,34 @@ class RelExpr : public Expr {
     public:
         RelExpr(Position _pos, RelOp _op, std::shared_ptr<AlExpr> _lhs, std::shared_ptr<AlExpr> _rhs) 
             : Expr {_pos}, op{_op}, lhs{_lhs}, rhs{_rhs} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "Relational ";
+            switch (op) {
+                case RelOp::LESS:
+                    ss << "<";
+                    break;
+                case RelOp::LESS_EQ:
+                    ss << "<=";
+                    break;
+                case RelOp::EQEQ:
+                    ss << "==";
+                    break;
+                case RelOp::GREATER:
+                    ss << ">";
+                    break;
+                case RelOp::GREATER_EQ:
+                    ss << ">=";
+                    break;
+                case RelOp::DIFF:
+                    ss << "!=";
+                    break;
+            }
+            ss << "(" << lhs << ") ";
+            ss << "(" << rhs << ") ";
+            return ss.str();
+        }
 
 };
 
@@ -108,6 +140,37 @@ class AlBinExpr : public AlExpr {
     public:
         AlBinExpr(Position _pos, AlBinOp _op, std::shared_ptr<AlExpr> _lhs, std::shared_ptr<AlExpr> _rhs) 
             : AlExpr {_pos}, op{_op}, lhs{_lhs}, rhs{_rhs} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "Binary ";
+            switch (op) {
+                case AlBinOp::PLUS:
+                    ss << "+";
+                    break;
+                case AlBinOp::MINUS:
+                    ss << "-";
+                    break;
+                case AlBinOp::TIMES:
+                    ss << "*";
+                    break;
+                case AlBinOp::DIV:
+                    ss << "/";
+                    break;
+                case AlBinOp::MOD:
+                    ss << "%";
+                    break;
+                case AlBinOp::AND:
+                    ss << "&&";
+                    break;
+                case AlBinOp::OR:
+                    ss << "||";
+                    break;
+            }
+            ss << "(" << lhs << ") ";
+            ss << "(" << rhs << ") ";
+            return ss.str();
+        }
 };
 
 class AlUnExpr : public AlExpr {
@@ -128,6 +191,24 @@ class AlUnExpr : public AlExpr {
     public:
         AlUnExpr(Position _pos, AlUnOp _op, std::shared_ptr<AlExpr> _alexpr) 
             : AlExpr{_pos}, op{_op}, alexpr{_alexpr} {};
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "Unary ";
+            switch(op) {
+                case AlUnOp::PLUS:
+                    ss << "+";
+                    break;
+                case AlUnOp::MINUS:
+                    ss << "-";
+                    break;
+                case AlUnOp::NOT:
+                    ss << "not";
+                    break;
+            }
+            ss << alexpr;
+            return ss.str();
+        }
 };
 
 template<typename T>
@@ -138,6 +219,12 @@ class LitExpr : public AlExpr {
 
     public:
         LitExpr(Position _pos, T _val) : AlExpr{_pos}, val {_val} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "Literal (" << val << ")";
+            return ss.str();
+        }
 };
 
 
@@ -163,6 +250,14 @@ class BracketAccess : public AccessOperation {
                 std::shared_ptr<ConstructList<Expr>> _expressionList,
                 std::shared_ptr<AccessOperation> _accessOperation) 
             : AccessOperation{_pos}, expressionList{_expressionList}, accessOperation{_accessOperation} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "BracketAccess ";
+            ss << expressionList;
+            ss << accessOperation;
+            return ss.str();
+        }
 };
 
 class DotAccess : public AccessOperation {
