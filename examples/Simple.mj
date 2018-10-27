@@ -1,3 +1,51 @@
-program Simple;
+program Example;
 
-class Oi {}
+class Useless { }
+
+class QuasiUseless {
+    declarations
+    enddeclarations
+}
+
+class HalfUseless {
+    declarations
+        MyClass[] v = @MyClass[10];
+        string a, b;
+        int[][] identity = { {1, 0, 0}, {0, 1, 0}, {0, 0, 1} };
+    enddeclarations
+}
+
+class Switch {
+    method string map(val int key) {
+        switch key {
+            case 1 {
+                return "A"
+            }
+            case 2 {
+                return "B"
+            }
+            default {
+                return "Invalid"
+            }
+        };
+        print "Finished."
+    }
+}
+
+class Expr {
+    declarations
+        MyClass[][] v = @MyClass[10][10];
+        int a, b;
+        int bool;
+    enddeclarations
+    method void makeExpr() {
+        print "oi";
+        read a;
+        bool := not ((a != b) && b || (a || b));
+        bool := a + b - a * b / a % b + a + v[2,3].name[19];
+        a := -2;
+        a := +2;
+        makeExpr()
+    }
+}
+
