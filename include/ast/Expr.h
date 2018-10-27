@@ -24,12 +24,12 @@ class ConstructList : public Node {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "{" << std::endl;
+            ss << "[" << std::endl;
             for (auto i : this->constructs) {
                 if (i != nullptr)
                     ss << (*i) << std::endl;
             }
-            ss << "}" << std::endl;
+            ss << "]";
             return ss.str();
         }
 };
@@ -89,7 +89,7 @@ class RelExpr : public Expr {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "Relational ";
+            ss << "op: ";
             switch (op) {
                 case RelOp::LESS:
                     ss << "<";
@@ -110,8 +110,9 @@ class RelExpr : public Expr {
                     ss << "!=";
                     break;
             }
-            ss << "(" << *lhs << ") ";
-            ss << "(" << *rhs << ") ";
+            ss << std::endl;
+            ss << "lhs" << *lhs << std::endl;
+            ss << "rhs" << *rhs << std::endl;
             return ss.str();
         }
 
@@ -144,7 +145,7 @@ class AlBinExpr : public AlExpr {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "Binary ";
+            ss << "op: ";
             switch (op) {
                 case AlBinOp::PLUS:
                     ss << "+";
@@ -168,8 +169,9 @@ class AlBinExpr : public AlExpr {
                     ss << "||";
                     break;
             }
-            ss << "(" << *lhs << ") ";
-            ss << "(" << *rhs << ") ";
+            ss << std::endl;
+            ss << "lhs: "<< *lhs << std::endl;
+            ss << "rhs: " << *rhs << std::endl;
             return ss.str();
         }
 };
@@ -195,7 +197,7 @@ class AlUnExpr : public AlExpr {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "Unary ";
+            ss << "op: ";
             switch(op) {
                 case AlUnOp::PLUS:
                     ss << "+";
@@ -207,7 +209,8 @@ class AlUnExpr : public AlExpr {
                     ss << "not";
                     break;
             }
-            ss << *alexpr;
+            ss << std::endl;
+            ss << "expr: " << *alexpr << std::endl;
             return ss.str();
         }
 };
@@ -223,7 +226,7 @@ class LitExpr : public AlExpr {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "Literal (" << val << ")";
+            ss << "value: " << val << std::endl;
             return ss.str();
         }
 };
@@ -254,10 +257,9 @@ class BracketAccess : public AccessOperation {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "BracketAccess ";
-            ss << *expressionList << std::endl;
+            ss << "exprList: " << *expressionList << std::endl;
             if (accessOperation != nullptr)
-                ss << *accessOperation;
+                ss << "accessOp: " << *accessOperation << std::endl;
             return ss.str();
         }
 };
@@ -275,10 +277,9 @@ class DotAccess : public AccessOperation {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "DotAccess ";
-            ss << id << std::endl;
+            ss << "id: " << id << std::endl;
             if (accessOperation != nullptr)
-                ss << *accessOperation;
+                ss << "accessOp: " << *accessOperation << std::endl;
             return ss.str();
         }
 };
@@ -296,10 +297,9 @@ class Var : public AlExpr {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "Var ";
-            ss << id << std::endl;
+            ss << "id: " << id << std::endl;
             if (accessOperation != nullptr)
-                ss << *accessOperation;
+                ss << "accessOp: " << *accessOperation << std::endl;
             return ss.str();
         }
 };
@@ -317,10 +317,9 @@ class FunctionCallExpr : public AlExpr {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "FunctionCallExpr ";
-            ss << *var << std::endl;
+            ss << "var: " << *var << std::endl;
             if (actualParams != nullptr)
-                ss << *actualParams;
+                ss << "actualParams: " << *actualParams << std::endl;
             return ss.str();
         }
 };
@@ -348,8 +347,8 @@ class AssignStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "AssignStmt ";
-            ss << *var << std::endl << *expr;
+            ss << "var: " << *var << std::endl;
+            ss << "expr: " << *expr << std::endl;
             return ss.str();
         }
 };
@@ -367,10 +366,9 @@ class FunctionCallStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "FunctionCallStmt ";
-            ss << *var << std::endl;
+            ss << "var: " << *var << std::endl;
             if (actualParams != nullptr)
-                ss << *actualParams;
+                ss << "actualParams: " << *actualParams << std::endl;
             return ss.str();
         }
 };
@@ -383,8 +381,7 @@ class ReadStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "ReadStmt ";
-            ss << id;
+            ss << "id: " << id << std::endl;
             return ss.str();
         }
 };
@@ -398,7 +395,7 @@ class PrintStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "PrintStmt " << *expr;
+            ss << "expr: " << *expr << std::endl;
             return ss.str();
         }
 
@@ -406,8 +403,8 @@ class PrintStmt : public Stmt {
 
 class Case : public Node {
     protected:
-	std::shared_ptr<Expr> expr;
-	std::shared_ptr<ConstructList<Stmt>> stmts;
+        std::shared_ptr<Expr> expr;
+        std::shared_ptr<ConstructList<Stmt>> stmts;
     public:
         Case(
                 Position _pos,
@@ -417,7 +414,8 @@ class Case : public Node {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "Case " << *expr << std::endl << *stmts;
+            ss << "expr: " << *expr << std::endl;
+            ss << "stmts: " << *stmts << std::endl;
             return ss.str();
         }
 
@@ -445,9 +443,10 @@ class SwitchStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "SwitchStmt " << *expr << std::endl << *caseList;
+            ss << "expr: " << *expr << std::endl;
+            ss << "caseList: " << *caseList << std::endl;
             if (defaultStmts  != nullptr) 
-                ss << *defaultStmts;
+                ss << "defaultStmts" << *defaultStmts << std::endl;
             return ss.str();
         }
 };
@@ -465,7 +464,7 @@ class WhileStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "WhileStmt " << *expr << std::endl << *stmts;
+            ss << "expr: " << *expr << std::endl;
             return ss.str();
         }
 
@@ -491,11 +490,12 @@ class ForStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "ForStmt " << id << std::endl << assignExpr << std::endl;
+            ss << "id: " << id << std::endl;
+            ss << "assignExpr: " << *assignExpr << std::endl;
             if (stepExpr != nullptr)
-                ss << *stepExpr << std::endl;
-            ss << *toExpr << std::endl;
-            ss << *stmts;
+                ss << "stepExpr: " << *stepExpr << std::endl;
+            ss << "toExpr: " << *toExpr << std::endl;
+            ss <<"stmts: " << *stmts << std::endl;
             return ss.str();
         }
 
@@ -521,7 +521,7 @@ class Else : public ElsePart {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "Else " << *stmts;
+            ss << "stmts: " << *stmts << std::endl;
             return ss.str();
         }
 
@@ -542,9 +542,10 @@ class IfStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "IfStmt " << *expr << std::endl << *stmts << std::endl;
+            ss << "expr: " << *expr << std::endl;
+            ss << "stmts: " << *stmts << std::endl;
             if (elsePart != nullptr)
-                ss << *elsePart;
+                ss << "elsePart: " << *elsePart << std::endl;
             return ss.str();
         }
 };
@@ -560,7 +561,7 @@ class ElseIf : public ElsePart {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "ElseIf " << *ifStmt;
+            ss << "ifStmt: " << *ifStmt << std::endl;
             return ss.str();
         }
 };
@@ -576,9 +577,9 @@ class ReturnStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "ReturnStmt ";
+            ss << "stmt: " << "return" << std::endl;
             if (expr != nullptr)
-                ss << *expr;
+                ss << "expr: " << *expr << std::endl;
             return ss.str();
         }
 };
@@ -598,7 +599,8 @@ class Type : public Node {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "Type " << typeName << "(" << numBrackets << ")";
+            ss << "name: " << typeName << std::endl;
+            ss << "numBrackets: " << numBrackets << std::endl;
             return ss.str();
         }
 
@@ -614,7 +616,8 @@ class VarDeclId : public Node {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "VarDeclId " << id << "(" << numBrackets << ")";
+            ss << "id: " << id << std::endl;
+            ss << "numBrackets: " << numBrackets << std::endl;
             return ss.str();
         }
 
@@ -642,11 +645,10 @@ class FieldDeclVar : public Node {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "FieldDeclVar ";
             if (varDeclId != nullptr)
-                ss << *varDeclId;
+                ss << "varDeclId: " << *varDeclId << std::endl;
             if (varInit != nullptr) 
-                ss << *varInit; 
+                ss << "varInit: " << *varInit << std::endl; 
             return ss.str();
         }
 
@@ -665,7 +667,8 @@ class FieldDecl : public Node {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "FieldDecl " << *type << std::endl << *varsDecls;
+            ss << "type: " << *type << std::endl;
+            ss << "varsDecls: " << *varsDecls << std::endl;
             return ss.str();
         }
 
@@ -682,9 +685,8 @@ class Decls : public Node {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "Decls ";
             if (fields != nullptr)
-                ss << *fields;
+                ss << "fields: " << *fields << std::endl;
             return ss.str();
         }
 
@@ -707,7 +709,9 @@ class FormalParams : public Node {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "FormalParams " << val << std::endl << *type << std::endl << *ids;
+            ss << "val: " << val << std::endl;
+            ss << "type: " << *type << std::endl;
+            ss << "ids: " << *ids << std::endl; 
             return ss.str();
         }
 
@@ -727,12 +731,11 @@ class Block : public Node {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "Block ";
             if (decls != nullptr) {
-                ss << *decls << std::endl; 
+                ss << "decls: " << *decls << std::endl; 
             }
             if (stmts != nullptr)
-                ss << *stmts;
+                ss << "stmts: " << *stmts << std::endl;
             return ss.str();
         }
 
@@ -747,9 +750,8 @@ class MethodReturnType : public Node {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "MethodReturnType ";
             if (type != nullptr)
-                ss << *type;
+                ss << "type: " << *type << std::endl;
             return ss.str();
         }
 
@@ -772,15 +774,14 @@ class MethodDecl : public Node {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "MethodDecl ";
             if (returnType != nullptr)
-                ss << *returnType << std::endl;
-            ss << id << std::endl;
+                ss << "return: " << *returnType << std::endl;
+            ss << "methodName: " << id << std::endl;
             if (params != nullptr) {
-                ss << *params << std::endl; 
+                ss << "params: " << *params << std::endl;
             }
             if (block != nullptr)
-                ss << *block;
+                ss << "block: " << *block << std::endl;
             return ss.str();
         }
 
@@ -799,12 +800,11 @@ class ClassBody : public Node {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "ClassBody ";
             if (decls != nullptr) {
-                ss << *decls << std::endl;
+                ss << "decls: " << *decls << std::endl;
             }
             if (methods != nullptr) {
-                ss << *methods;
+                ss << "methods: " << *methods << std::endl;
             }
             return ss.str();
         }
@@ -824,10 +824,9 @@ class ClassDecl : public Node {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "ClassDecl " << id << std::endl;
-            if (body != nullptr) {
-                ss << *body;
-            }
+            ss << "className: " << id << std::endl;
+            if (body != nullptr) 
+                ss << "body: " << *body << std::endl;
             return ss.str();
         }
 
@@ -846,7 +845,8 @@ class Program : public Node {
     
         std::string show() const override {
             std::stringstream ss;
-            ss << "program (" + id + ")" << std::endl << *classes;
+            ss << "program: " << id << std::endl;
+            ss << "classes: " << *classes << std::endl;
             return ss.str();
         }
 };
@@ -860,7 +860,7 @@ class ExprVarInit : public VarInit {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "ExprVarInit " << *expr;
+            ss << "expr: " << *expr << std::endl;
             return ss.str();
         }
 
@@ -876,7 +876,7 @@ class ArrayInitVarInit : public VarInit {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "ArrayInitVarInit " << *arrayInit;
+            ss << "arrayInit: " << *arrayInit << std::endl;
             return ss.str();
         }
 
@@ -895,7 +895,8 @@ class ArrayCreation : public VarInit {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "ArrayCreation " << type << std::endl << dims;
+            ss << "type: " << *type << std::endl;
+            ss << "dims: " << *dims << std::endl;
             return ss.str();
         }
 
@@ -910,7 +911,7 @@ class ArrayCreationVarInit : public VarInit {
 
         std::string show() const override {
             std::stringstream ss;
-            ss << "ArrayCreationVarInit " << arrayInit;
+            ss << "arrayInit: " << arrayInit << std::endl;
             return ss.str();
         }
 
