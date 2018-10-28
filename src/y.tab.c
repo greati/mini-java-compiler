@@ -81,11 +81,12 @@ extern int yylex();
 void yyerror(char *s);
 
 Position getPos();
+Position getPos(YYLTYPE);
 
-Program *root;
+std::shared_ptr<Program> root;
 
 
-#line 89 "src/y.tab.c" /* yacc.c:339  */
+#line 90 "src/y.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -177,69 +178,13 @@ extern int yydebug;
     LAMBDA = 55
   };
 #endif
-/* Tokens.  */
-#define END_OF_FILE 0
-#define TOK_PROGRAM 1
-#define TOK_IDENTIFIER 2
-#define TOK_SEMICOLON 3
-#define TOK_CLASS 4
-#define TOK_LCURLY 5
-#define TOK_RCURLY 6
-#define TOK_DECLARATIONS 7
-#define TOK_ENDDECLARATIONS 8
-#define TOK_EQUALS 9
-#define TOK_COMMA 10
-#define TOK_INT 11
-#define TOK_STRING 12
-#define TOK_LRSQUARE 13
-#define TOK_METHOD 14
-#define TOK_LPAREN 15
-#define TOK_RPAREN 16
-#define TOK_VOID 17
-#define TOK_VAL 18
-#define TOK_ARROBA 19
-#define TOK_LSQUARE 20
-#define TOK_RSQUARE 21
-#define TOK_ASSIGN 22
-#define TOK_RETURN 23
-#define TOK_IF 24
-#define TOK_ELSE 25
-#define TOK_FOR 26
-#define TOK_TO 27
-#define TOK_STEP 28
-#define TOK_WHILE 29
-#define TOK_SWITCH 30
-#define TOK_CASE 31
-#define TOK_DEFAULT 32
-#define TOK_PRINT 33
-#define TOK_READ 34
-#define TOK_LESS 35
-#define TOK_LESSEQ 36
-#define TOK_EQEQ 37
-#define TOK_DIFF 38
-#define TOK_GREATEREQ 39
-#define TOK_GREATER 40
-#define TOK_PLUS 41
-#define TOK_UPLUS 42
-#define TOK_MINUS 43
-#define TOK_UMINUS 44
-#define TOK_NOT 45
-#define TOK_2PIPE 46
-#define TOK_ASTERISK 47
-#define TOK_SLASH 48
-#define TOK_AND 49
-#define TOK_MOD 50
-#define TOK_INTEGERCONSTANT 51
-#define TOK_STRINGCONSTANT 52
-#define TOK_DOT 53
-#define LAMBDA 55
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 24 "src/MJLALRParser.y" /* yacc.c:355  */
+#line 27 "src/MJLALRParser.y" /* yacc.c:355  */
 
     Var *var;
     Type *type;
@@ -284,7 +229,7 @@ union YYSTYPE
     ConstructList<MethodDecl>* methodDeclList;
     ConstructList<FieldDecl>* fieldDeclList;
 
-#line 288 "src/y.tab.c" /* yacc.c:355  */
+#line 233 "src/y.tab.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -292,16 +237,30 @@ typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 #endif
 
+/* Location type.  */
+#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
+typedef struct YYLTYPE YYLTYPE;
+struct YYLTYPE
+{
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+};
+# define YYLTYPE_IS_DECLARED 1
+# define YYLTYPE_IS_TRIVIAL 1
+#endif
+
 
 extern YYSTYPE yylval;
-
+extern YYLTYPE yylloc;
 int yyparse (void);
 
 #endif /* !YY_YY_INCLUDE_Y_TAB_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
-#line 305 "src/y.tab.c" /* yacc.c:358  */
+#line 264 "src/y.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -482,13 +441,15 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 
 #if (! defined yyoverflow \
      && (! defined __cplusplus \
-         || (defined YYSTYPE_IS_TRIVIAL && YYSTYPE_IS_TRIVIAL)))
+         || (defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL \
+             && defined YYSTYPE_IS_TRIVIAL && YYSTYPE_IS_TRIVIAL)))
 
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
   yytype_int16 yyss_alloc;
   YYSTYPE yyvs_alloc;
+  YYLTYPE yyls_alloc;
 };
 
 /* The size of the maximum gap between one aligned stack and the next.  */
@@ -497,8 +458,8 @@ union yyalloc
 /* The size of an array large to enough to hold all stacks, each with
    N elements.  */
 # define YYSTACK_BYTES(N) \
-     ((N) * (sizeof (yytype_int16) + sizeof (YYSTYPE)) \
-      + YYSTACK_GAP_MAXIMUM)
+     ((N) * (sizeof (yytype_int16) + sizeof (YYSTYPE) + sizeof (YYLTYPE)) \
+      + 2 * YYSTACK_GAP_MAXIMUM)
 
 # define YYCOPY_NEEDED 1
 
@@ -543,16 +504,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  4
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   279
+#define YYLAST   236
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  57
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  46
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  115
+#define YYNRULES  114
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  218
+#define YYNSTATES  214
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
@@ -598,18 +559,18 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   180,   180,   183,   186,   187,   190,   191,   193,   194,
-     195,   196,   197,   198,   199,   205,   206,   212,   214,   216,
-     218,   221,   223,   224,   225,   226,   227,   228,   229,   234,
-     236,   237,   238,   240,   242,   245,   247,   250,   253,   254,
-     255,   257,   258,   259,   260,   262,   263,   266,   268,   270,
-     273,   275,   277,   278,   279,   282,   284,   286,   288,   289,
-     290,   291,   292,   293,   294,   295,   296,   297,   298,   301,
-     303,   304,   305,   308,   312,   316,   322,   328,   330,   333,
-     337,   338,   339,   341,   342,   345,   347,   348,   350,   353,
-     356,   359,   362,   365,   368,   370,   372,   374,   376,   379,
-     382,   385,   388,   391,   394,   397,   398,   399,   400,   401,
-     402,   405,   406,   409,   410,   413
+       0,   183,   183,   187,   190,   191,   194,   195,   197,   198,
+     199,   200,   202,   203,   204,   210,   211,   217,   219,   221,
+     223,   226,   228,   229,   230,   231,   232,   233,   234,   239,
+     241,   242,   243,   245,   247,   250,   252,   255,   258,   259,
+     260,   263,   264,   265,   266,   268,   269,   272,   274,   276,
+     279,   281,   283,   284,   285,   288,   290,   292,   294,   295,
+     296,   297,   298,   299,   300,   301,   302,   303,   304,   307,
+     309,   310,   311,   314,   318,   322,   328,   334,   336,   339,
+     343,   344,   345,   347,   348,   351,   353,   354,   356,   359,
+     362,   365,   368,   371,   374,   376,   378,   380,   382,   385,
+     388,   391,   394,   397,   400,   403,   404,   405,   406,   407,
+     408,   411,   414,   415,   418
 };
 #endif
 
@@ -658,12 +619,12 @@ static const yytype_uint16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF -139
+#define YYPACT_NINF -149
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-139)))
+  (!!((Yystate) == (-149)))
 
-#define YYTABLE_NINF -67
+#define YYTABLE_NINF -85
 
 #define yytable_value_is_error(Yytable_value) \
   0
@@ -672,28 +633,28 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-      43,     9,    14,    47,  -139,    51,    18,  -139,    51,    52,
-      52,  -139,    15,  -139,  -139,    56,    82,    49,  -139,  -139,
-      60,  -139,  -139,  -139,    67,    77,    83,    75,     7,    86,
-      49,  -139,  -139,   119,    75,    85,  -139,    87,    75,  -139,
-    -139,  -139,    97,  -139,  -139,  -139,  -139,    83,   123,  -139,
-      94,  -139,   -18,     8,    46,   119,    98,    98,    98,  -139,
-    -139,  -139,  -139,  -139,  -139,   217,    96,   233,    98,   113,
-    -139,   111,   114,   121,   117,   120,   115,  -139,  -139,  -139,
-      98,    98,    98,    98,    98,    98,    98,    98,    98,    98,
-      98,    98,    98,    26,   124,   119,   127,   134,  -139,   131,
-     139,   151,   -18,  -139,   123,  -139,  -139,  -139,    98,  -139,
-     227,   227,   227,   227,   227,   227,   109,   109,   109,  -139,
-    -139,  -139,  -139,   146,   149,  -139,   160,   127,   159,  -139,
-     108,   160,   -18,    98,  -139,  -139,   152,  -139,  -139,   165,
-    -139,  -139,   127,  -139,  -139,  -139,  -139,   115,   190,  -139,
-    -139,  -139,   166,    98,    98,   177,    98,    71,    98,   178,
-     175,   179,  -139,  -139,  -139,  -139,  -139,  -139,  -139,    21,
-    -139,  -139,   165,   163,   165,   181,   185,  -139,  -139,  -139,
-     213,    31,    98,   168,    98,  -139,  -139,     6,  -139,   180,
-     182,  -139,    10,   164,   188,   103,   186,     0,  -139,  -139,
-    -139,  -139,    98,  -139,   165,   165,  -139,  -139,   165,    11,
-    -139,  -139,   191,    98,  -139,  -139,   165,  -139
+      17,    30,    54,    62,  -149,    73,    31,    69,  -149,    51,
+      78,   120,  -149,    31,  -149,  -149,    77,   118,    13,  -149,
+    -149,  -149,  -149,  -149,  -149,    79,    85,    97,    88,    86,
+     149,   107,    13,  -149,   118,    88,   104,  -149,   108,    88,
+    -149,    16,  -149,  -149,   116,  -149,  -149,  -149,  -149,    97,
+      23,  -149,    42,  -149,   123,  -149,    64,   -16,    23,   113,
+     118,   113,   113,   113,  -149,  -149,  -149,  -149,  -149,  -149,
+     147,   129,   127,    74,  -149,    49,  -149,  -149,   113,   145,
+    -149,   112,   143,   134,   136,   133,  -149,  -149,  -149,   113,
+     113,   113,   113,   113,   113,   113,   113,   113,   113,   113,
+     113,   113,    94,  -149,   100,    80,   113,   153,   113,   113,
+     113,   160,   162,   156,  -149,  -149,  -149,  -149,  -149,  -149,
+    -149,     2,   118,   165,   186,  -149,   175,   142,   182,   -16,
+      23,  -149,  -149,   113,  -149,   157,   157,   157,   157,   157,
+     157,   161,   161,   161,  -149,  -149,  -149,  -149,   183,  -149,
+    -149,  -149,  -149,  -149,    42,   179,    42,   197,  -149,  -149,
+    -149,    74,    94,   113,   165,   202,  -149,    49,    16,   -16,
+     113,  -149,  -149,   192,  -149,   189,   113,  -149,     9,  -149,
+     199,  -149,  -149,   165,  -149,  -149,  -149,  -149,   133,    21,
+     190,    42,   113,     3,    -1,  -149,  -149,  -149,  -149,  -149,
+     113,  -149,    42,  -149,  -149,    42,    11,  -149,   210,   113,
+    -149,  -149,    42,  -149
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -701,48 +662,48 @@ static const yytype_int16 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     0,     1,     0,     0,     2,     3,     0,
-       0,     4,     0,     6,     5,     0,     0,    13,    10,     8,
-       0,    23,    24,    25,     0,     0,     0,    26,     0,     0,
-      13,    12,    11,    15,    26,    20,    17,    18,    26,    22,
-      30,    31,     0,     7,    14,    16,    40,     0,     0,    27,
-       0,    21,   113,     0,     0,     0,     0,     0,     0,   107,
-     108,    19,    42,    43,    41,    94,   109,     0,     0,     0,
-     112,     0,    46,     0,     0,     0,     0,    95,    96,    97,
+       0,     0,     0,     0,     1,     0,     0,     0,     2,     0,
+       0,     0,     6,     0,     4,     8,     0,    15,     0,    10,
+       5,    12,    23,    24,    25,     0,     0,     0,    26,     0,
+       0,     0,     0,    11,    15,    26,    20,    17,    18,    26,
+      22,     0,    30,    31,     0,     7,    14,    16,    40,     0,
+       0,    27,     0,    29,     0,    21,     0,   112,     0,     0,
+       0,     0,     0,     0,   107,   108,    19,    42,    43,    41,
+      94,   109,     0,     0,    51,    38,    45,   106,     0,     0,
+     111,    46,     0,     0,     0,     0,    95,    96,    97,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,    34,    39,     0,
-       0,    68,   113,    45,     0,    44,   106,   105,     0,    48,
-      89,    90,    88,    93,    91,    92,    98,    99,   100,   101,
-     102,   103,   104,     0,     0,    67,     9,     0,    36,    33,
-       0,     9,   113,     0,   114,    47,     0,   111,   110,     0,
-      29,    32,     0,    35,    28,   115,    69,    49,     0,    51,
-      37,    50,     0,    70,     0,     0,     0,     0,     0,     0,
-       0,    54,    59,    60,    62,    61,    63,    64,    65,     0,
-      53,    71,     0,     0,     0,     0,     0,    86,    87,    52,
-       0,     0,     0,    72,     0,    77,    80,     0,    55,     0,
-       0,    56,     0,     0,     0,     0,    84,     0,    58,    57,
-      74,    73,     0,    81,     0,     0,    85,    78,     0,     0,
-      83,    82,     0,     0,    76,    79,     0,    75
+       0,     0,     0,    53,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,    54,    59,    60,    62,    61,    63,    64,
+      65,     0,     0,     0,    34,    39,     0,     0,    68,   112,
+       0,    44,   105,     0,    48,    89,    90,    88,    93,    91,
+      92,    98,    99,   100,   101,   102,   103,   104,     0,    67,
+      80,    81,    58,    71,     0,     0,     0,     0,    86,    87,
+      52,     0,     0,     0,     0,    36,    33,     0,     0,   112,
+       0,   113,    47,     0,   110,    72,     0,    77,     0,    55,
+       0,    56,    32,     0,    35,    28,   114,    69,    49,     0,
+       0,     0,     0,     0,     0,    57,    37,    50,    74,    73,
+       0,    83,     0,    85,    78,     0,     0,    82,     0,     0,
+      76,    79,     0,    75
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-    -139,  -139,   193,  -139,   210,   211,  -139,   194,   195,  -139,
-    -139,   183,   -27,  -139,    20,  -139,  -139,  -139,    99,   -61,
-    -139,  -139,   184,  -139,   129,  -139,    80,   100,   -19,    55,
-    -139,    59,   -66,  -139,    44,  -139,  -139,  -139,  -139,    54,
-    -139,  -139,   -48,   122,  -138,   -99
+    -149,  -149,   211,  -149,   208,   212,  -149,   193,   188,  -149,
+    -149,   177,   -29,  -149,    57,  -149,  -149,  -149,    60,  -148,
+    -149,  -149,   174,  -149,    98,  -149,    41,    63,  -141,    71,
+    -149,    68,   -76,  -149,    44,  -149,  -149,  -149,  -149,    43,
+    -149,  -149,   -50,    82,   -70,  -124
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int16 yydefgoto[] =
 {
-      -1,     2,     7,     8,    13,   139,    18,    29,    24,    25,
-      35,    36,    26,    27,    39,    30,    42,    97,    98,   129,
-      99,    37,    72,    62,    73,    63,   109,   140,   149,   160,
-     161,   124,   125,   162,   163,   164,   165,   166,   196,   197,
-     167,   168,   101,    65,    66,    70
+      -1,     2,     8,     9,    12,    52,    19,    31,    25,    26,
+      36,    37,    27,    28,    40,    32,    44,   124,   125,   166,
+     126,    38,    81,    67,    82,    68,   134,    53,    74,   112,
+     113,   148,   149,   114,   115,   116,   117,   118,   193,   194,
+     119,   120,   128,    70,    71,    80
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -750,94 +711,86 @@ static const yytype_int16 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int16 yytable[] =
 {
-      64,    41,   100,   134,    68,    64,    75,   194,   207,    71,
-     169,    21,    52,     3,     4,    53,    15,   148,   148,     9,
-      22,    23,    10,    -9,    16,    54,    40,   123,    76,    55,
-      52,    -9,   189,   145,   208,    52,   154,    69,   181,   195,
-      96,   213,   169,    54,   -66,   182,     1,    74,    54,   -66,
-      52,    56,     5,    57,    46,    58,    64,     6,    49,    12,
-     136,    59,    60,    54,    19,    28,   141,   146,   127,    56,
-      31,    57,   175,    58,    56,    52,    57,    32,    58,    59,
-      60,   150,    33,    20,    59,    60,    21,    34,    54,    56,
-      38,    57,   -15,    58,    43,    22,    23,    47,    48,    59,
-      60,    50,    52,    96,   204,   171,   172,    52,   174,   176,
-     177,    67,    21,    93,    56,    54,    57,   102,    58,   103,
-      54,    22,    23,    21,    59,    60,   104,    52,    95,   105,
-      53,   128,    22,    23,   191,   106,   193,   108,   107,   130,
-      54,    56,   126,    57,    55,    58,    56,   205,    57,   131,
-      58,    59,    60,   183,   209,   185,    59,    60,    89,    90,
-      91,    92,   132,   133,   137,   216,    56,   138,    57,    16,
-      58,   142,   148,   200,   170,   147,    59,    60,    77,    78,
-      79,   173,   178,   179,   180,   210,   211,   184,   186,   212,
-     214,   152,   187,   202,    52,   192,   203,   217,   198,   215,
-     199,    11,   110,   111,   112,   113,   114,   115,   116,   117,
-     118,   119,   120,   121,   122,   153,   154,    52,   155,   195,
-      14,   156,   157,    17,    44,   158,   159,   151,    45,   143,
-      51,   144,    61,   135,    94,   188,   201,    21,   153,   154,
-     190,   155,     0,     0,   156,   157,    22,    23,   158,   159,
-     206,   -38,     0,    95,    80,    81,    82,    83,    84,    85,
-      86,     0,    87,     0,     0,    88,    89,    90,    91,    92,
-      86,     0,    87,     0,     0,    88,    89,    90,    91,    92
+      69,    43,   127,   121,   191,   171,    78,   204,    69,    84,
+     191,   -84,    72,   175,    29,   177,   182,    16,    73,   162,
+       1,   -13,    72,    -9,    56,    17,   163,    57,    73,    30,
+      58,    85,    10,   205,     3,   196,   192,   -84,    11,    79,
+      59,   209,   192,    72,    60,   186,   123,   106,   198,    73,
+     201,    -3,     6,    22,     4,   153,   154,     7,   156,   157,
+     158,   207,    23,    24,   208,   210,    61,     5,    62,   122,
+      63,   213,    76,    13,     6,   104,    64,    65,    57,     7,
+      69,    83,    77,   173,    57,   -70,    15,    21,   -70,    33,
+      34,   121,    48,   164,   187,    83,    51,    59,    57,   105,
+     106,    35,   107,    39,    41,   108,   109,   150,   151,   110,
+     111,    59,   -66,   181,    83,    45,    49,    57,   152,    50,
+      54,    16,    22,    61,   130,    62,   190,    63,    -9,    17,
+      59,    23,    24,    64,    65,   103,    -9,    61,   123,    62,
+      75,    63,   202,    86,    87,    88,   102,    64,    65,   129,
+     206,   131,    77,    22,   132,   133,    61,   155,    62,   212,
+      63,   161,    23,    24,   159,   169,    64,    65,    42,   165,
+     160,   135,   136,   137,   138,   139,   140,   141,   142,   143,
+     144,   145,   146,   147,    89,    90,    91,    92,    93,    94,
+      95,   167,    96,   168,   170,    97,    98,    99,   100,   101,
+      95,   174,    96,   176,   178,    97,    98,    99,   100,   101,
+      98,    99,   100,   101,   183,   188,   189,   195,   211,   200,
+      14,    20,    47,    18,    66,    46,    55,   184,   172,   197,
+     180,   185,   179,   199,     0,     0,   203
 };
 
 static const yytype_int16 yycheck[] =
 {
-      48,    28,    68,   102,    22,    53,    54,     1,     8,     1,
-     148,     4,     4,     4,     0,     7,     1,     7,     7,     1,
-      13,    14,     4,     8,     9,    17,    19,     1,    55,    21,
-       4,    16,     1,   132,    34,     4,    26,    55,    17,    33,
-      67,    30,   180,    17,    18,    24,     3,     1,    17,    18,
-       4,    43,     5,    45,    34,    47,   104,     6,    38,     7,
-     108,    53,    54,    17,     8,    16,   127,   133,    95,    43,
-      10,    45,     1,    47,    43,     4,    45,    10,    47,    53,
-      54,   142,     5,     1,    53,    54,     4,     4,    17,    43,
-      15,    45,    10,    47,     8,    13,    14,    12,    11,    53,
-      54,     4,     4,   130,     1,   153,   154,     4,   156,   157,
-     158,    17,     4,    17,    43,    17,    45,     4,    47,     8,
-      17,    13,    14,     4,    53,    54,    12,     4,    20,     8,
-       7,     4,    13,    14,   182,    18,   184,    22,    18,     5,
-      17,    43,    18,    45,    21,    47,    43,   195,    45,    18,
-      47,    53,    54,   172,   202,   174,    53,    54,    49,    50,
-      51,    52,    23,    12,    18,   213,    43,    18,    45,     9,
-      47,    12,     7,   192,     8,    23,    53,    54,    56,    57,
-      58,     4,     4,     8,     5,   204,   205,    24,     7,   208,
-     209,     1,     7,    29,     4,    27,     8,   216,    18,     8,
-      18,     8,    80,    81,    82,    83,    84,    85,    86,    87,
-      88,    89,    90,    91,    92,    25,    26,     4,    28,    33,
-      10,    31,    32,    12,    30,    35,    36,   147,    33,   130,
-      47,   131,    48,   104,     1,   180,   192,     4,    25,    26,
-     181,    28,    -1,    -1,    31,    32,    13,    14,    35,    36,
-     196,    18,    -1,    20,    37,    38,    39,    40,    41,    42,
-      43,    -1,    45,    -1,    -1,    48,    49,    50,    51,    52,
-      43,    -1,    45,    -1,    -1,    48,    49,    50,    51,    52
+      50,    30,    78,    73,     1,   129,    22,     8,    58,    59,
+       1,     8,     1,   154,     1,   156,   164,     1,     7,    17,
+       3,     8,     1,     7,     1,     9,    24,     4,     7,    16,
+       7,    60,     1,    34,     4,   183,    33,    34,     7,    55,
+      17,    30,    33,     1,    21,   169,    75,    26,   189,     7,
+     191,     0,     1,     4,     0,   105,   106,     6,   108,   109,
+     110,   202,    13,    14,   205,   206,    43,     5,    45,    20,
+      47,   212,     8,     4,     1,     1,    53,    54,     4,     6,
+     130,     1,    18,   133,     4,     5,     8,    10,     8,    10,
+       5,   161,    35,   122,   170,     1,    39,    17,     4,    25,
+      26,     4,    28,    15,    18,    31,    32,     7,     8,    35,
+      36,    17,    18,   163,     1,     8,    12,     4,    18,    11,
+       4,     1,     4,    43,    12,    45,   176,    47,     8,     9,
+      17,    13,    14,    53,    54,     8,    16,    43,   167,    45,
+      17,    47,   192,    61,    62,    63,    17,    53,    54,     4,
+     200,     8,    18,     4,    18,    22,    43,     4,    45,   209,
+      47,     5,    13,    14,     4,    23,    53,    54,    19,     4,
+       8,    89,    90,    91,    92,    93,    94,    95,    96,    97,
+      98,    99,   100,   101,    37,    38,    39,    40,    41,    42,
+      43,     5,    45,    18,    12,    48,    49,    50,    51,    52,
+      43,    18,    45,    24,     7,    48,    49,    50,    51,    52,
+      49,    50,    51,    52,    12,    23,    27,    18,     8,    29,
+       9,    13,    34,    11,    50,    32,    49,   167,   130,   188,
+     162,   168,   161,   189,    -1,    -1,   193
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,    58,     4,     0,     5,     6,    59,    60,     1,
-       4,    59,     7,    61,    61,     1,     9,    62,    63,     8,
-       1,     4,    13,    14,    65,    66,    69,    70,    16,    64,
-      72,    10,    10,     5,     4,    67,    68,    78,    15,    71,
-      19,    69,    73,     8,    64,    65,    71,    12,    11,    71,
-       4,    68,     4,     7,    17,    21,    43,    45,    47,    53,
-      54,    79,    80,    82,    99,   100,   101,    17,    22,    55,
-     102,     1,    79,    81,     1,    99,    69,   100,   100,   100,
-      37,    38,    39,    40,    41,    42,    43,    45,    48,    49,
-      50,    51,    52,    17,     1,    20,    69,    74,    75,    77,
-      89,    99,     4,     8,    12,     8,    18,    18,    22,    83,
-     100,   100,   100,   100,   100,   100,   100,   100,   100,   100,
-     100,   100,   100,     1,    88,    89,    18,    69,     4,    76,
-       5,    18,    23,    12,   102,    81,    99,    18,    18,    62,
-      84,    76,    12,    75,    84,   102,    89,    23,     7,    85,
-      76,    83,     1,    25,    26,    28,    31,    32,    35,    36,
-      86,    87,    90,    91,    92,    93,    94,    97,    98,   101,
-       8,    99,    99,     4,    99,     1,    99,    99,     4,     8,
-       5,    17,    24,    85,    24,    85,     7,     7,    86,     1,
-      88,    99,    27,    99,     1,    33,    95,    96,    18,    18,
-      85,    91,    29,     8,     1,    99,    96,     8,    34,    99,
-      85,    85,    85,    30,    85,     8,    99,    85
+       0,     3,    58,     4,     0,     5,     1,     6,    59,    60,
+       1,     7,    61,     4,    59,     8,     1,     9,    62,    63,
+      61,    10,     4,    13,    14,    65,    66,    69,    70,     1,
+      16,    64,    72,    10,     5,     4,    67,    68,    78,    15,
+      71,    18,    19,    69,    73,     8,    64,    65,    71,    12,
+      11,    71,    62,    84,     4,    68,     1,     4,     7,    17,
+      21,    43,    45,    47,    53,    54,    79,    80,    82,    99,
+     100,   101,     1,     7,    85,    17,     8,    18,    22,    55,
+     102,    79,    81,     1,    99,    69,   100,   100,   100,    37,
+      38,    39,    40,    41,    42,    43,    45,    48,    49,    50,
+      51,    52,    17,     8,     1,    25,    26,    28,    31,    32,
+      35,    36,    86,    87,    90,    91,    92,    93,    94,    97,
+      98,   101,    20,    69,    74,    75,    77,    89,    99,     4,
+      12,     8,    18,    22,    83,   100,   100,   100,   100,   100,
+     100,   100,   100,   100,   100,   100,   100,   100,    88,    89,
+       7,     8,    18,    99,    99,     4,    99,    99,    99,     4,
+       8,     5,    17,    24,    69,     4,    76,     5,    18,    23,
+      12,   102,    81,    99,    18,    85,    24,    85,     7,    86,
+      88,    99,    76,    12,    75,    84,   102,    89,    23,    27,
+      99,     1,    33,    95,    96,    18,    76,    83,    85,    91,
+      29,    85,    99,    96,     8,    34,    99,    85,    85,    30,
+      85,     8,    99,    85
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
@@ -854,24 +807,24 @@ static const yytype_uint8 yyr1[] =
       94,    94,    95,    95,    96,    96,    97,    98,    99,    99,
       99,    99,    99,    99,    99,   100,   100,   100,   100,   100,
      100,   100,   100,   100,   100,   100,   100,   100,   100,   100,
-     100,   100,   101,   102,   102,   102
+     100,   101,   102,   102,   102
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     4,     1,     2,     3,     3,     4,     3,     0,
-       1,     3,     3,     0,     2,     0,     3,     2,     1,     3,
-       1,     3,     2,     1,     1,     1,     0,     2,     7,     7,
+       0,     2,     4,     1,     2,     3,     2,     4,     2,     0,
+       1,     3,     2,     0,     2,     0,     3,     2,     1,     3,
+       1,     3,     2,     1,     1,     1,     0,     2,     7,     3,
        1,     1,     3,     2,     1,     3,     1,     3,     0,     1,
-       2,     1,     1,     1,     3,     3,     1,     3,     3,     3,
-       4,     2,     3,     3,     1,     3,     3,     4,     4,     1,
+       2,     1,     1,     1,     3,     2,     1,     3,     3,     3,
+       4,     2,     3,     2,     1,     3,     3,     4,     2,     1,
        1,     1,     1,     1,     1,     1,     0,     1,     1,     3,
        1,     2,     3,     5,     5,     9,     7,     3,     5,     7,
-       3,     5,     3,     3,     1,     2,     2,     2,     3,     3,
+       2,     2,     3,     2,     1,     2,     2,     2,     3,     3,
        3,     3,     3,     3,     1,     2,     2,     2,     3,     3,
-       3,     3,     3,     3,     3,     3,     3,     1,     1,     1,
-       4,     4,     2,     0,     3,     4
+       3,     3,     3,     3,     3,     3,     2,     1,     1,     1,
+       4,     2,     0,     3,     4
 };
 
 
@@ -909,6 +862,32 @@ while (0)
 #define YYERRCODE       256
 
 
+/* YYLLOC_DEFAULT -- Set CURRENT to span from RHS[1] to RHS[N].
+   If N is 0, then set CURRENT to the empty location which ends
+   the previous symbol: RHS[0] (always defined).  */
+
+#ifndef YYLLOC_DEFAULT
+# define YYLLOC_DEFAULT(Current, Rhs, N)                                \
+    do                                                                  \
+      if (N)                                                            \
+        {                                                               \
+          (Current).first_line   = YYRHSLOC (Rhs, 1).first_line;        \
+          (Current).first_column = YYRHSLOC (Rhs, 1).first_column;      \
+          (Current).last_line    = YYRHSLOC (Rhs, N).last_line;         \
+          (Current).last_column  = YYRHSLOC (Rhs, N).last_column;       \
+        }                                                               \
+      else                                                              \
+        {                                                               \
+          (Current).first_line   = (Current).last_line   =              \
+            YYRHSLOC (Rhs, 0).last_line;                                \
+          (Current).first_column = (Current).last_column =              \
+            YYRHSLOC (Rhs, 0).last_column;                              \
+        }                                                               \
+    while (0)
+#endif
+
+#define YYRHSLOC(Rhs, K) ((Rhs)[K])
+
 
 /* Enable debugging if requested.  */
 #if YYDEBUG
@@ -924,9 +903,48 @@ do {                                            \
     YYFPRINTF Args;                             \
 } while (0)
 
-/* This macro is provided for backward compatibility. */
+
+/* YY_LOCATION_PRINT -- Print the location on the stream.
+   This macro was not mandated originally: define only if we know
+   we won't break user code: when these are the locations we know.  */
+
 #ifndef YY_LOCATION_PRINT
-# define YY_LOCATION_PRINT(File, Loc) ((void) 0)
+# if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
+
+/* Print *YYLOCP on YYO.  Private, do not rely on its existence. */
+
+YY_ATTRIBUTE_UNUSED
+static unsigned
+yy_location_print_ (FILE *yyo, YYLTYPE const * const yylocp)
+{
+  unsigned res = 0;
+  int end_col = 0 != yylocp->last_column ? yylocp->last_column - 1 : 0;
+  if (0 <= yylocp->first_line)
+    {
+      res += YYFPRINTF (yyo, "%d", yylocp->first_line);
+      if (0 <= yylocp->first_column)
+        res += YYFPRINTF (yyo, ".%d", yylocp->first_column);
+    }
+  if (0 <= yylocp->last_line)
+    {
+      if (yylocp->first_line < yylocp->last_line)
+        {
+          res += YYFPRINTF (yyo, "-%d", yylocp->last_line);
+          if (0 <= end_col)
+            res += YYFPRINTF (yyo, ".%d", end_col);
+        }
+      else if (0 <= end_col && yylocp->first_column < end_col)
+        res += YYFPRINTF (yyo, "-%d", end_col);
+    }
+  return res;
+ }
+
+#  define YY_LOCATION_PRINT(File, Loc)          \
+  yy_location_print_ (File, &(Loc))
+
+# else
+#  define YY_LOCATION_PRINT(File, Loc) ((void) 0)
+# endif
 #endif
 
 
@@ -936,7 +954,7 @@ do {                                                                      \
     {                                                                     \
       YYFPRINTF (stderr, "%s ", Title);                                   \
       yy_symbol_print (stderr,                                            \
-                  Type, Value); \
+                  Type, Value, Location); \
       YYFPRINTF (stderr, "\n");                                           \
     }                                                                     \
 } while (0)
@@ -947,10 +965,11 @@ do {                                                                      \
 `----------------------------------------*/
 
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp)
 {
   FILE *yyo = yyoutput;
   YYUSE (yyo);
+  YYUSE (yylocationp);
   if (!yyvaluep)
     return;
 # ifdef YYPRINT
@@ -966,12 +985,14 @@ yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvalue
 `--------------------------------*/
 
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp)
 {
   YYFPRINTF (yyoutput, "%s %s (",
              yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
 
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep);
+  YY_LOCATION_PRINT (yyoutput, *yylocationp);
+  YYFPRINTF (yyoutput, ": ");
+  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp);
   YYFPRINTF (yyoutput, ")");
 }
 
@@ -1004,7 +1025,7 @@ do {                                                            \
 `------------------------------------------------*/
 
 static void
-yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule)
+yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule)
 {
   unsigned long yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
@@ -1018,7 +1039,7 @@ yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule)
       yy_symbol_print (stderr,
                        yystos[yyssp[yyi + 1 - yynrhs]],
                        &(yyvsp[(yyi + 1) - (yynrhs)])
-                                              );
+                       , &(yylsp[(yyi + 1) - (yynrhs)])                       );
       YYFPRINTF (stderr, "\n");
     }
 }
@@ -1026,7 +1047,7 @@ yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule)
 # define YY_REDUCE_PRINT(Rule)          \
 do {                                    \
   if (yydebug)                          \
-    yy_reduce_print (yyssp, yyvsp, Rule); \
+    yy_reduce_print (yyssp, yyvsp, yylsp, Rule); \
 } while (0)
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
@@ -1285,9 +1306,10 @@ yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
 `-----------------------------------------------*/
 
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp)
 {
   YYUSE (yyvaluep);
+  YYUSE (yylocationp);
   if (!yymsg)
     yymsg = "Deleting";
   YY_SYMBOL_PRINT (yymsg, yytype, yyvaluep, yylocationp);
@@ -1305,6 +1327,12 @@ int yychar;
 
 /* The semantic value of the lookahead symbol.  */
 YYSTYPE yylval;
+/* Location data for the lookahead symbol.  */
+YYLTYPE yylloc
+# if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
+  = { 1, 1, 1, 1 }
+# endif
+;
 /* Number of syntax errors so far.  */
 int yynerrs;
 
@@ -1323,6 +1351,7 @@ yyparse (void)
     /* The stacks and their tools:
        'yyss': related to states.
        'yyvs': related to semantic values.
+       'yyls': related to locations.
 
        Refer to the stacks through separate pointers, to allow yyoverflow
        to reallocate them elsewhere.  */
@@ -1337,6 +1366,14 @@ yyparse (void)
     YYSTYPE *yyvs;
     YYSTYPE *yyvsp;
 
+    /* The location stack.  */
+    YYLTYPE yylsa[YYINITDEPTH];
+    YYLTYPE *yyls;
+    YYLTYPE *yylsp;
+
+    /* The locations where the error started and ended.  */
+    YYLTYPE yyerror_range[3];
+
     YYSIZE_T yystacksize;
 
   int yyn;
@@ -1346,6 +1383,7 @@ yyparse (void)
   /* The variables used to return semantic value and location from the
      action routines.  */
   YYSTYPE yyval;
+  YYLTYPE yyloc;
 
 #if YYERROR_VERBOSE
   /* Buffer for error messages, and its allocated size.  */
@@ -1354,7 +1392,7 @@ yyparse (void)
   YYSIZE_T yymsg_alloc = sizeof yymsgbuf;
 #endif
 
-#define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
+#define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N), yylsp -= (N))
 
   /* The number of symbols on the RHS of the reduced rule.
      Keep to zero when no symbol should be popped.  */
@@ -1362,6 +1400,7 @@ yyparse (void)
 
   yyssp = yyss = yyssa;
   yyvsp = yyvs = yyvsa;
+  yylsp = yyls = yylsa;
   yystacksize = YYINITDEPTH;
 
   YYDPRINTF ((stderr, "Starting parse\n"));
@@ -1370,6 +1409,7 @@ yyparse (void)
   yyerrstatus = 0;
   yynerrs = 0;
   yychar = YYEMPTY; /* Cause a token to be read.  */
+  yylsp[0] = yylloc;
   goto yysetstate;
 
 /*------------------------------------------------------------.
@@ -1395,6 +1435,7 @@ yyparse (void)
            memory.  */
         YYSTYPE *yyvs1 = yyvs;
         yytype_int16 *yyss1 = yyss;
+        YYLTYPE *yyls1 = yyls;
 
         /* Each stack pointer address is followed by the size of the
            data in use in that stack, in bytes.  This used to be a
@@ -1403,8 +1444,10 @@ yyparse (void)
         yyoverflow (YY_("memory exhausted"),
                     &yyss1, yysize * sizeof (*yyssp),
                     &yyvs1, yysize * sizeof (*yyvsp),
+                    &yyls1, yysize * sizeof (*yylsp),
                     &yystacksize);
 
+        yyls = yyls1;
         yyss = yyss1;
         yyvs = yyvs1;
       }
@@ -1427,6 +1470,7 @@ yyparse (void)
           goto yyexhaustedlab;
         YYSTACK_RELOCATE (yyss_alloc, yyss);
         YYSTACK_RELOCATE (yyvs_alloc, yyvs);
+        YYSTACK_RELOCATE (yyls_alloc, yyls);
 #  undef YYSTACK_RELOCATE
         if (yyss1 != yyssa)
           YYSTACK_FREE (yyss1);
@@ -1436,6 +1480,7 @@ yyparse (void)
 
       yyssp = yyss + yysize - 1;
       yyvsp = yyvs + yysize - 1;
+      yylsp = yyls + yysize - 1;
 
       YYDPRINTF ((stderr, "Stack size increased to %lu\n",
                   (unsigned long) yystacksize));
@@ -1513,7 +1558,7 @@ yybackup:
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   *++yyvsp = yylval;
   YY_IGNORE_MAYBE_UNINITIALIZED_END
-
+  *++yylsp = yylloc;
   goto yynewstate;
 
 
@@ -1544,812 +1589,811 @@ yyreduce:
      GCC warning that YYVAL may be used uninitialized.  */
   yyval = yyvsp[1-yylen];
 
-
+  /* Default location. */
+  YYLLOC_DEFAULT (yyloc, (yylsp - yylen), yylen);
+  yyerror_range[1] = yyloc;
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
         case 2:
-#line 180 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.program) = new Program(getPos(), 
-                                                                                std::make_shared<Id>(getPos(), (yyvsp[-2].id)),
-			                                                                  std::shared_ptr<ConstructList<ClassDecl>>((yyvsp[0].classDeclList))); root = (yyval.program);}
-#line 1557 "src/y.tab.c" /* yacc.c:1651  */
+#line 183 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.program) = new Program(getPos((yylsp[-3])), 
+                                                                                std::make_shared<Id>(getPos((yylsp[-2])), (yyvsp[-2].id)),
+			                                                                  std::shared_ptr<ConstructList<ClassDecl>>((yyvsp[0].classDeclList))); 
+                                                                                    root = std::shared_ptr<Program>((yyval.program));}
+#line 1605 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 3:
-#line 183 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {std::vector<std::shared_ptr<Node>> classes;
-			                                                             classes.push_back(std::shared_ptr<ClassDecl>((yyvsp[0].classDecl)));
-                                                                                     (yyval.classDeclList) = new ConstructList<ClassDecl>(getPos(),classes);}
-#line 1565 "src/y.tab.c" /* yacc.c:1651  */
+#line 187 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {std::deque<std::shared_ptr<Node>> classes;
+			                                                             classes.push_front(std::shared_ptr<ClassDecl>((yyvsp[0].classDecl)));
+                                                                                     (yyval.classDeclList) = new ConstructList<ClassDecl>(getPos((yylsp[0])),classes);}
+#line 1613 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 4:
-#line 186 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {auto lst = (yyvsp[0].classDeclList); lst->push_back(std::shared_ptr<ClassDecl>((yyvsp[-1].classDecl)));(yyval.classDeclList)=lst;}
-#line 1571 "src/y.tab.c" /* yacc.c:1651  */
+#line 190 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {auto lst = (yyvsp[0].classDeclList); lst->push_front(std::shared_ptr<ClassDecl>((yyvsp[-1].classDecl)));(yyval.classDeclList)=lst;}
+#line 1619 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 5:
-#line 187 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.classDecl) = new ClassDecl(getPos(), 
-                                                                                        std::make_shared<Id>(getPos(), std::string((yyvsp[-1].id))),
+#line 191 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.classDecl) = new ClassDecl(getPos((yylsp[-2])), 
+                                                                                        std::make_shared<Id>(getPos((yylsp[-1])), std::string((yyvsp[-1].id))),
 			                                                                  std::shared_ptr<ClassBody>((yyvsp[0].classBody)));}
-#line 1579 "src/y.tab.c" /* yacc.c:1651  */
+#line 1627 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 6:
-#line 190 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {}
-#line 1585 "src/y.tab.c" /* yacc.c:1651  */
+#line 194 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.classDecl)=nullptr;}
+#line 1633 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 7:
-#line 191 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.classBody) = new ClassBody(getPos(), std::shared_ptr<Decls>((yyvsp[-2].decls)),
+#line 195 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.classBody) = new ClassBody(getPos((yyloc)), std::shared_ptr<Decls>((yyvsp[-2].decls)),
 			                                                                  std::shared_ptr<ConstructList<MethodDecl>>((yyvsp[-1].methodDeclList)));}
-#line 1592 "src/y.tab.c" /* yacc.c:1651  */
+#line 1640 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 8:
-#line 193 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {}
-#line 1598 "src/y.tab.c" /* yacc.c:1651  */
+#line 197 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.classBody)=nullptr;}
+#line 1646 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 9:
-#line 194 "src/MJLALRParser.y" /* yacc.c:1651  */
+#line 198 "src/MJLALRParser.y" /* yacc.c:1651  */
     {(yyval.decls) = nullptr;}
-#line 1604 "src/y.tab.c" /* yacc.c:1651  */
+#line 1652 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 10:
-#line 195 "src/MJLALRParser.y" /* yacc.c:1651  */
+#line 199 "src/MJLALRParser.y" /* yacc.c:1651  */
     {(yyval.decls) = (yyvsp[0].decls);}
-#line 1610 "src/y.tab.c" /* yacc.c:1651  */
+#line 1658 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 11:
-#line 196 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.decls) = new Decls(getPos(), std::shared_ptr<ConstructList<FieldDecl>>((yyvsp[-1].fieldDeclList)));}
-#line 1616 "src/y.tab.c" /* yacc.c:1651  */
+#line 200 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.decls) = new Decls(getPos((yylsp[-2])), 
+                                                                                            std::shared_ptr<ConstructList<FieldDecl>>((yyvsp[-1].fieldDeclList)));}
+#line 1665 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 12:
-#line 197 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {}
-#line 1622 "src/y.tab.c" /* yacc.c:1651  */
+#line 202 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.decls)=nullptr;}
+#line 1671 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 13:
-#line 198 "src/MJLALRParser.y" /* yacc.c:1651  */
+#line 203 "src/MJLALRParser.y" /* yacc.c:1651  */
     {(yyval.methodDeclList) = nullptr;}
-#line 1628 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 14:
-#line 199 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.methodDeclList)=(yyvsp[0].methodDeclList); std::vector<std::shared_ptr<Node>> methodDecls;
-                                                                                     auto lst = (yyvsp[0].methodDeclList) == nullptr
-                                                                                              ? new ConstructList<MethodDecl>(getPos(), methodDecls)
-                                                                                              : (yyvsp[0].methodDeclList);
-                                                                                     lst->push_back(std::shared_ptr<MethodDecl>((yyvsp[-1].methodDecl)));
-                                                                                     (yyval.methodDeclList) = lst;}
-#line 1639 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 15:
-#line 205 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.fieldDeclList) = nullptr;}
-#line 1645 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 16:
-#line 206 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.fieldDeclList)=(yyvsp[0].fieldDeclList); std::vector<std::shared_ptr<Node>> fieldDecls;
-                                                                                     auto lst = (yyvsp[0].fieldDeclList) == nullptr
-                                                                                              ? new ConstructList<FieldDecl>(getPos(), fieldDecls)
-                                                                                              : (yyvsp[0].fieldDeclList);
-                                                                                     lst->push_back(std::shared_ptr<FieldDecl>((yyvsp[-2].fieldDecl)));
-                                                                                     (yyval.fieldDeclList) = lst;}
-#line 1656 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 17:
-#line 212 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.fieldDecl) = new FieldDecl(getPos(), std::shared_ptr<Type>((yyvsp[-1].type)),
-			                                                                  std::shared_ptr<ConstructList<FieldDeclVar>>((yyvsp[0].fieldDeclVarList)));}
-#line 1663 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 18:
-#line 214 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.fieldDeclVar) = new FieldDeclVar(getPos(),std::shared_ptr<VarDeclId>((yyvsp[0].varDeclId)),
-                                                                                        std::shared_ptr<VarInit>(nullptr));}
-#line 1670 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 19:
-#line 216 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.fieldDeclVar) = new FieldDeclVar(getPos(),std::shared_ptr<VarDeclId>((yyvsp[-2].varDeclId)),
-                                                                                          std::shared_ptr<VarInit> ((yyvsp[0].varInit)));}
 #line 1677 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
+  case 14:
+#line 204 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.methodDeclList)=(yyvsp[0].methodDeclList); std::deque<std::shared_ptr<Node>> methodDecls;
+                                                                                     auto lst = (yyvsp[0].methodDeclList) == nullptr
+                                                                                              ? new ConstructList<MethodDecl>(getPos((yylsp[-1])), methodDecls)
+                                                                                              : (yyvsp[0].methodDeclList);
+                                                                                     lst->push_front(std::shared_ptr<MethodDecl>((yyvsp[-1].methodDecl)));
+                                                                                     (yyval.methodDeclList) = lst;}
+#line 1688 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 15:
+#line 210 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.fieldDeclList) = nullptr;}
+#line 1694 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 16:
+#line 211 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.fieldDeclList)=(yyvsp[0].fieldDeclList); std::deque<std::shared_ptr<Node>> fieldDecls;
+                                                                                     auto lst = (yyvsp[0].fieldDeclList) == nullptr
+                                                                                              ? new ConstructList<FieldDecl>(getPos((yylsp[-2])), fieldDecls)
+                                                                                              : (yyvsp[0].fieldDeclList);
+                                                                                     lst->push_front(std::shared_ptr<FieldDecl>((yyvsp[-2].fieldDecl)));
+                                                                                     (yyval.fieldDeclList) = lst;}
+#line 1705 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 17:
+#line 217 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.fieldDecl) = new FieldDecl(getPos((yyloc)), std::shared_ptr<Type>((yyvsp[-1].type)),
+			                                                                  std::shared_ptr<ConstructList<FieldDeclVar>>((yyvsp[0].fieldDeclVarList)));}
+#line 1712 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 18:
+#line 219 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.fieldDeclVar) = new FieldDeclVar(getPos((yylsp[0])),std::shared_ptr<VarDeclId>((yyvsp[0].varDeclId)),
+                                                                                        std::shared_ptr<VarInit>(nullptr));}
+#line 1719 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 19:
+#line 221 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.fieldDeclVar) = new FieldDeclVar(getPos((yylsp[-2])),std::shared_ptr<VarDeclId>((yyvsp[-2].varDeclId)),
+                                                                                          std::shared_ptr<VarInit> ((yyvsp[0].varInit)));}
+#line 1726 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
   case 20:
-#line 218 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {std::vector<std::shared_ptr<Node>> fieldDeclVars;
-			                                                             fieldDeclVars.push_back(std::shared_ptr<FieldDeclVar>((yyvsp[0].fieldDeclVar)));
-                                                                                     (yyval.fieldDeclVarList) = new ConstructList<FieldDeclVar>(getPos(),fieldDeclVars);}
-#line 1685 "src/y.tab.c" /* yacc.c:1651  */
+#line 223 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {std::deque<std::shared_ptr<Node>> fieldDeclVars;
+			                                                             fieldDeclVars.push_front(std::shared_ptr<FieldDeclVar>((yyvsp[0].fieldDeclVar)));
+                                                                                     (yyval.fieldDeclVarList) = new ConstructList<FieldDeclVar>(getPos((yylsp[0])),fieldDeclVars);}
+#line 1734 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 21:
-#line 221 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {auto lst = (yyvsp[0].fieldDeclVarList); lst->push_back(std::shared_ptr<FieldDeclVar>((yyvsp[-2].fieldDeclVar)));
+#line 226 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {auto lst = (yyvsp[0].fieldDeclVarList); lst->push_front(std::shared_ptr<FieldDeclVar>((yyvsp[-2].fieldDeclVar)));
                                                                                      (yyval.fieldDeclVarList) = lst;}
-#line 1692 "src/y.tab.c" /* yacc.c:1651  */
+#line 1741 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 22:
-#line 223 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.type) = new Type(getPos(), (yyvsp[0].litInt), (yyvsp[-1].litString));}
-#line 1698 "src/y.tab.c" /* yacc.c:1651  */
+#line 228 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.type) = new Type(getPos((yylsp[-1])), (yyvsp[0].litInt), (yyvsp[-1].litString));}
+#line 1747 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 23:
-#line 224 "src/MJLALRParser.y" /* yacc.c:1651  */
+#line 229 "src/MJLALRParser.y" /* yacc.c:1651  */
     {(yyval.litString) = (yyvsp[0].id);}
-#line 1704 "src/y.tab.c" /* yacc.c:1651  */
+#line 1753 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 24:
-#line 225 "src/MJLALRParser.y" /* yacc.c:1651  */
+#line 230 "src/MJLALRParser.y" /* yacc.c:1651  */
     {(yyval.litString) = (yyvsp[0].typeName);}
-#line 1710 "src/y.tab.c" /* yacc.c:1651  */
+#line 1759 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 25:
-#line 226 "src/MJLALRParser.y" /* yacc.c:1651  */
+#line 231 "src/MJLALRParser.y" /* yacc.c:1651  */
     {(yyval.litString) = (yyvsp[0].typeName);}
-#line 1716 "src/y.tab.c" /* yacc.c:1651  */
+#line 1765 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 26:
-#line 227 "src/MJLALRParser.y" /* yacc.c:1651  */
+#line 232 "src/MJLALRParser.y" /* yacc.c:1651  */
     {(yyval.litInt) = 0;}
-#line 1722 "src/y.tab.c" /* yacc.c:1651  */
+#line 1771 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 27:
-#line 228 "src/MJLALRParser.y" /* yacc.c:1651  */
+#line 233 "src/MJLALRParser.y" /* yacc.c:1651  */
     {(yyval.litInt) = 1 + (yyvsp[0].litInt);}
-#line 1728 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 28:
-#line 230 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.methodDecl) = new MethodDecl(getPos(), std::shared_ptr<MethodReturnType>((yyvsp[-5].methodReturnType)),
-                                                                                          std::make_shared<Id>(getPos(), std::string((yyvsp[-4].id))), 
-                                                                                          std::shared_ptr<ConstructList<FormalParams>>((yyvsp[-2].formalParamsList)),
-                                                                                          std::shared_ptr<Block>((yyvsp[0].block)));}
-#line 1737 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 29:
-#line 235 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {}
-#line 1743 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 30:
-#line 236 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.methodReturnType) = new MethodReturnType(getPos(), std::shared_ptr<Type>(nullptr));}
-#line 1749 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 31:
-#line 237 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.methodReturnType) = new MethodReturnType(getPos(), std::shared_ptr<Type>((yyvsp[0].type)));}
-#line 1755 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 32:
-#line 238 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.formalParams) = new FormalParams(getPos(), true, std::shared_ptr<Type>((yyvsp[-1].type)),
-			                                                                  std::shared_ptr<ConstructList<Id>>((yyvsp[0].stringList)));}
-#line 1762 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 33:
-#line 240 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.formalParams) = new FormalParams(getPos(), false, std::shared_ptr<Type>((yyvsp[-1].type)),
-                                                                                          std::shared_ptr<ConstructList<Id>>((yyvsp[0].stringList)));}
-#line 1769 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 34:
-#line 242 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {std::vector<std::shared_ptr<Node>> formalParams;
-		                                                                     formalParams.push_back(std::shared_ptr<FormalParams>((yyvsp[0].formalParams)));
-                                                                                     (yyval.formalParamsList) = new ConstructList<FormalParams>(getPos(),formalParams);}
 #line 1777 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 35:
-#line 245 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {auto lst = (yyvsp[0].formalParamsList); lst->push_back(std::shared_ptr<FormalParams>((yyvsp[-2].formalParams)));
-                                                                                     (yyval.formalParamsList) = lst;}
-#line 1784 "src/y.tab.c" /* yacc.c:1651  */
+  case 28:
+#line 235 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.methodDecl) = new MethodDecl(getPos((yylsp[-6])), std::shared_ptr<MethodReturnType>((yyvsp[-5].methodReturnType)),
+                                                                                          std::make_shared<Id>(getPos((yylsp[-4])), std::string((yyvsp[-4].id))), 
+                                                                                          std::shared_ptr<ConstructList<FormalParams>>((yyvsp[-2].formalParamsList)),
+                                                                                          std::shared_ptr<Block>((yyvsp[0].block)));}
+#line 1786 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 36:
-#line 247 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {std::vector<std::shared_ptr<Node>> ids;
-			                                                             ids.push_back(std::make_shared<Id>(getPos(), std::string((yyvsp[0].id))));
-                                                                                     (yyval.stringList) = new ConstructList<Id>(getPos(),ids);}
+  case 29:
+#line 240 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.methodDecl)=nullptr;}
 #line 1792 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 37:
+  case 30:
+#line 241 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.methodReturnType) = new MethodReturnType(getPos((yylsp[0])), std::shared_ptr<Type>(nullptr));}
+#line 1798 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 31:
+#line 242 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.methodReturnType) = new MethodReturnType(getPos((yylsp[0])), std::shared_ptr<Type>((yyvsp[0].type)));}
+#line 1804 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 32:
+#line 243 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.formalParams) = new FormalParams(getPos((yylsp[-2])), true, std::shared_ptr<Type>((yyvsp[-1].type)),
+			                                                                  std::shared_ptr<ConstructList<Id>>((yyvsp[0].stringList)));}
+#line 1811 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 33:
+#line 245 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.formalParams) = new FormalParams(getPos((yyloc)), false, std::shared_ptr<Type>((yyvsp[-1].type)),
+                                                                                          std::shared_ptr<ConstructList<Id>>((yyvsp[0].stringList)));}
+#line 1818 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 34:
+#line 247 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {std::deque<std::shared_ptr<Node>> formalParams;
+		                                                                     formalParams.push_front(std::shared_ptr<FormalParams>((yyvsp[0].formalParams)));
+                                                                                     (yyval.formalParamsList) = new ConstructList<FormalParams>(getPos((yylsp[0])),formalParams);}
+#line 1826 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 35:
 #line 250 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {auto lst = (yyvsp[0].formalParamsList); lst->push_front(std::shared_ptr<FormalParams>((yyvsp[-2].formalParams)));
+                                                                                     (yyval.formalParamsList) = lst;}
+#line 1833 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 36:
+#line 252 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {std::deque<std::shared_ptr<Node>> ids;
+			                                                             ids.push_front(std::make_shared<Id>(getPos((yylsp[0])), std::string((yyvsp[0].id))));
+                                                                                     (yyval.stringList) = new ConstructList<Id>(getPos((yyloc)),ids);}
+#line 1841 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 37:
+#line 255 "src/MJLALRParser.y" /* yacc.c:1651  */
     {auto lst = (yyvsp[0].stringList); 
-                                                                                    lst->push_back(std::make_shared<Id>(getPos(), std::string((yyvsp[-2].id))));
+                                                                                    lst->push_front(std::make_shared<Id>(getPos((yylsp[-2])), std::string((yyvsp[-2].id))));
                                                                                      (yyval.stringList) = lst;}
-#line 1800 "src/y.tab.c" /* yacc.c:1651  */
+#line 1849 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 38:
-#line 253 "src/MJLALRParser.y" /* yacc.c:1651  */
+#line 258 "src/MJLALRParser.y" /* yacc.c:1651  */
     {(yyval.formalParamsList) = nullptr;}
-#line 1806 "src/y.tab.c" /* yacc.c:1651  */
+#line 1855 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 39:
-#line 254 "src/MJLALRParser.y" /* yacc.c:1651  */
+#line 259 "src/MJLALRParser.y" /* yacc.c:1651  */
     {(yyval.formalParamsList) = (yyvsp[0].formalParamsList);}
-#line 1812 "src/y.tab.c" /* yacc.c:1651  */
+#line 1861 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 40:
-#line 255 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.varDeclId) = new VarDeclId(getPos(), 
-                                                                                                        std::make_shared<Id>(getPos(), std::string((yyvsp[-1].id))), (yyvsp[0].litInt));}
-#line 1819 "src/y.tab.c" /* yacc.c:1651  */
+#line 260 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.varDeclId) = new VarDeclId(getPos((yyloc)), 
+                                                                                                        std::make_shared<Id>(getPos((yylsp[-1])), 
+                                                                                                        std::string((yyvsp[-1].id))), (yyvsp[0].litInt));}
+#line 1869 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 41:
-#line 257 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.varInit) = new ExprVarInit(getPos(),std::shared_ptr<Expr>((yyvsp[0].expr)));}
-#line 1825 "src/y.tab.c" /* yacc.c:1651  */
+#line 263 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.varInit) = new ExprVarInit(getPos((yylsp[0])),std::shared_ptr<Expr>((yyvsp[0].expr)));}
+#line 1875 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 42:
-#line 258 "src/MJLALRParser.y" /* yacc.c:1651  */
+#line 264 "src/MJLALRParser.y" /* yacc.c:1651  */
     {(yyval.varInit) = (yyvsp[0].arrayInit);}
-#line 1831 "src/y.tab.c" /* yacc.c:1651  */
+#line 1881 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 43:
-#line 259 "src/MJLALRParser.y" /* yacc.c:1651  */
+#line 265 "src/MJLALRParser.y" /* yacc.c:1651  */
     {(yyval.varInit) = (yyvsp[0].arrayCreation);}
-#line 1837 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 44:
-#line 260 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.arrayInit) = new ArrayInitVarInit(getPos(),
-			                                                                      std::shared_ptr<ConstructList<VarInit>>((yyvsp[-1].varInitList)));}
-#line 1844 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 45:
-#line 262 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {}
-#line 1850 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 46:
-#line 263 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {std::vector<std::shared_ptr<Node>> varInits;
-		                                                                     varInits.push_back(std::shared_ptr<VarInit>((yyvsp[0].varInit)));
-                                                                                     (yyval.varInitList) = new ConstructList<VarInit>(getPos(),varInits);}
-#line 1858 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 47:
-#line 266 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {auto lst = (yyvsp[0].varInitList); lst->push_back(std::shared_ptr<VarInit>((yyvsp[-2].varInit)));
-                                                                                     (yyval.varInitList) = lst;}
-#line 1865 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 48:
-#line 268 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.arrayCreation) = new ArrayCreation(getPos(), std::shared_ptr<Type>((yyvsp[-1].type)),
-			                                                                      std::shared_ptr<ConstructList<Expr>>((yyvsp[0].constructList)));}
-#line 1872 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 49:
-#line 270 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {std::vector<std::shared_ptr<Node>> exprs;
-			                                                             exprs.push_back(std::shared_ptr<Expr>((yyvsp[-1].expr)));
-                                                                                     (yyval.constructList) = new ConstructList<Expr>(getPos(),exprs);}
-#line 1880 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 50:
-#line 273 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {auto lst = (yyvsp[0].constructList); lst->push_back(std::shared_ptr<Expr>((yyvsp[-2].expr)));
-                                                                                     (yyval.constructList) = lst;}
 #line 1887 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 51:
-#line 275 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.block) = new Block(getPos(), std::shared_ptr<Decls>((yyvsp[-1].decls)),
-			                                                                       std::shared_ptr<ConstructList<Stmt>>((yyvsp[0].stmtList)));}
+  case 44:
+#line 266 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.arrayInit) = new ArrayInitVarInit(getPos((yyloc)),
+			                                                                      std::shared_ptr<ConstructList<VarInit>>((yyvsp[-1].varInitList)));}
 #line 1894 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 52:
-#line 277 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.stmtList) = (yyvsp[-1].stmtList);}
+  case 45:
+#line 268 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.arrayInit)=nullptr;}
 #line 1900 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
+  case 46:
+#line 269 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {std::deque<std::shared_ptr<Node>> varInits;
+		                                                                     varInits.push_front(std::shared_ptr<VarInit>((yyvsp[0].varInit)));
+                                                                                     (yyval.varInitList) = new ConstructList<VarInit>(getPos((yyloc)),varInits);}
+#line 1908 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 47:
+#line 272 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {auto lst = (yyvsp[0].varInitList); lst->push_front(std::shared_ptr<VarInit>((yyvsp[-2].varInit)));
+                                                                                     (yyval.varInitList) = lst;}
+#line 1915 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 48:
+#line 274 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.arrayCreation) = new ArrayCreation(getPos((yyloc)), std::shared_ptr<Type>((yyvsp[-1].type)),
+			                                                                      std::shared_ptr<ConstructList<Expr>>((yyvsp[0].constructList)));}
+#line 1922 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 49:
+#line 276 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {std::deque<std::shared_ptr<Node>> exprs;
+			                                                             exprs.push_front(std::shared_ptr<Expr>((yyvsp[-1].expr)));
+                                                                                     (yyval.constructList) = new ConstructList<Expr>(getPos((yyloc)),exprs);}
+#line 1930 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 50:
+#line 279 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {auto lst = (yyvsp[0].constructList); lst->push_front(std::shared_ptr<Expr>((yyvsp[-2].expr)));
+                                                                                     (yyval.constructList) = lst;}
+#line 1937 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 51:
+#line 281 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.block) = new Block(getPos((yyloc)), std::shared_ptr<Decls>((yyvsp[-1].decls)),
+			                                                                       std::shared_ptr<ConstructList<Stmt>>((yyvsp[0].stmtList)));}
+#line 1944 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 52:
+#line 283 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.stmtList) = (yyvsp[-1].stmtList);}
+#line 1950 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
   case 53:
-#line 278 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {}
-#line 1906 "src/y.tab.c" /* yacc.c:1651  */
+#line 284 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.stmtList)=nullptr;}
+#line 1956 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 54:
-#line 279 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {std::vector<std::shared_ptr<Node>> stmts;
-			                                                             stmts.push_back(std::shared_ptr<Stmt>((yyvsp[0].stmt)));
-                                                                                     (yyval.stmtList) = new ConstructList<Stmt>(getPos(),stmts);}
-#line 1914 "src/y.tab.c" /* yacc.c:1651  */
+#line 285 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {std::deque<std::shared_ptr<Node>> stmts;
+			                                                             stmts.push_front(std::shared_ptr<Stmt>((yyvsp[0].stmt)));
+                                                                                     (yyval.stmtList) = new ConstructList<Stmt>(getPos((yyloc)),stmts);}
+#line 1964 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 55:
-#line 282 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.stmtList)=(yyvsp[0].stmtList); auto lst = (yyvsp[0].stmtList); lst->push_back(std::shared_ptr<Stmt>((yyvsp[-2].stmt)));
-                                                                                     (yyval.stmtList) = lst;}
-#line 1921 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 56:
-#line 284 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.stmt) = new AssignStmt(getPos(), std::shared_ptr<Var>((yyvsp[-2].var)),
-			                                                                                 std::shared_ptr<Expr>((yyvsp[0].expr)));}
-#line 1928 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 57:
-#line 286 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.stmt) = new FunctionCallStmt(getPos(), std::shared_ptr<Var>((yyvsp[-3].var)),
-                                                                                                         std::shared_ptr<ConstructList<Expr>>((yyvsp[-1].constructList)));}
-#line 1935 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 58:
 #line 288 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {}
-#line 1941 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 59:
-#line 289 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.stmt) = (yyvsp[0].returnStmt);}
-#line 1947 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 60:
-#line 290 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.stmt) = (yyvsp[0].ifStmt);}
-#line 1953 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 61:
-#line 291 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.stmt) = (yyvsp[0].whileStmt);}
-#line 1959 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 62:
-#line 292 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.stmt) = (yyvsp[0].forStmt);}
-#line 1965 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 63:
-#line 293 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.stmt) = (yyvsp[0].switchStmt);}
+    {(yyval.stmtList)=(yyvsp[0].stmtList); auto lst = (yyvsp[0].stmtList); lst->push_front(std::shared_ptr<Stmt>((yyvsp[-2].stmt)));
+                                                                                     (yyval.stmtList) = lst;}
 #line 1971 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 64:
+  case 56:
+#line 290 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.stmt) = new AssignStmt(getPos((yyloc)), std::shared_ptr<Var>((yyvsp[-2].var)),
+			                                                                                 std::shared_ptr<Expr>((yyvsp[0].expr)));}
+#line 1978 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 57:
+#line 292 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.stmt) = new FunctionCallStmt(getPos((yyloc)), std::shared_ptr<Var>((yyvsp[-3].var)),
+                                                                                                         std::shared_ptr<ConstructList<Expr>>((yyvsp[-1].constructList)));}
+#line 1985 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 58:
 #line 294 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.stmt) = (yyvsp[0].printStmt);}
-#line 1977 "src/y.tab.c" /* yacc.c:1651  */
+    {(yyval.stmt)=nullptr;}
+#line 1991 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 65:
+  case 59:
 #line 295 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.stmt) = (yyvsp[0].readStmt);}
-#line 1983 "src/y.tab.c" /* yacc.c:1651  */
+    {(yyval.stmt) = (yyvsp[0].returnStmt);}
+#line 1997 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 66:
+  case 60:
 #line 296 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.constructList) = nullptr;}
-#line 1989 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 67:
-#line 297 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.constructList) = (yyvsp[0].constructList);}
-#line 1995 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 68:
-#line 298 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {std::vector<std::shared_ptr<Node>> exps; 
-                                                                                     exps.push_back(std::shared_ptr<Expr>((yyvsp[0].expr)));
-                                                                                     (yyval.constructList) = new ConstructList<Expr>(getPos(),exps);}
+    {(yyval.stmt) = (yyvsp[0].ifStmt);}
 #line 2003 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 69:
+  case 61:
+#line 297 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.stmt) = (yyvsp[0].whileStmt);}
+#line 2009 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 62:
+#line 298 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.stmt) = (yyvsp[0].forStmt);}
+#line 2015 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 63:
+#line 299 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.stmt) = (yyvsp[0].switchStmt);}
+#line 2021 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 64:
+#line 300 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.stmt) = (yyvsp[0].printStmt);}
+#line 2027 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 65:
 #line 301 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.constructList)=(yyvsp[0].constructList); auto lst = (yyvsp[0].constructList); lst->push_back(std::shared_ptr<Expr>((yyvsp[-2].expr)));
-                                                                                     (yyval.constructList) = lst;}
-#line 2010 "src/y.tab.c" /* yacc.c:1651  */
+    {(yyval.stmt) = (yyvsp[0].readStmt);}
+#line 2033 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 70:
-#line 303 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.returnStmt) = new ReturnStmt(getPos(), std::shared_ptr<Expr>(nullptr));}
-#line 2016 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 71:
-#line 304 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.returnStmt) = new ReturnStmt(getPos(), std::shared_ptr<Expr>((yyvsp[0].expr)));}
-#line 2022 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 72:
-#line 305 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.ifStmt) = new IfStmt(getPos(), std::shared_ptr<Expr>((yyvsp[-1].expr)),
-			                                                                             std::shared_ptr<ConstructList<Stmt>>((yyvsp[0].stmtList)),
-                                                                                                     nullptr);}
-#line 2030 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 73:
-#line 308 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.ifStmt) = new IfStmt(getPos(), std::shared_ptr<Expr>((yyvsp[-3].expr)),
-                                                                                                     std::shared_ptr<ConstructList<Stmt>>((yyvsp[-2].stmtList)),
-                                                                                                     std::make_shared<ElseIf>(getPos(),
-                                                                                                                std::shared_ptr<IfStmt>((yyvsp[0].ifStmt))));}
+  case 66:
+#line 302 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.constructList) = nullptr;}
 #line 2039 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 74:
-#line 312 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.ifStmt) = new IfStmt(getPos(), std::shared_ptr<Expr>((yyvsp[-3].expr)),
+  case 67:
+#line 303 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.constructList) = (yyvsp[0].constructList);}
+#line 2045 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 68:
+#line 304 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {std::deque<std::shared_ptr<Node>> exps; 
+                                                                                     exps.push_front(std::shared_ptr<Expr>((yyvsp[0].expr)));
+                                                                                     (yyval.constructList) = new ConstructList<Expr>(getPos((yylsp[0])),exps);}
+#line 2053 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 69:
+#line 307 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.constructList)=(yyvsp[0].constructList); auto lst = (yyvsp[0].constructList); lst->push_front(std::shared_ptr<Expr>((yyvsp[-2].expr)));
+                                                                                     (yyval.constructList) = lst;}
+#line 2060 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 70:
+#line 309 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.returnStmt) = new ReturnStmt(getPos((yylsp[0])), std::shared_ptr<Expr>(nullptr));}
+#line 2066 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 71:
+#line 310 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.returnStmt) = new ReturnStmt(getPos((yylsp[-1])), std::shared_ptr<Expr>((yyvsp[0].expr)));}
+#line 2072 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 72:
+#line 311 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.ifStmt) = new IfStmt(getPos((yylsp[-2])), std::shared_ptr<Expr>((yyvsp[-1].expr)),
+			                                                                             std::shared_ptr<ConstructList<Stmt>>((yyvsp[0].stmtList)),
+                                                                                                     nullptr);}
+#line 2080 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 73:
+#line 314 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.ifStmt) = new IfStmt(getPos((yylsp[-4])), std::shared_ptr<Expr>((yyvsp[-3].expr)),
                                                                                                      std::shared_ptr<ConstructList<Stmt>>((yyvsp[-2].stmtList)),
-                                                                                                     std::make_shared<Else>(getPos(),
+                                                                                                     std::make_shared<ElseIf>(getPos((yylsp[-1])),
+                                                                                                                std::shared_ptr<IfStmt>((yyvsp[0].ifStmt))));}
+#line 2089 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 74:
+#line 318 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.ifStmt) = new IfStmt(getPos((yylsp[-4])), std::shared_ptr<Expr>((yyvsp[-3].expr)),
+                                                                                                     std::shared_ptr<ConstructList<Stmt>>((yyvsp[-2].stmtList)),
+                                                                                                     std::make_shared<Else>(getPos((yylsp[-1])),
                                                                                                        std::shared_ptr<ConstructList<Stmt>>((yyvsp[0].stmtList))));}
-#line 2048 "src/y.tab.c" /* yacc.c:1651  */
+#line 2098 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 75:
-#line 317 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.forStmt) = new ForStmt(getPos(), std::make_shared<Id>(getPos(), std::string((yyvsp[-7].id))), 
+#line 323 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.forStmt) = new ForStmt(getPos((yylsp[-8])), std::make_shared<Id>(getPos((yylsp[-7])), std::string((yyvsp[-7].id))), 
                                                                                                     std::shared_ptr<Expr>((yyvsp[-5].expr)),
                                                                                                       std::shared_ptr<Expr>((yyvsp[-3].expr)),
                                                                                                       std::shared_ptr<Expr>((yyvsp[-1].expr)),
                                                                                                       std::shared_ptr<ConstructList<Stmt>>((yyvsp[0].stmtList)));}
-#line 2058 "src/y.tab.c" /* yacc.c:1651  */
+#line 2108 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 76:
-#line 323 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.forStmt) = new ForStmt(getPos(), 
-                                                                                                    std::make_shared<Id>(getPos(), std::string((yyvsp[-5].id))), 
+#line 329 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.forStmt) = new ForStmt(getPos((yylsp[-6])), 
+                                                                                                    std::make_shared<Id>(getPos((yylsp[-5])), std::string((yyvsp[-5].id))), 
                                                                                                     std::shared_ptr<Expr>((yyvsp[-3].expr)),
                                                                                                       std::shared_ptr<Expr>((yyvsp[-1].expr)), nullptr,
                                                                                                       std::shared_ptr<ConstructList<Stmt>>((yyvsp[0].stmtList)));}
-#line 2068 "src/y.tab.c" /* yacc.c:1651  */
+#line 2118 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 77:
-#line 328 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.whileStmt) = new WhileStmt(getPos(), std::shared_ptr<Expr>((yyvsp[-1].expr)),
+#line 334 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.whileStmt) = new WhileStmt(getPos((yylsp[-2])), std::shared_ptr<Expr>((yyvsp[-1].expr)),
 			                                                                                std::shared_ptr<ConstructList<Stmt>>((yyvsp[0].stmtList)));}
-#line 2075 "src/y.tab.c" /* yacc.c:1651  */
+#line 2125 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 78:
-#line 330 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.switchStmt) = new SwitchStmt(getPos(), std::shared_ptr<Expr>((yyvsp[-3].expr)),
+#line 336 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.switchStmt) = new SwitchStmt(getPos((yylsp[-4])), std::shared_ptr<Expr>((yyvsp[-3].expr)),
 			                                                                             std::shared_ptr<ConstructList<Case>>((yyvsp[-1].caseList)),
                                                                                                      nullptr);}
-#line 2083 "src/y.tab.c" /* yacc.c:1651  */
+#line 2133 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 79:
-#line 334 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.switchStmt) = new SwitchStmt(getPos(), std::shared_ptr<Expr>((yyvsp[-5].expr)),
+#line 340 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.switchStmt) = new SwitchStmt(getPos((yylsp[-6])), std::shared_ptr<Expr>((yyvsp[-5].expr)),
                                                                                                      std::shared_ptr<ConstructList<Case>>((yyvsp[-3].caseList)),
                                                                                                      std::shared_ptr<ConstructList<Stmt>>((yyvsp[-1].stmtList)));}
-#line 2091 "src/y.tab.c" /* yacc.c:1651  */
+#line 2141 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 80:
-#line 337 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {}
-#line 2097 "src/y.tab.c" /* yacc.c:1651  */
+#line 343 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.switchStmt)=nullptr;}
+#line 2147 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 81:
-#line 338 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {}
-#line 2103 "src/y.tab.c" /* yacc.c:1651  */
+#line 344 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.switchStmt)=nullptr;}
+#line 2153 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 82:
-#line 339 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.case_) = new Case(getPos(), std::shared_ptr<Expr>((yyvsp[-1].expr)),
-			                                                                           std::shared_ptr<ConstructList<Stmt>>((yyvsp[0].stmtList)));}
-#line 2110 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 83:
-#line 341 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {}
-#line 2116 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 84:
-#line 342 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {std::vector<std::shared_ptr<Node>> cases;
-			                                                                                     cases.push_back(std::shared_ptr<Case>((yyvsp[0].case_)));
-                                                                                     (yyval.caseList) = new ConstructList<Case>(getPos(),cases);}
-#line 2124 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 85:
 #line 345 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.caseList)=(yyvsp[0].caseList); auto lst = (yyvsp[0].caseList); lst->push_back(std::shared_ptr<Case>((yyvsp[-1].case_)));
-                                                                                     (yyval.caseList) = lst;}
-#line 2131 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 86:
-#line 347 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.printStmt) = new PrintStmt(getPos(), std::shared_ptr<Expr>((yyvsp[0].expr)));}
-#line 2137 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 87:
-#line 348 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.readStmt) = new ReadStmt(getPos(), 
-                                                                                                    std::make_shared<Id>(getPos(), std::string((yyvsp[0].id))));}
-#line 2144 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 88:
-#line 350 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.expr) = new RelExpr(getPos(), RelExpr::RelOp::EQEQ,
-                                                                                                        std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
-                                                                                                        std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2152 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 89:
-#line 353 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.expr) = new RelExpr(getPos(), RelExpr::RelOp::LESS,
-                                                                                                        std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
-                                                                                                        std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
+    {(yyval.case_) = new Case(getPos((yylsp[-2])), std::shared_ptr<Expr>((yyvsp[-1].expr)),
+			                                                                           std::shared_ptr<ConstructList<Stmt>>((yyvsp[0].stmtList)));}
 #line 2160 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 90:
+  case 83:
+#line 347 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.case_)=nullptr;}
+#line 2166 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 84:
+#line 348 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {std::deque<std::shared_ptr<Node>> cases;
+			                                                                                     cases.push_front(std::shared_ptr<Case>((yyvsp[0].case_)));
+                                                                                     (yyval.caseList) = new ConstructList<Case>(getPos((yylsp[0])),cases);}
+#line 2174 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 85:
+#line 351 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.caseList)=(yyvsp[0].caseList); auto lst = (yyvsp[0].caseList); lst->push_front(std::shared_ptr<Case>((yyvsp[-1].case_)));
+                                                                                     (yyval.caseList) = lst;}
+#line 2181 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 86:
+#line 353 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.printStmt) = new PrintStmt(getPos((yylsp[-1])), std::shared_ptr<Expr>((yyvsp[0].expr)));}
+#line 2187 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 87:
+#line 354 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.readStmt) = new ReadStmt(getPos((yylsp[-1])), 
+                                                                                                    std::make_shared<Id>(getPos((yylsp[0])), std::string((yyvsp[0].id))));}
+#line 2194 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 88:
 #line 356 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.expr) = new RelExpr(getPos(), RelExpr::RelOp::LESS_EQ,
+    {(yyval.expr) = new RelExpr(getPos((yylsp[-1])), RelExpr::RelOp::EQEQ,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2168 "src/y.tab.c" /* yacc.c:1651  */
+#line 2202 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 89:
+#line 359 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.expr) = new RelExpr(getPos((yylsp[-1])), RelExpr::RelOp::LESS,
+                                                                                                        std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
+                                                                                                        std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
+#line 2210 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 90:
+#line 362 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.expr) = new RelExpr(getPos((yylsp[-1])), RelExpr::RelOp::LESS_EQ,
+                                                                                                        std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
+                                                                                                        std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
+#line 2218 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 91:
-#line 359 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.expr) = new RelExpr(getPos(), RelExpr::RelOp::GREATER_EQ,
+#line 365 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.expr) = new RelExpr(getPos((yylsp[-1])), RelExpr::RelOp::GREATER_EQ,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2176 "src/y.tab.c" /* yacc.c:1651  */
+#line 2226 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 92:
-#line 362 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.expr) = new RelExpr(getPos(), RelExpr::RelOp::GREATER,
+#line 368 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.expr) = new RelExpr(getPos((yylsp[-1])), RelExpr::RelOp::GREATER,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2184 "src/y.tab.c" /* yacc.c:1651  */
+#line 2234 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 93:
-#line 365 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.expr) = new RelExpr(getPos(), RelExpr::RelOp::DIFF,
+#line 371 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.expr) = new RelExpr(getPos((yylsp[-1])), RelExpr::RelOp::DIFF,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2192 "src/y.tab.c" /* yacc.c:1651  */
+#line 2242 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 94:
-#line 368 "src/MJLALRParser.y" /* yacc.c:1651  */
+#line 374 "src/MJLALRParser.y" /* yacc.c:1651  */
     {(yyval.expr) = (yyvsp[0].alExpr);}
-#line 2198 "src/y.tab.c" /* yacc.c:1651  */
+#line 2248 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 95:
-#line 370 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = new AlUnExpr(getPos(), AlUnExpr::AlUnOp::PLUS,
+#line 376 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.alExpr) = new AlUnExpr(getPos((yylsp[-1])), AlUnExpr::AlUnOp::PLUS,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2205 "src/y.tab.c" /* yacc.c:1651  */
+#line 2255 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 96:
-#line 372 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = new AlUnExpr(getPos(), AlUnExpr::AlUnOp::MINUS,
+#line 378 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.alExpr) = new AlUnExpr(getPos((yylsp[-1])), AlUnExpr::AlUnOp::MINUS,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2212 "src/y.tab.c" /* yacc.c:1651  */
+#line 2262 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 97:
-#line 374 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = new AlUnExpr(getPos(), AlUnExpr::AlUnOp::NOT,
+#line 380 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.alExpr) = new AlUnExpr(getPos((yylsp[-1])), AlUnExpr::AlUnOp::NOT,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2219 "src/y.tab.c" /* yacc.c:1651  */
+#line 2269 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 98:
-#line 376 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = new AlBinExpr(getPos(), AlBinExpr::AlBinOp::PLUS,
+#line 382 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.alExpr) = new AlBinExpr(getPos((yylsp[-1])), AlBinExpr::AlBinOp::PLUS,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2227 "src/y.tab.c" /* yacc.c:1651  */
+#line 2277 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 99:
-#line 379 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = new AlBinExpr(getPos(), AlBinExpr::AlBinOp::MINUS,
+#line 385 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.alExpr) = new AlBinExpr(getPos((yylsp[-1])), AlBinExpr::AlBinOp::MINUS,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2235 "src/y.tab.c" /* yacc.c:1651  */
+#line 2285 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
   case 100:
-#line 382 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = new AlBinExpr(getPos(), AlBinExpr::AlBinOp::OR,
-                                                                                                        std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
-                                                                                                        std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2243 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 101:
-#line 385 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = new AlBinExpr(getPos(), AlBinExpr::AlBinOp::TIMES,
-                                                                                                        std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
-                                                                                                        std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2251 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 102:
 #line 388 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = new AlBinExpr(getPos(), AlBinExpr::AlBinOp::DIV,
+    {(yyval.alExpr) = new AlBinExpr(getPos((yylsp[-1])), AlBinExpr::AlBinOp::OR,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2259 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 103:
-#line 391 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = new AlBinExpr(getPos(), AlBinExpr::AlBinOp::AND,
-                                                                                                        std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
-                                                                                                        std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2267 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 104:
-#line 394 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = new AlBinExpr(getPos(), AlBinExpr::AlBinOp::MOD,
-                                                                                                        std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
-                                                                                                        std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2275 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 105:
-#line 397 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = new ExprParen(getPos(), std::shared_ptr<Expr>((yyvsp[-1].expr)));}
-#line 2281 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 106:
-#line 398 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {}
-#line 2287 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 107:
-#line 399 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = new LitExpr<int>(getPos(), (yyvsp[0].litInt));}
 #line 2293 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 108:
+  case 101:
+#line 391 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.alExpr) = new AlBinExpr(getPos((yylsp[-1])), AlBinExpr::AlBinOp::TIMES,
+                                                                                                        std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
+                                                                                                        std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
+#line 2301 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 102:
+#line 394 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.alExpr) = new AlBinExpr(getPos((yylsp[-1])), AlBinExpr::AlBinOp::DIV,
+                                                                                                        std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
+                                                                                                        std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
+#line 2309 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 103:
+#line 397 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.alExpr) = new AlBinExpr(getPos((yylsp[-1])), AlBinExpr::AlBinOp::AND,
+                                                                                                        std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
+                                                                                                        std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
+#line 2317 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 104:
 #line 400 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = new LitExpr<std::string>(getPos(), std::string((yyvsp[0].litString)));}
-#line 2299 "src/y.tab.c" /* yacc.c:1651  */
+    {(yyval.alExpr) = new AlBinExpr(getPos((yylsp[-1])), AlBinExpr::AlBinOp::MOD,
+                                                                                                        std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
+                                                                                                        std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
+#line 2325 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 109:
-#line 401 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = (yyvsp[0].var);}
-#line 2305 "src/y.tab.c" /* yacc.c:1651  */
+  case 105:
+#line 403 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.alExpr) = new ExprParen(getPos((yylsp[-2])), std::shared_ptr<Expr>((yyvsp[-1].expr)));}
+#line 2331 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 110:
-#line 402 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.alExpr) = new FunctionCallExpr(getPos(),
-                                                                                          std::shared_ptr<Var>((yyvsp[-3].var)),
-                                                                                          std::shared_ptr<ConstructList<Expr>>((yyvsp[-1].constructList)));}
-#line 2313 "src/y.tab.c" /* yacc.c:1651  */
+  case 106:
+#line 404 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.alExpr)=nullptr;}
+#line 2337 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 111:
+  case 107:
 #line 405 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {}
-#line 2319 "src/y.tab.c" /* yacc.c:1651  */
+    {(yyval.alExpr) = new LitExpr<int>(getPos((yylsp[0])), (yyvsp[0].litInt));}
+#line 2343 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
-  case 112:
+  case 108:
 #line 406 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.var) = new Var(getPos(), 
-                                                                                                        std::make_shared<Id>(getPos(), std::string((yyvsp[-1].id))), 
-                                                                                                        std::shared_ptr<AccessOperation>((yyvsp[0].accessOp)));}
-#line 2327 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 113:
-#line 409 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.accessOp) = nullptr;}
-#line 2333 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 114:
-#line 410 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.accessOp) = new DotAccess(getPos(), 
-                                                                                                        std::make_shared<Id>(getPos(), std::string((yyvsp[-1].id))),
-                                                                                                        std::shared_ptr<AccessOperation>((yyvsp[0].accessOp)));}
-#line 2341 "src/y.tab.c" /* yacc.c:1651  */
-    break;
-
-  case 115:
-#line 413 "src/MJLALRParser.y" /* yacc.c:1651  */
-    {(yyval.accessOp) = new BracketAccess(getPos(),
-                                                                                          std::shared_ptr<ConstructList<Expr>>((yyvsp[-2].constructList)),
-                                                                                          std::shared_ptr<AccessOperation>((yyvsp[0].accessOp)));}
+    {(yyval.alExpr) = new LitExpr<std::string>(getPos((yylsp[0])), std::string((yyvsp[0].litString)));}
 #line 2349 "src/y.tab.c" /* yacc.c:1651  */
     break;
 
+  case 109:
+#line 407 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.alExpr) = (yyvsp[0].var);}
+#line 2355 "src/y.tab.c" /* yacc.c:1651  */
+    break;
 
-#line 2353 "src/y.tab.c" /* yacc.c:1651  */
+  case 110:
+#line 408 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.alExpr) = new FunctionCallExpr(getPos((yylsp[-2])),
+                                                                                          std::shared_ptr<Var>((yyvsp[-3].var)),
+                                                                                          std::shared_ptr<ConstructList<Expr>>((yyvsp[-1].constructList)));}
+#line 2363 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 111:
+#line 411 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.var) = new Var(getPos((yyloc)), 
+                                                                                                        std::make_shared<Id>(getPos((yylsp[-1])), std::string((yyvsp[-1].id))), 
+                                                                                                        std::shared_ptr<AccessOperation>((yyvsp[0].accessOp)));}
+#line 2371 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 112:
+#line 414 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.accessOp) = nullptr;}
+#line 2377 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 113:
+#line 415 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.accessOp) = new DotAccess(getPos((yylsp[-2])), 
+                                                                                                        std::make_shared<Id>(getPos((yylsp[-1])), std::string((yyvsp[-1].id))),
+                                                                                                        std::shared_ptr<AccessOperation>((yyvsp[0].accessOp)));}
+#line 2385 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+  case 114:
+#line 418 "src/MJLALRParser.y" /* yacc.c:1651  */
+    {(yyval.accessOp) = new BracketAccess(getPos((yylsp[-3])),
+                                                                                          std::shared_ptr<ConstructList<Expr>>((yyvsp[-2].constructList)),
+                                                                                          std::shared_ptr<AccessOperation>((yyvsp[0].accessOp)));}
+#line 2393 "src/y.tab.c" /* yacc.c:1651  */
+    break;
+
+
+#line 2397 "src/y.tab.c" /* yacc.c:1651  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2370,6 +2414,7 @@ yyreduce:
   YY_STACK_PRINT (yyss, yyssp);
 
   *++yyvsp = yyval;
+  *++yylsp = yyloc;
 
   /* Now 'shift' the result of the reduction.  Determine what state
      that goes to, based on the state we popped back to and the rule
@@ -2434,7 +2479,7 @@ yyerrlab:
 #endif
     }
 
-
+  yyerror_range[1] = yylloc;
 
   if (yyerrstatus == 3)
     {
@@ -2450,7 +2495,7 @@ yyerrlab:
       else
         {
           yydestruct ("Error: discarding",
-                      yytoken, &yylval);
+                      yytoken, &yylval, &yylloc);
           yychar = YYEMPTY;
         }
     }
@@ -2504,9 +2549,9 @@ yyerrlab1:
       if (yyssp == yyss)
         YYABORT;
 
-
+      yyerror_range[1] = *yylsp;
       yydestruct ("Error: popping",
-                  yystos[yystate], yyvsp);
+                  yystos[yystate], yyvsp, yylsp);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -2516,6 +2561,11 @@ yyerrlab1:
   *++yyvsp = yylval;
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 
+  yyerror_range[2] = yylloc;
+  /* Using YYLLOC is tempting, but would change the location of
+     the lookahead.  YYLOC is available though.  */
+  YYLLOC_DEFAULT (yyloc, yyerror_range, 2);
+  *++yylsp = yyloc;
 
   /* Shift the error token.  */
   YY_SYMBOL_PRINT ("Shifting", yystos[yyn], yyvsp, yylsp);
@@ -2555,7 +2605,7 @@ yyreturn:
          user semantic actions for why this is necessary.  */
       yytoken = YYTRANSLATE (yychar);
       yydestruct ("Cleanup: discarding lookahead",
-                  yytoken, &yylval);
+                  yytoken, &yylval, &yylloc);
     }
   /* Do not reclaim the symbols of the rule whose action triggered
      this YYABORT or YYACCEPT.  */
@@ -2564,7 +2614,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-                  yystos[*yyssp], yyvsp);
+                  yystos[*yyssp], yyvsp, yylsp);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -2577,12 +2627,15 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 416 "src/MJLALRParser.y" /* yacc.c:1910  */
+#line 421 "src/MJLALRParser.y" /* yacc.c:1910  */
 
 
 
 Position getPos() {
-    return Position{current_line, offset};
+    return Position{-1,-1};
+}
+Position getPos(YYLTYPE loc) {
+    return Position{loc.first_line, loc.first_column};
 }
 
 void yyerror(char *s) { 

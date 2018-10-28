@@ -1,4 +1,4 @@
-program string ;
+program string;
 
 class $oi {
     declarations

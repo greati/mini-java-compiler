@@ -102,69 +102,13 @@ extern int yydebug;
     LAMBDA = 55
   };
 #endif
-/* Tokens.  */
-#define END_OF_FILE 0
-#define TOK_PROGRAM 1
-#define TOK_IDENTIFIER 2
-#define TOK_SEMICOLON 3
-#define TOK_CLASS 4
-#define TOK_LCURLY 5
-#define TOK_RCURLY 6
-#define TOK_DECLARATIONS 7
-#define TOK_ENDDECLARATIONS 8
-#define TOK_EQUALS 9
-#define TOK_COMMA 10
-#define TOK_INT 11
-#define TOK_STRING 12
-#define TOK_LRSQUARE 13
-#define TOK_METHOD 14
-#define TOK_LPAREN 15
-#define TOK_RPAREN 16
-#define TOK_VOID 17
-#define TOK_VAL 18
-#define TOK_ARROBA 19
-#define TOK_LSQUARE 20
-#define TOK_RSQUARE 21
-#define TOK_ASSIGN 22
-#define TOK_RETURN 23
-#define TOK_IF 24
-#define TOK_ELSE 25
-#define TOK_FOR 26
-#define TOK_TO 27
-#define TOK_STEP 28
-#define TOK_WHILE 29
-#define TOK_SWITCH 30
-#define TOK_CASE 31
-#define TOK_DEFAULT 32
-#define TOK_PRINT 33
-#define TOK_READ 34
-#define TOK_LESS 35
-#define TOK_LESSEQ 36
-#define TOK_EQEQ 37
-#define TOK_DIFF 38
-#define TOK_GREATEREQ 39
-#define TOK_GREATER 40
-#define TOK_PLUS 41
-#define TOK_UPLUS 42
-#define TOK_MINUS 43
-#define TOK_UMINUS 44
-#define TOK_NOT 45
-#define TOK_2PIPE 46
-#define TOK_ASTERISK 47
-#define TOK_SLASH 48
-#define TOK_AND 49
-#define TOK_MOD 50
-#define TOK_INTEGERCONSTANT 51
-#define TOK_STRINGCONSTANT 52
-#define TOK_DOT 53
-#define LAMBDA 55
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 24 "src/MJLALRParser.y" /* yacc.c:1913  */
+#line 27 "src/MJLALRParser.y" /* yacc.c:1913  */
 
     Var *var;
     Type *type;
@@ -209,7 +153,7 @@ union YYSTYPE
     ConstructList<MethodDecl>* methodDeclList;
     ConstructList<FieldDecl>* fieldDeclList;
 
-#line 213 "include/y.tab.h" /* yacc.c:1913  */
+#line 157 "include/y.tab.h" /* yacc.c:1913  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -217,9 +161,23 @@ typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 #endif
 
+/* Location type.  */
+#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
+typedef struct YYLTYPE YYLTYPE;
+struct YYLTYPE
+{
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+};
+# define YYLTYPE_IS_DECLARED 1
+# define YYLTYPE_IS_TRIVIAL 1
+#endif
+
 
 extern YYSTYPE yylval;
-
+extern YYLTYPE yylloc;
 int yyparse (void);
 
 #endif /* !YY_YY_INCLUDE_Y_TAB_H_INCLUDED  */

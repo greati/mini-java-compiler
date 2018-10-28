@@ -71,7 +71,7 @@ lalrparserast:
 	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(BINDIR)
 	lex -o $(SRCDIR)/lex.yy.c $(SRCDIR)/mjclexer.l
-	yacc -o $(SRCDIR)/y.tab.c $(SRCDIR)/MJLALRParser.y --defines=include/y.tab.h
+	bison -o $(SRCDIR)/y.tab.c $(SRCDIR)/MJLALRParser.y --defines=include/y.tab.h
 	g++ $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJMessage.cpp -o $(BINDIR)/mjclalr $(SRCDIR)/y.tab.c $(SRCDIR)/lex.yy.c $(INCFLAG) -std=c++11
 
 lexer:

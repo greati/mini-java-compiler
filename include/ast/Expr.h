@@ -6,6 +6,7 @@
 #include <vector>
 #include <exception>
 #include <sstream>
+#include <deque>
 
 class Id : public Node {
     protected:
@@ -25,13 +26,17 @@ class Id : public Node {
 template<typename T>
 class ConstructList : public Node {
     protected:
-        std::vector<std::shared_ptr<Node>> constructs;
+        std::deque<std::shared_ptr<Node>> constructs;
     public:
-        ConstructList (Position _pos, std::vector<std::shared_ptr<Node>> _constructs) 
+        ConstructList (Position _pos, std::deque<std::shared_ptr<Node>> _constructs) 
         : Node {_pos}, constructs {_constructs} {}
         
         void push_back(std::shared_ptr<T> elem) {
             this->constructs.push_back(elem);
+        }
+
+        void push_front(std::shared_ptr<T> elem) {
+            this->constructs.push_front(elem);
         }
 
         bool empty() {return constructs.empty();}
@@ -1208,7 +1213,5 @@ class ArrayCreationVarInit : public VarInit {
             arrayInit.computeLevel();
         }
 };
-
-
 
 #endif

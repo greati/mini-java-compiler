@@ -9,7 +9,10 @@
 #include "Lexer.h"
 #include "MJMessage.h"
 
-#define YY_USER_ACTION offset += yyleng;
+#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = current_line;\
+        yylloc.first_column = offset;\
+        yylloc.last_column = offset + yyleng - 1;\
+        offset += yyleng;
 
 int offset = 1;                         // Keep track of the column number
 int current_line = 1;                   // Keep track of the line number
@@ -20,6 +23,8 @@ int current_line = 1;                   // Keep track of the line number
 void lexer_error(std::string);
 
 %}
+
+%option yylineno
 
 ws                  [\t ]+
 comment             #.*
