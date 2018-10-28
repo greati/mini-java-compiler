@@ -195,7 +195,7 @@ union YYSTYPE
     char* id;
     char* litString;
     int litInt;
-    ConstructList<std::string>* stringList;
+    ConstructList<Id>* stringList;
     MethodReturnType* methodReturnType;
     MethodDecl* methodDecl;
     Block* block;

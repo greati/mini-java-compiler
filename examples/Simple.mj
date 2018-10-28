@@ -1,20 +1,7 @@
 program Example;
 
-
 class Expr {
-    declarations
-        MyClass[][] v = @MyClass[10][10];
-        int a, b;
-        int bool;
-    enddeclarations
-    method void makeExpr() {
-        print "oi";
-        read a;
-        bool := not ((a != b) && b || (a || b));
-        bool := a + b - a * b / a % b + a + v[2,3].name[19];
-        a := -2;
-        a := +2;
-        makeExpr()
-    }
+
 }
+
 
