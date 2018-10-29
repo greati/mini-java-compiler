@@ -1121,15 +1121,21 @@ class Program : public Node {
     
         std::string show() const override {
             std::stringstream ss;
-            ss << "programName: " << *id << std::endl;
-            ss << "classes: " << *classes << std::endl;
+            if (id != nullptr)
+                ss << "programName: " << *id << std::endl;
+            if (classes != nullptr)
+                ss << "classes: " << *classes << std::endl;
             return ss.str();
         }
         void computeLevel() override {
-            id->level = this->level + 1;
-            classes->level = this->level + 1;
-            id->computeLevel();
-            classes->computeLevel();
+            if (id != nullptr) {
+                id->level = this->level + 1;
+                id->computeLevel();
+            }
+            if (classes != nullptr) {
+                classes->level = this->level + 1;
+                classes->computeLevel();
+            }
         }
 };
 

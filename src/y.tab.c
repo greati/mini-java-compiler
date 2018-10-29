@@ -2645,8 +2645,10 @@ void yyerror(char *s) {
 
 int main() {
     auto ret = yyparse();
-    root->computeLevel();
-    std::cout << root->print() << std::endl;
+    if (root != nullptr) {
+        root->computeLevel();
+        std::cout << root->print() << std::endl;
+    }
     return ret;
 }
 
