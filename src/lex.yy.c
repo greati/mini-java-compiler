@@ -954,12 +954,12 @@ YY_RULE_SETUP
 case 16:
 YY_RULE_SETUP
 #line 56 "src/mjclexer.l"
-{ yylval.typeName = yytext; return TOK_INT; }
+{ yylval.typeName = strdup(yytext); return TOK_INT; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 57 "src/mjclexer.l"
-{ yylval.typeName = yytext; return TOK_STRING; }
+{ yylval.typeName = strdup(yytext); return TOK_STRING; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
@@ -969,7 +969,7 @@ YY_RULE_SETUP
 case 19:
 YY_RULE_SETUP
 #line 59 "src/mjclexer.l"
-{ yylval.typeName = yytext; return TOK_VOID; }
+{ yylval.typeName = strdup(yytext); return TOK_VOID; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP

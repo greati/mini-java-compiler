@@ -1,0 +1,431 @@
+{
+pos: [1,1]
+programName: {
+pos: [1,9]
+idName: BinarySearchProgram
+}
+classes: {
+pos: [3,1]
+[
+{
+pos: [3,1]
+className: {
+pos: [3,7]
+idName: BinarySearch
+}
+body: {
+pos: [4,1]
+methods: {
+pos: [5,2]
+[
+{
+pos: [5,2]
+return: {
+pos: [5,9]
+type: {
+pos: [5,9]
+name: int
+numBrackets: 0
+}
+}
+methodName: {
+pos: [5,13]
+idName: binarySearch
+}
+params: {
+pos: [5,51]
+[
+{
+pos: [5,26]
+val: 0
+type: {
+pos: [5,26]
+name: int
+numBrackets: 1
+}
+ids: {
+pos: [5,32]
+[
+{
+pos: [5,32]
+idName: arr
+}
+]}
+}
+{
+pos: [5,37]
+val: 0
+type: {
+pos: [5,37]
+name: int
+numBrackets: 0
+}
+ids: {
+pos: [5,41]
+[
+{
+pos: [5,41]
+idName: l
+}
+]}
+}
+{
+pos: [5,44]
+val: 0
+type: {
+pos: [5,44]
+name: int
+numBrackets: 0
+}
+ids: {
+pos: [5,48]
+[
+{
+pos: [5,48]
+idName: r
+}
+]}
+}
+{
+pos: [5,51]
+val: 0
+type: {
+pos: [5,51]
+name: int
+numBrackets: 0
+}
+ids: {
+pos: [5,55]
+[
+{
+pos: [5,55]
+idName: x
+}
+]}
+}
+]}
+block: {
+pos: [6,3]
+decls: {
+pos: [6,3]
+fields: {
+pos: [7,4]
+[
+{
+pos: [7,4]
+type: {
+pos: [7,4]
+name: int
+numBrackets: 0
+}
+varsDecls: {
+pos: [7,8]
+[
+{
+pos: [7,8]
+varDeclId: {
+pos: [7,8]
+id: {
+pos: [7,8]
+idName: mid
+}
+numBrackets: 0
+}
+}
+]}
+}
+]}
+}
+stmts: {
+pos: [23,3]
+[
+{
+pos: [10,3]
+expr: {
+pos: [10,8]
+op: >=
+lhs{
+pos: [10,6]
+id: {
+pos: [10,6]
+idName: r
+}
+}
+rhs{
+pos: [10,11]
+value: 1
+}
+}
+stmts: {
+pos: [21,4]
+[
+{
+pos: [12,4]
+what: assignStmt
+var: {
+pos: [12,4]
+id: {
+pos: [12,4]
+idName: mid
+}
+}
+expr: {
+pos: [12,13]
+op: +
+lhs: {
+pos: [12,11]
+id: {
+pos: [12,11]
+idName: l
+}
+}
+rhs: {
+pos: [12,22]
+op: /
+lhs: {
+pos: [12,15]
+op: -
+lhs: {
+pos: [12,16]
+id: {
+pos: [12,16]
+idName: r
+}
+}
+rhs: {
+pos: [12,20]
+id: {
+pos: [12,20]
+idName: l
+}
+}
+}
+rhs: {
+pos: [12,23]
+value: 2
+}
+}
+}
+}
+{
+pos: [13,4]
+expr: {
+pos: [13,16]
+op: ==
+lhs{
+pos: [13,7]
+id: {
+pos: [13,7]
+idName: arr
+}
+accessOp: {
+pos: [13,10]
+exprList: {
+pos: [13,11]
+[
+{
+pos: [13,11]
+id: {
+pos: [13,11]
+idName: mid
+}
+}
+]}
+}
+}
+rhs{
+pos: [13,19]
+id: {
+pos: [13,19]
+idName: x
+}
+}
+}
+stmts: {
+pos: [15,5]
+[
+{
+pos: [15,5]
+stmt: return
+expr: {
+pos: [15,12]
+id: {
+pos: [15,12]
+idName: mid
+}
+}
+}
+]}
+elsePart: {
+pos: [17,13]
+ifStmt: {
+pos: [17,18]
+expr: {
+pos: [17,30]
+op: >
+lhs{
+pos: [17,21]
+id: {
+pos: [17,21]
+idName: arr
+}
+accessOp: {
+pos: [17,24]
+exprList: {
+pos: [17,25]
+[
+{
+pos: [17,25]
+id: {
+pos: [17,25]
+idName: mid
+}
+}
+]}
+}
+}
+rhs{
+pos: [17,32]
+id: {
+pos: [17,32]
+idName: x
+}
+}
+}
+stmts: {
+pos: [19,5]
+[
+{
+pos: [19,5]
+stmt: return
+expr: {
+pos: [19,24]
+var: {
+pos: [19,12]
+id: {
+pos: [19,12]
+idName: binarySearch
+}
+}
+actualParams: {
+pos: [19,40]
+[
+{
+pos: [19,25]
+id: {
+pos: [19,25]
+idName: arr
+}
+}
+{
+pos: [19,30]
+id: {
+pos: [19,30]
+idName: l
+}
+}
+{
+pos: [19,36]
+op: -
+lhs: {
+pos: [19,33]
+id: {
+pos: [19,33]
+idName: mid
+}
+}
+rhs: {
+pos: [19,37]
+value: 1
+}
+}
+{
+pos: [19,40]
+id: {
+pos: [19,40]
+idName: x
+}
+}
+]}
+}
+}
+]}
+}
+}
+}
+{
+pos: [21,4]
+stmt: return
+expr: {
+pos: [21,23]
+var: {
+pos: [21,11]
+id: {
+pos: [21,11]
+idName: binarySearch
+}
+}
+actualParams: {
+pos: [21,39]
+[
+{
+pos: [21,24]
+id: {
+pos: [21,24]
+idName: arr
+}
+}
+{
+pos: [21,32]
+op: +
+lhs: {
+pos: [21,29]
+id: {
+pos: [21,29]
+idName: mid
+}
+}
+rhs: {
+pos: [21,33]
+value: 1
+}
+}
+{
+pos: [21,36]
+id: {
+pos: [21,36]
+idName: r
+}
+}
+{
+pos: [21,39]
+id: {
+pos: [21,39]
+idName: x
+}
+}
+]}
+}
+}
+]}
+}
+{
+pos: [23,3]
+stmt: return
+expr: {
+pos: [23,10]
+op: -
+expr: {
+pos: [23,11]
+value: 1
+}
+}
+}
+]}
+}
+}
+]}
+}
+}
+]}
+}

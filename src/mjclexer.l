@@ -53,10 +53,10 @@ enddeclarations         { return TOK_ENDDECLARATIONS; }
 \[\]                    { return TOK_LRSQUARE; }
 \[                      { return TOK_LSQUARE; }
 \]                      { return TOK_RSQUARE; }
-int                     { yylval.typeName = yytext; return TOK_INT; }
-string                  { yylval.typeName = yytext; return TOK_STRING; }
+int                     { yylval.typeName = strdup(yytext); return TOK_INT; }
+string                  { yylval.typeName = strdup(yytext); return TOK_STRING; }
 method                  { return TOK_METHOD; }
-void                    { yylval.typeName = yytext; return TOK_VOID; }
+void                    { yylval.typeName = strdup(yytext); return TOK_VOID; }
 \(                      { return TOK_LPAREN; }
 \)                      { return TOK_RPAREN; }
 val                     { return TOK_VAL; }

@@ -441,6 +441,7 @@ class AssignStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
+            ss << "what: " << "assignStmt" << std::endl;
             ss << "var: " << *var << std::endl;
             ss << "expr: " << *expr << std::endl;
             return ss.str();
@@ -467,6 +468,7 @@ class FunctionCallStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
+            ss << "what: " << "functionCallStmt" << std::endl;
             ss << "var: " << *var << std::endl;
             if (actualParams != nullptr)
                 ss << "actualParams: " << *actualParams << std::endl;
@@ -491,6 +493,7 @@ class ReadStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
+            ss << "what: " << "readStmt" << std::endl;
             ss << "id: " << *id << std::endl;
             return ss.str();
         }
@@ -511,6 +514,7 @@ class PrintStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
+            ss << "what: " << "printStmt" << std::endl;
             ss << "expr: " << *expr << std::endl;
             return ss.str();
         }
@@ -533,6 +537,7 @@ class Case : public Node {
 
         std::string show() const override {
             std::stringstream ss;
+            ss << "what: " << "case" << std::endl;
             ss << "expr: " << *expr << std::endl;
             ss << "stmts: " << *stmts << std::endl;
             return ss.str();
@@ -568,6 +573,7 @@ class SwitchStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
+            ss << "what: " << "switchStmt" << std::endl;
             ss << "expr: " << *expr << std::endl;
             ss << "caseList: " << *caseList << std::endl;
             if (defaultStmts  != nullptr) 
@@ -599,6 +605,7 @@ class WhileStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
+            ss << "what: " << "whileStmt" << std::endl;
             ss << "expr: " << *expr << std::endl;
             return ss.str();
         }
@@ -631,6 +638,7 @@ class ForStmt : public Stmt {
 
         std::string show() const override {
             std::stringstream ss;
+            ss << "what: " << "forStmt" << std::endl;
             ss << "id: " << *id << std::endl;
             ss << "assignExpr: " << *assignExpr << std::endl;
             if (stepExpr != nullptr)
