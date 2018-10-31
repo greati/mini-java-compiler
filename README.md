@@ -40,8 +40,8 @@ each of those parsers by following these steps:
 Yacc was used to generate a bottom-up parser for the Mini-Java Language.
 You can run it by following these steps:
 
-1. run `$ make lalrparser`
+1. run `$ make lalrparserast
 2. run `$ ./bin/mjclalr < your-program.mj`
 
-
+This will print an Abstract Syntax Tree of the program.
 
