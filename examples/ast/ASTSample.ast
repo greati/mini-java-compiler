@@ -1,0 +1,165 @@
+{
+pos: [1,1]
+programName: {
+pos: [1,9]
+idName: ExampleAST
+}
+classes: {
+pos: [3,1]
+[
+{
+pos: [3,1]
+className: {
+pos: [3,7]
+idName: ClassExampleAST
+}
+body: {
+pos: [3,23]
+decls: {
+pos: [4,5]
+fields: {
+pos: [5,9]
+[
+{
+pos: [5,9]
+type: {
+pos: [5,9]
+name: int
+numBrackets: 0
+}
+varsDecls: {
+pos: [5,16]
+[
+{
+pos: [5,13]
+varDeclId: {
+pos: [5,13]
+id: {
+pos: [5,13]
+idName: a
+}
+numBrackets: 0
+}
+}
+{
+pos: [5,16]
+varDeclId: {
+pos: [5,16]
+id: {
+pos: [5,16]
+idName: b
+}
+numBrackets: 0
+}
+varInit: {
+pos: [5,20]
+expr: {
+pos: [5,20]
+value: 2
+}
+}
+}
+]}
+}
+]}
+}
+methods: {
+pos: [8,5]
+[
+{
+pos: [8,5]
+return: {
+pos: [8,12]
+type: {
+pos: [8,12]
+name: string
+numBrackets: 0
+}
+}
+methodName: {
+pos: [8,19]
+idName: sum
+}
+params: {
+pos: [8,23]
+[
+{
+pos: [8,23]
+val: 0
+type: {
+pos: [8,23]
+name: int
+numBrackets: 0
+}
+ids: {
+pos: [8,27]
+[
+{
+pos: [8,27]
+idName: c
+}
+]}
+}
+]}
+block: {
+pos: [8,28]
+stmts: {
+pos: [11,9]
+[
+{
+pos: [9,9]
+what: readStmt
+id: {
+pos: [9,14]
+idName: a
+}
+}
+{
+pos: [10,9]
+what: readStmt
+id: {
+pos: [10,14]
+idName: b
+}
+}
+{
+pos: [11,9]
+what: printStmt
+expr: {
+pos: [11,21]
+op: +
+lhs: {
+pos: [11,17]
+op: +
+lhs: {
+pos: [11,15]
+id: {
+pos: [11,15]
+idName: a
+}
+}
+rhs: {
+pos: [11,19]
+id: {
+pos: [11,19]
+idName: b
+}
+}
+}
+rhs: {
+pos: [11,23]
+id: {
+pos: [11,23]
+idName: c
+}
+}
+}
+}
+]}
+}
+}
+]}
+}
+}
+]}
+}

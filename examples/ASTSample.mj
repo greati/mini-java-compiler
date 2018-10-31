@@ -1,0 +1,13 @@
+program ExampleAST;
+
+class ClassExampleAST {
+    declarations
+        int a, b = 2;
+    enddeclarations
+    
+    method string sum(int c) {
+        read a;
+        read b;
+        print a + b + c
+    }
+}

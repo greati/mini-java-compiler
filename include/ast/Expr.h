@@ -3,22 +3,103 @@
 
 #include "Node.h"
 #include <memory>
+#include <vector>
+#include <exception>
+#include <sstream>
+#include <deque>
+
+class Id : public Node {
+    protected:
+        std::string id;
+    public:
+        Id (Position _pos, std::string _id) : Node {_pos}, id {_id} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "idName: " << id << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {};
+};
+
+template<typename T>
+class ConstructList : public Node {
+    protected:
+        std::deque<std::shared_ptr<Node>> constructs;
+    public:
+        ConstructList (Position _pos, std::deque<std::shared_ptr<Node>> _constructs) 
+        : Node {_pos}, constructs {_constructs} {}
+        
+        void push_back(std::shared_ptr<T> elem) {
+            this->constructs.push_back(elem);
+        }
+
+        void push_front(std::shared_ptr<T> elem) {
+            this->constructs.push_front(elem);
+        }
+
+        bool empty() {return constructs.empty();}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "[" << std::endl;
+            for (auto i : this->constructs) {
+                if (i != nullptr)
+                    ss << (*i) << std::endl;
+            }
+            ss << "]";
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            for (auto i : this->constructs) {
+                if (i != nullptr) {
+                    (*i).level = this->level + 1;
+                    (*i).computeLevel();
+                }
+            }
+        }
+};
 
 class Expr : public Node {
 
     public:
-        Expr(Node::Position _pos) : Node {_pos} {};
+        Expr(Position _pos) : Node {_pos} {};
+
+        std::string show() const override {
+            return "";
+        }
+        void computeLevel() override {};
+};
+
+class AlExpr : public Expr {
+
+    public:
+        AlExpr(Position _pos) : Expr {_pos} {};
+
+};
+
+class ExprParen : public AlExpr {
+    protected:
+        std::shared_ptr<Expr> expr;
+    public:
+        ExprParen(Position _pos, std::shared_ptr<Expr> _expr)
+        : AlExpr {_pos}, expr {_expr} {}
+
+        std::string show() const override {
+            return expr->show();
+        }
+
+        void computeLevel() override {
+            expr->level = this->level + 1;
+            expr->computeLevel();
+        };
 
 };
 
 class RelExpr : public Expr {
-
-    protected:
-
-        RelOp op;
-        std::shared_ptr<AlExpr> lhs;
-        std::shared_ptr<AlExpr> rhs;
-
+ 
     public:
 
         enum class RelOp {
@@ -30,25 +111,55 @@ class RelExpr : public Expr {
             DIFF
         };
 
-        RelExpr(Node::Position _pos, RelOp _op, std::shared_ptr<AlExpr> _lhs, std::shared_ptr<AlExpr> _rhs) 
-            : Expr {_pos}, op{_op}, lhs{_lhs}, rhs{_rhs} {}
+   protected:
 
-};
-
-class AlExpr : public Expr {
-
-    public:
-        AlExpr(Node::Position _pos) : Expr {_pos} {};
-
-};
-
-class AlBinExpr : public AlExpr {
-
-    protected:
-
-        AlBinOp op;
+        RelOp op;
         std::shared_ptr<AlExpr> lhs;
         std::shared_ptr<AlExpr> rhs;
+
+    public:
+        RelExpr(Position _pos, RelOp _op, std::shared_ptr<AlExpr> _lhs, std::shared_ptr<AlExpr> _rhs) 
+            : Expr {_pos}, op{_op}, lhs{_lhs}, rhs{_rhs} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "op: ";
+            switch (op) {
+                case RelOp::LESS:
+                    ss << "<";
+                    break;
+                case RelOp::LESS_EQ:
+                    ss << "<=";
+                    break;
+                case RelOp::EQEQ:
+                    ss << "==";
+                    break;
+                case RelOp::GREATER:
+                    ss << ">";
+                    break;
+                case RelOp::GREATER_EQ:
+                    ss << ">=";
+                    break;
+                case RelOp::DIFF:
+                    ss << "!=";
+                    break;
+            }
+            ss << std::endl;
+            ss << "lhs" << *lhs << std::endl;
+            ss << "rhs" << *rhs << std::endl;
+            return ss.str();
+        }
+        void computeLevel() override {
+            lhs->level = this->level + 1;
+            rhs->level = this->level + 1;
+            lhs->computeLevel();
+            rhs->computeLevel();
+        };
+
+};
+
+
+class AlBinExpr : public AlExpr {
 
     public:
 
@@ -62,17 +173,58 @@ class AlBinExpr : public AlExpr {
             OR            
         };
 
-        AlExpr(Node::Position _pos, AlBinOp _op, std::shared_ptr<AlExpr> _lhs, std::shared_ptr<AlExpr> _rhs) 
+    protected:
+
+        AlBinOp op;
+        std::shared_ptr<AlExpr> lhs;
+        std::shared_ptr<AlExpr> rhs;
+
+    public:
+        AlBinExpr(Position _pos, AlBinOp _op, std::shared_ptr<AlExpr> _lhs, std::shared_ptr<AlExpr> _rhs) 
             : AlExpr {_pos}, op{_op}, lhs{_lhs}, rhs{_rhs} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "op: ";
+            switch (op) {
+                case AlBinOp::PLUS:
+                    ss << "+";
+                    break;
+                case AlBinOp::MINUS:
+                    ss << "-";
+                    break;
+                case AlBinOp::TIMES:
+                    ss << "*";
+                    break;
+                case AlBinOp::DIV:
+                    ss << "/";
+                    break;
+                case AlBinOp::MOD:
+                    ss << "%";
+                    break;
+                case AlBinOp::AND:
+                    ss << "&&";
+                    break;
+                case AlBinOp::OR:
+                    ss << "||";
+                    break;
+            }
+            ss << std::endl;
+            ss << "lhs: "<< *lhs << std::endl;
+            ss << "rhs: " << *rhs << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            lhs->level = this->level + 1;
+            rhs->level = this->level + 1;
+            lhs->computeLevel();
+            rhs->computeLevel();
+        };
 };
 
 class AlUnExpr : public AlExpr {
     
-    protected:
-        
-        AlUnOp op;
-        std::shared_ptr<AlExpr> alexpr;
-        
     public:
         
         enum class AlUnOp {
@@ -81,8 +233,38 @@ class AlUnExpr : public AlExpr {
             NOT
         };
 
-        AlUnExpr(Node::Position _pos, AlUnOp _op, std::shared_ptr<AlExpr> _alexpr) 
+    protected:
+        
+        AlUnOp op;
+        std::shared_ptr<AlExpr> alexpr;
+
+    public:
+        AlUnExpr(Position _pos, AlUnOp _op, std::shared_ptr<AlExpr> _alexpr) 
             : AlExpr{_pos}, op{_op}, alexpr{_alexpr} {};
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "op: ";
+            switch(op) {
+                case AlUnOp::PLUS:
+                    ss << "+";
+                    break;
+                case AlUnOp::MINUS:
+                    ss << "-";
+                    break;
+                case AlUnOp::NOT:
+                    ss << "not";
+                    break;
+            }
+            ss << std::endl;
+            ss << "expr: " << *alexpr << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            alexpr->level = this->level + 1;
+            alexpr->computeLevel();
+        };
 };
 
 template<typename T>
@@ -92,17 +274,957 @@ class LitExpr : public AlExpr {
         T val;
 
     public:
-        LitExpr(Node::Position _pos, T _val) : AlExpr{_pos}, val {_val} {}
+        LitExpr(Position _pos, T _val) : AlExpr{_pos}, val {_val} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "value: " << val << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {}
 };
 
-class IdExpr : public AlExpr {
+
+
+class AccessOperation : public Node {
+    public:
+        AccessOperation(Position _pos) : Node {_pos} {};
+
+        std::string show() const override {
+            return "";
+        }
+
+        void computeLevel() override {};
+};
+
+class BracketAccess : public AccessOperation {
     
     protected:
-        std::string id;
+        std::shared_ptr<ConstructList<Expr>> expressionList; 
+        std::shared_ptr<AccessOperation> accessOperation;
 
     public:
-        IdExpr(Node::Position _pos, std::string _id) : AlExpr{_pos}, id{_id} {}
+        BracketAccess(
+                Position _pos, 
+                std::shared_ptr<ConstructList<Expr>> _expressionList,
+                std::shared_ptr<AccessOperation> _accessOperation) 
+            : AccessOperation{_pos}, expressionList{_expressionList}, accessOperation{_accessOperation} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "exprList: " << *expressionList << std::endl;
+            if (accessOperation != nullptr)
+                ss << "accessOp: " << *accessOperation << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            this->expressionList->level = this->level + 1;
+            expressionList->computeLevel();
+            if (accessOperation != nullptr) {
+                this->accessOperation->level = this->level + 1;
+                accessOperation->computeLevel();
+            }
+        }
 };
 
+class DotAccess : public AccessOperation {
+    protected:
+        std::shared_ptr<Id> id;
+        std::shared_ptr<AccessOperation> accessOperation;
+    public:
+        DotAccess(
+                Position _pos, 
+                std::shared_ptr<Id> _id,
+                std::shared_ptr<AccessOperation> _accessOperation) 
+            : AccessOperation{_pos}, id{_id}, accessOperation{_accessOperation} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "id: " << *id << std::endl;
+            if (accessOperation != nullptr)
+                ss << "accessOp: " << *accessOperation << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            id->level = this->level + 1;
+            id->computeLevel();
+            if (accessOperation != nullptr) {
+                accessOperation->level = this->level + 1;
+                accessOperation->computeLevel();
+            }
+        }
+};
+
+class Var : public AlExpr {
+    protected:
+        std::shared_ptr<Id> id;
+        std::shared_ptr<AccessOperation> accessOperation;
+    public:
+        Var(
+                Position _pos, 
+                std::shared_ptr<Id> _id,
+                std::shared_ptr<AccessOperation> _accessOperation) 
+            : AlExpr{_pos}, id{_id}, accessOperation{_accessOperation} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "id: " << *id << std::endl;
+            if (accessOperation != nullptr)
+                ss << "accessOp: " << *accessOperation << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            id->level = this->level + 1;
+            id->computeLevel();
+            if (accessOperation != nullptr) {
+                accessOperation->level = this->level + 1;
+                accessOperation->computeLevel();
+            }
+        }
+};
+
+class FunctionCallExpr : public AlExpr {
+    protected:
+        std::shared_ptr<Var> var;
+        std::shared_ptr<ConstructList<Expr>> actualParams;
+    public:
+        FunctionCallExpr(
+                Position _pos,
+                std::shared_ptr<Var> _var,
+                std::shared_ptr<ConstructList<Expr>> _actualParams) 
+        : AlExpr{_pos}, var{_var}, actualParams{_actualParams}{}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "var: " << *var << std::endl;
+            if (actualParams != nullptr)
+                ss << "actualParams: " << *actualParams << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            var->level = this->level + 1;
+            var->computeLevel();
+            if (actualParams != nullptr) {
+                actualParams->level = this->level + 1;
+                actualParams->computeLevel();
+            }
+        }
+};
+
+
+class Stmt : public Node {
+    public:
+        Stmt(Position _pos) : Node {_pos} {};
+
+        std::string show() const override {
+            return "";
+        }
+        void computeLevel() override {};
+};
+
+class AssignStmt : public Stmt {
+    protected:
+	std::shared_ptr<Var> var;
+	std::shared_ptr<Expr> expr;
+    public:
+        AssignStmt(
+            Position _pos,
+	    std::shared_ptr<Var> _var,
+	    std::shared_ptr<Expr> _expr)
+	: Stmt {_pos}, var {_var}, expr {_expr} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "what: " << "assignStmt" << std::endl;
+            ss << "var: " << *var << std::endl;
+            ss << "expr: " << *expr << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            var->level = this->level + 1;
+            expr->level = this->level + 1;
+            var->computeLevel();
+            expr->computeLevel();
+        }
+};
+
+class FunctionCallStmt : public Stmt {
+    protected:
+        std::shared_ptr<Var> var;
+        std::shared_ptr<ConstructList<Expr>> actualParams;
+    public:
+        FunctionCallStmt(
+                Position _pos,
+                std::shared_ptr<Var> _var,
+                std::shared_ptr<ConstructList<Expr>> _actualParams) 
+        : Stmt{_pos}, var{_var}, actualParams{_actualParams}{}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "what: " << "functionCallStmt" << std::endl;
+            ss << "var: " << *var << std::endl;
+            if (actualParams != nullptr)
+                ss << "actualParams: " << *actualParams << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            var->level = this->level + 1;
+            var->computeLevel();
+            if (actualParams != nullptr) {
+                actualParams->level = this->level + 1;
+                actualParams->computeLevel();
+            }
+        }
+};
+
+class ReadStmt : public Stmt {
+    protected:
+        std::shared_ptr<Id> id;
+    public:
+        ReadStmt(Position _pos, std::shared_ptr<Id> _id) : Stmt {_pos}, id{_id} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "what: " << "readStmt" << std::endl;
+            ss << "id: " << *id << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            id->level = this->level + 1;
+            id->computeLevel();
+        }
+
+};
+
+class PrintStmt : public Stmt {
+    protected:
+	std::shared_ptr<Expr> expr;
+    public:
+        PrintStmt(Position _pos, std::shared_ptr<Expr> _expr)
+		: Stmt {_pos}, expr{_expr} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "what: " << "printStmt" << std::endl;
+            ss << "expr: " << *expr << std::endl;
+            return ss.str();
+        }
+        void computeLevel() override {
+            expr->level = this->level + 1;
+            expr->computeLevel();
+        }
+};
+
+class Case : public Node {
+    protected:
+        std::shared_ptr<Expr> expr;
+        std::shared_ptr<ConstructList<Stmt>> stmts;
+    public:
+        Case(
+                Position _pos,
+                std::shared_ptr<Expr> _expr,
+                std::shared_ptr<ConstructList<Stmt>> _stmts)
+            : Node {_pos}, expr {_expr}, stmts {_stmts} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "what: " << "case" << std::endl;
+            ss << "expr: " << *expr << std::endl;
+            ss << "stmts: " << *stmts << std::endl;
+            return ss.str();
+        }
+        void computeLevel() override {
+            expr->level = this->level + 1;
+            stmts->level = this->level + 1;
+            expr->computeLevel();
+            stmts->computeLevel();
+        };
+
+};
+
+class SwitchStmt : public Stmt {
+    protected:
+        std::shared_ptr<Expr> expr;
+        std::shared_ptr<ConstructList<Case>> caseList;
+        std::shared_ptr<ConstructList<Stmt>> defaultStmts;
+    public:
+        SwitchStmt(
+                Position _pos,
+                std::shared_ptr<Expr> _expr,
+                std::shared_ptr<ConstructList<Case>> _caseList,
+                std::shared_ptr<ConstructList<Stmt>> _defaultsStmts) 
+        : Stmt{_pos}, expr {_expr}, defaultStmts {_defaultsStmts} {
+
+            if (_caseList->empty()) 
+                throw std::invalid_argument("case list can't be empty in a switch");
+            else
+                this->caseList = _caseList;
+
+        }
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "what: " << "switchStmt" << std::endl;
+            ss << "expr: " << *expr << std::endl;
+            ss << "caseList: " << *caseList << std::endl;
+            if (defaultStmts  != nullptr) 
+                ss << "defaultStmts" << *defaultStmts << std::endl;
+            return ss.str();
+        }
+        void computeLevel() override {
+            expr->level = this->level + 1;
+            expr->computeLevel();
+            caseList->level = this->level + 1;
+            caseList->computeLevel();
+            if (defaultStmts != nullptr) {
+                defaultStmts->level = this->level + 1;
+                defaultStmts->computeLevel();
+            }
+        }
+};
+
+class WhileStmt : public Stmt {
+    protected:
+        std::shared_ptr<Expr> expr;
+        std::shared_ptr<ConstructList<Stmt>> stmts;
+    public:
+        WhileStmt(
+                Position _pos,
+                std::shared_ptr<Expr> _expr,
+                std::shared_ptr<ConstructList<Stmt>> _stmts)
+            : Stmt {_pos}, expr {_expr}, stmts {_stmts} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "what: " << "whileStmt" << std::endl;
+            ss << "expr: " << *expr << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            expr->level = this->level + 1;
+            stmts->level = this->level + 1;
+            expr->computeLevel();
+            stmts->computeLevel();
+        }
+};
+
+class ForStmt : public Stmt {
+    protected:
+        std::shared_ptr<Id> id;
+        std::shared_ptr<Expr> assignExpr;
+        std::shared_ptr<Expr> toExpr;
+        std::shared_ptr<Expr> stepExpr;
+        std::shared_ptr<ConstructList<Stmt>> stmts;
+    public:
+        ForStmt(
+                Position _pos,
+                std::shared_ptr<Id> _id,
+                std::shared_ptr<Expr> _assignExpr,
+                std::shared_ptr<Expr> _toExpr,
+                std::shared_ptr<Expr> _stepExpr,
+                std::shared_ptr<ConstructList<Stmt>> _stmts)
+            : Stmt {_pos}, id {_id}, assignExpr {_assignExpr}, 
+            toExpr{_toExpr}, stepExpr{_stepExpr}, stmts {_stmts} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "what: " << "forStmt" << std::endl;
+            ss << "id: " << *id << std::endl;
+            ss << "assignExpr: " << *assignExpr << std::endl;
+            if (stepExpr != nullptr)
+                ss << "stepExpr: " << *stepExpr << std::endl;
+            ss << "toExpr: " << *toExpr << std::endl;
+            ss <<"stmts: " << *stmts << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            id->level = this->level + 1;
+            id->computeLevel();
+            assignExpr->level = this->level + 1;
+            assignExpr->computeLevel();
+            toExpr->level = this->level + 1;
+            toExpr->computeLevel();
+            if (stepExpr != nullptr) {
+                stepExpr->level = this->level + 1;
+                stepExpr->computeLevel();
+            }
+            stmts->level = this->level + 1;
+            stmts->computeLevel();
+        }
+};
+
+class ElsePart : public Node {
+    public:
+        ElsePart(Position _pos) : Node {_pos} {}
+
+        std::string show() const override {
+            return "";
+        }
+        void computeLevel() override {};
+};
+
+class Else : public ElsePart {
+    protected:
+        std::shared_ptr<ConstructList<Stmt>> stmts;
+    public:
+        Else (
+                Position _pos,
+                std::shared_ptr<ConstructList<Stmt>> _stmts) 
+            : ElsePart {_pos}, stmts {_stmts} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "stmts: " << *stmts << std::endl;
+            return ss.str();
+        }
+        void computeLevel() override {
+            stmts->level = this->level + 1;
+            stmts->computeLevel();
+        }
+};
+
+class IfStmt : public Stmt {
+    protected:
+	std::shared_ptr<Expr> expr;
+	std::shared_ptr<ConstructList<Stmt>> stmts;
+	std::shared_ptr<ElsePart> elsePart;
+    public:
+	IfStmt (
+		Position _pos,
+		std::shared_ptr<Expr> _expr,
+		std::shared_ptr<ConstructList<Stmt>> _stmts,
+		std::shared_ptr<ElsePart> _elsePart)
+	    : Stmt {_pos}, expr {_expr}, stmts {_stmts}, elsePart {_elsePart} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "expr: " << *expr << std::endl;
+            ss << "stmts: " << *stmts << std::endl;
+            if (elsePart != nullptr)
+                ss << "elsePart: " << *elsePart << std::endl;
+            return ss.str();
+        }
+        
+        void computeLevel() override {
+            expr->level = this->level + 1;
+            expr->computeLevel();
+            stmts->level = this->level + 1;
+            stmts->computeLevel();
+            if (elsePart != nullptr) {
+                elsePart->level = this->level + 1;
+                elsePart->computeLevel();
+            }
+        }
+
+};
+
+class ElseIf : public ElsePart {
+    protected:
+	std::shared_ptr<IfStmt> ifStmt;
+    public:
+        ElseIf(
+                Position _pos,
+                std::shared_ptr<IfStmt> _ifStmt) 
+            : ElsePart {_pos}, ifStmt {_ifStmt} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "ifStmt: " << *ifStmt << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            ifStmt->level = this->level + 1; 
+            ifStmt->computeLevel();
+        }
+};
+
+class ReturnStmt : public Stmt {
+    protected:
+        std::shared_ptr<Expr> expr;
+    public:
+        ReturnStmt (
+                Position _pos,
+                std::shared_ptr<Expr> _expr)
+            : Stmt {_pos}, expr {_expr} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "stmt: " << "return" << std::endl;
+            if (expr != nullptr)
+                ss << "expr: " << *expr << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            if (expr != nullptr) {
+                expr->level = this->level + 1;
+                expr->computeLevel();
+            }
+        }
+};
+
+
+
+class Type : public Node {
+    protected:
+        int numBrackets;
+        std::string typeName;
+    public:
+        Type(
+            Position _pos,
+	    int _numBrackets,
+            std::string _typeName)
+        : Node {_pos}, numBrackets {_numBrackets}, typeName {_typeName} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "name: " << typeName << std::endl;
+            ss << "numBrackets: " << numBrackets << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {}
+};
+
+class VarDeclId : public Node {
+    protected:
+        std::shared_ptr<Id> id;
+        int numBrackets;
+    public:
+        VarDeclId(Position _pos, std::shared_ptr<Id> _id, int _numBrackets) 
+        : Node {_pos}, id {_id}, numBrackets {_numBrackets} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "id: " << *id << std::endl;
+            ss << "numBrackets: " << numBrackets << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            id->level = this->level + 1;
+            id->computeLevel();
+        }
+
+};
+
+class VarInit : public Node {
+    public:
+        VarInit(Position _pos) : Node {_pos} {}
+
+        std::string show() const override {
+            return "";
+        }
+        void computeLevel() override {};
+};
+
+class FieldDeclVar : public Node {
+    protected:
+        std::shared_ptr<VarDeclId> varDeclId;
+        std::shared_ptr<VarInit> varInit;
+    public:
+        FieldDeclVar (
+            Position _pos,
+            std::shared_ptr<VarDeclId> _varDeclId,
+            std::shared_ptr<VarInit> _varInit) 
+        : Node {_pos}, varDeclId {_varDeclId}, varInit {_varInit} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            if (varDeclId != nullptr)
+                ss << "varDeclId: " << *varDeclId << std::endl;
+            if (varInit != nullptr) 
+                ss << "varInit: " << *varInit << std::endl; 
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            if (varDeclId != nullptr) {
+                varDeclId->level = this->level + 1;
+                varDeclId->computeLevel();
+            }
+            if (varInit != nullptr) {
+                varInit->level = this->level + 1;
+                varInit->computeLevel();
+            }
+        }
+
+};
+
+class FieldDecl : public Node {
+    protected:
+        std::shared_ptr<Type> type;
+        std::shared_ptr<ConstructList<FieldDeclVar>> varsDecls;
+    public:
+        FieldDecl (
+            Position _pos,
+            std::shared_ptr<Type> _type,
+            std::shared_ptr<ConstructList<FieldDeclVar>> _varDecls) 
+        : Node {_pos}, type {_type}, varsDecls {_varDecls} {} 
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "type: " << *type << std::endl;
+            ss << "varsDecls: " << *varsDecls << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            type->level = this->level + 1;
+            varsDecls->level = this->level + 1;
+            type->computeLevel();
+            varsDecls->computeLevel();
+        }
+};
+
+class Decls : public Node {
+    protected:
+        std::shared_ptr<ConstructList<FieldDecl>> fields;
+    public:
+        Decls(
+            Position _pos,
+            std::shared_ptr<ConstructList<FieldDecl>> _fields)
+        : Node {_pos}, fields{_fields} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            if (fields != nullptr)
+                ss << "fields: " << *fields << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            if (fields != nullptr) {
+                fields->level = this->level + 1;
+                fields->computeLevel();
+            }
+        }
+
+};
+
+class FormalParams : public Node {
+
+    protected:
+        bool val;
+        std::shared_ptr<Type> type;
+        std::shared_ptr<ConstructList<Id>> ids;
+
+    public:
+        FormalParams (
+            Position _pos,
+	    bool _val,
+            std::shared_ptr<Type> _type,
+            std::shared_ptr<ConstructList<Id>> _ids) 
+        : Node {_pos}, val {_val}, type {_type}, ids{_ids} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "val: " << val << std::endl;
+            ss << "type: " << *type << std::endl;
+            ss << "ids: " << *ids << std::endl; 
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            type->level = this->level + 1;
+            ids->level = this->level + 1;
+            type->computeLevel();
+            ids->computeLevel();
+        }
+};
+
+class Block : public Node {
+
+    protected:
+        std::shared_ptr<Decls> decls;
+        std::shared_ptr<ConstructList<Stmt>> stmts;
+    public:
+        Block(
+            Position _pos,
+            std::shared_ptr<Decls> _decls,
+            std::shared_ptr<ConstructList<Stmt>> _stmts) 
+        : Node {_pos}, decls {_decls}, stmts {_stmts} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            if (decls != nullptr) {
+                ss << "decls: " << *decls << std::endl; 
+            }
+            if (stmts != nullptr)
+                ss << "stmts: " << *stmts << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            if (decls != nullptr) {
+                decls->level = this->level + 1;
+                decls->computeLevel();
+            }
+            if (stmts != nullptr) {
+                stmts->level = this->level + 1;
+                stmts->computeLevel();
+            }
+        }
+};
+
+class MethodReturnType : public Node {
+    protected:
+        std::shared_ptr<Type> type;
+    public:
+        MethodReturnType(Position _pos, std::shared_ptr<Type> _type)
+        : Node {_pos}, type {_type} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            if (type != nullptr)
+                ss << "type: " << *type << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            if (type != nullptr) {
+                type->level = this->level + 1;
+                type->computeLevel();
+            }
+        }
+};
+
+class MethodDecl : public Node {
+    protected:
+        std::shared_ptr<MethodReturnType> returnType;
+        std::shared_ptr<Id> id;
+        std::shared_ptr<ConstructList<FormalParams>> params;
+        std::shared_ptr<Block> block;
+    public:
+        MethodDecl(
+            Position _pos,
+            std::shared_ptr<MethodReturnType> _returnType,
+            std::shared_ptr<Id> _id,
+            std::shared_ptr<ConstructList<FormalParams>> _params,
+            std::shared_ptr<Block> _block) 
+        : Node {_pos}, returnType {_returnType}, id {_id}, params {_params}, block {_block} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            if (returnType != nullptr)
+                ss << "return: " << *returnType << std::endl;
+            ss << "methodName: " << *id << std::endl;
+            if (params != nullptr) {
+                ss << "params: " << *params << std::endl;
+            }
+            if (block != nullptr)
+                ss << "block: " << *block << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            if (returnType != nullptr) {
+                returnType->level = this->level + 1;
+                returnType->computeLevel();
+            }
+
+            id->level = this->level + 1;
+            id->computeLevel();
+
+            if (params != nullptr) {
+                params->level = this->level + 1;
+                params->computeLevel();
+            }
+
+            if (block != nullptr) {
+                block->level = this->level + 1;
+                block->computeLevel();
+            }
+        }
+};
+
+class ClassBody : public Node {
+    protected:
+        std::shared_ptr<Decls> decls;
+        std::shared_ptr<ConstructList<MethodDecl>> methods;
+    public:
+        ClassBody (
+            Position _pos,
+            std::shared_ptr<Decls> _decls,
+            std::shared_ptr<ConstructList<MethodDecl>> _methods) 
+        : Node {_pos}, decls {_decls}, methods {_methods} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            if (decls != nullptr) {
+                ss << "decls: " << *decls << std::endl;
+            }
+            if (methods != nullptr) {
+                ss << "methods: " << *methods << std::endl;
+            }
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            if (decls != nullptr) {
+                decls->level = this->level + 1;
+                decls->computeLevel();
+            }
+
+            if (methods != nullptr) {
+                methods->level = this->level + 1;
+                methods->computeLevel();
+            }
+        }
+};
+
+class ClassDecl : public Node {
+    protected:
+        std::shared_ptr<Id> id;
+        std::shared_ptr<ClassBody> body;
+    public:
+        ClassDecl (
+            Position _pos,
+            std::shared_ptr<Id> _id,
+            std::shared_ptr<ClassBody> _body) 
+        : Node {_pos}, id {_id}, body {_body} {} 
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "className: " << *id << std::endl;
+            if (body != nullptr) 
+                ss << "body: " << *body << std::endl;
+            return ss.str();
+        }
+        void computeLevel() override {
+            if (id != nullptr) {
+                id->level = this->level + 1;
+                id->computeLevel();
+            }
+
+            if (body != nullptr) {
+                body->level = this->level + 1;
+                body->computeLevel();
+            }
+        }
+};
+
+class Program : public Node {
+    protected:
+        std::shared_ptr<Id> id;
+        std::shared_ptr<ConstructList<ClassDecl>> classes;
+    public:
+        Program (
+            Position _pos,
+            std::shared_ptr<Id> _id,
+            std::shared_ptr<ConstructList<ClassDecl>> _classes) 
+        : Node {_pos}, id {_id}, classes {_classes} {}
+    
+        std::string show() const override {
+            std::stringstream ss;
+            if (id != nullptr)
+                ss << "programName: " << *id << std::endl;
+            if (classes != nullptr)
+                ss << "classes: " << *classes << std::endl;
+            return ss.str();
+        }
+        void computeLevel() override {
+            if (id != nullptr) {
+                id->level = this->level + 1;
+                id->computeLevel();
+            }
+            if (classes != nullptr) {
+                classes->level = this->level + 1;
+                classes->computeLevel();
+            }
+        }
+};
+
+class ExprVarInit : public VarInit {
+    protected:
+        std::shared_ptr<Expr> expr;
+    public:
+        ExprVarInit (Position _pos, std::shared_ptr<Expr> _expr) 
+        : VarInit {_pos}, expr {_expr} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "expr: " << *expr << std::endl;
+            return ss.str();
+        }
+        void computeLevel() override {
+            expr->level = this->level + 1;
+            expr->computeLevel();
+        }
+};
+
+class ArrayInitVarInit : public VarInit {
+    protected:
+        std::shared_ptr<ConstructList<VarInit>> arrayInit;
+    public:
+        ArrayInitVarInit (Position _pos,
+			std::shared_ptr<ConstructList<VarInit>> _arrayInit) 
+        : VarInit {_pos}, arrayInit {_arrayInit} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "arrayInit: " << *arrayInit << std::endl;
+            return ss.str();
+        }
+        void computeLevel() override {
+            arrayInit->level = this->level + 1;
+            arrayInit->computeLevel();
+        }
+};
+
+class ArrayCreation : public VarInit {
+    protected:
+	std::shared_ptr<Type> type;
+	std::shared_ptr<ConstructList<Expr>> dims;
+    public:
+        ArrayCreation(
+            Position _pos, 
+            std::shared_ptr<Type> _type, 
+            std::shared_ptr<ConstructList<Expr>> _dims)
+        : VarInit {_pos}, type {_type}, dims {_dims} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "type: " << *type << std::endl;
+            ss << "dims: " << *dims << std::endl;
+            return ss.str();
+        }
+        void computeLevel() override {
+            type->level = this->level + 1;
+            dims->level = this->level + 1;
+            type->computeLevel();
+            dims->computeLevel();
+        }
+};
+
+class ArrayCreationVarInit : public VarInit {
+     protected:
+        ArrayCreation arrayInit;
+    public:
+        ArrayCreationVarInit (Position _pos, ArrayCreation _arrayCreation) 
+        : VarInit {_pos}, arrayInit {_arrayCreation} {}
+
+        std::string show() const override {
+            std::stringstream ss;
+            ss << "arrayInit: " << arrayInit << std::endl;
+            return ss.str();
+        }
+
+        void computeLevel() override {
+            arrayInit.level = this->level + 1;
+            arrayInit.computeLevel();
+        }
+};
 
 #endif
