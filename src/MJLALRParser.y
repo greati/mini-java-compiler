@@ -191,15 +191,15 @@ class_decl_list         : class_decl                                            
 class_decl              : TOK_CLASS TOK_IDENTIFIER class_body                       {$$ = new ClassDecl(getPos(@1), 
                                                                                         std::make_shared<Id>(getPos(@2), std::string($2)),
 			                                                                  std::shared_ptr<ClassBody>($3));}
-                        | error class_body                                {$$=nullptr;}
+                        | TOK_CLASS error class_body                                {$$=nullptr;}
 class_body              : TOK_LCURLY decls_opt method_decl_list TOK_RCURLY          {$$ = new ClassBody(getPos(@$), std::shared_ptr<Decls>($2),
 			                                                                  std::shared_ptr<ConstructList<MethodDecl>>($3));}
-                        | error TOK_RCURLY                               {$$=nullptr;}
+                        | TOK_LCURLY error TOK_RCURLY                               {$$=nullptr;}
 decls_opt               : /* empty */                                               {$$ = nullptr;}
 			| decls                                                     {$$ = $1;}
 decls                   : TOK_DECLARATIONS field_decl_list_decls TOK_ENDDECLARATIONS{$$ = new Decls(getPos(@1), 
                                                                                             std::shared_ptr<ConstructList<FieldDecl>>($2));}
-                        | error TOK_ENDDECLARATIONS                                 {$$=nullptr;}
+                        | TOK_DECLARATIONS error TOK_ENDDECLARATIONS                                 {$$=nullptr;}
 method_decl_list        : /* empty */                                               {$$ = nullptr;}
 			| method_decl method_decl_list                              {$$=$2; std::deque<std::shared_ptr<Node>> methodDecls;
                                                                                      auto lst = $2 == nullptr
@@ -236,7 +236,7 @@ method_decl             : TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPARE
                                                                                           std::make_shared<Id>(getPos(@3), std::string($3)), 
                                                                                           std::shared_ptr<ConstructList<FormalParams>>($5),
                                                                                           std::shared_ptr<Block>($7));}
-                        | error TOK_RPAREN block
+                        | TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN error TOK_RPAREN block
                                                                                     {$$=nullptr;}
 method_return_type      : TOK_VOID                                                  {$$ = new MethodReturnType(getPos(@1), std::shared_ptr<Type>(nullptr));}
                         | type                                                      {$$ = new MethodReturnType(getPos(@1), std::shared_ptr<Type>($1));}
@@ -341,7 +341,6 @@ switch_stmt             : TOK_SWITCH expr TOK_LCURLY case_list TOK_RCURLY       
                                                                                                      std::shared_ptr<ConstructList<Case>>($4),
                                                                                                      std::shared_ptr<ConstructList<Stmt>>($6));}
                         | error TOK_LCURLY                               {$$=nullptr;}
-                        | error TOK_RCURLY               {$$=nullptr;}
 case                    : TOK_CASE expr stmt_list                                   {$$ = new Case(getPos(@1), std::shared_ptr<Expr>($2),
 			                                                                           std::shared_ptr<ConstructList<Stmt>>($3));}
                         | error stmt_list                                  {$$=nullptr;}
