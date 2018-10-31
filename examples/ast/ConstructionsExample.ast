@@ -1,0 +1,759 @@
+{
+pos: [1,1]
+programName: {
+pos: [1,9]
+idName: Example
+}
+classes: {
+pos: [34,1]
+[
+{
+pos: [3,1]
+className: {
+pos: [3,7]
+idName: Useless
+}
+body: {
+pos: [3,15]
+}
+}
+{
+pos: [5,1]
+className: {
+pos: [5,7]
+idName: QuasiUseless
+}
+body: {
+pos: [5,20]
+decls: {
+pos: [6,5]
+}
+}
+}
+{
+pos: [10,1]
+className: {
+pos: [10,7]
+idName: HalfUseless
+}
+body: {
+pos: [10,19]
+decls: {
+pos: [11,5]
+fields: {
+pos: [14,9]
+[
+{
+pos: [12,9]
+type: {
+pos: [12,9]
+name: MyClass
+numBrackets: 1
+}
+varsDecls: {
+pos: [12,19]
+[
+{
+pos: [12,19]
+varDeclId: {
+pos: [12,19]
+id: {
+pos: [12,19]
+idName: v
+}
+numBrackets: 0
+}
+varInit: {
+pos: [12,23]
+type: {
+pos: [12,24]
+name: MyClass
+numBrackets: 0
+}
+dims: {
+pos: [12,31]
+[
+{
+pos: [12,32]
+value: 10
+}
+]}
+}
+}
+]}
+}
+{
+pos: [13,9]
+type: {
+pos: [13,9]
+name: string
+numBrackets: 0
+}
+varsDecls: {
+pos: [13,19]
+[
+{
+pos: [13,16]
+varDeclId: {
+pos: [13,16]
+id: {
+pos: [13,16]
+idName: a
+}
+numBrackets: 0
+}
+}
+{
+pos: [13,19]
+varDeclId: {
+pos: [13,19]
+id: {
+pos: [13,19]
+idName: b
+}
+numBrackets: 0
+}
+}
+]}
+}
+{
+pos: [14,9]
+type: {
+pos: [14,9]
+name: int
+numBrackets: 2
+}
+varsDecls: {
+pos: [14,17]
+[
+{
+pos: [14,17]
+varDeclId: {
+pos: [14,17]
+id: {
+pos: [14,17]
+idName: identity
+}
+numBrackets: 0
+}
+varInit: {
+pos: [14,28]
+arrayInit: {
+pos: [14,52]
+[
+{
+pos: [14,30]
+arrayInit: {
+pos: [14,37]
+[
+{
+pos: [14,31]
+expr: {
+pos: [14,31]
+value: 1
+}
+}
+{
+pos: [14,34]
+expr: {
+pos: [14,34]
+value: 0
+}
+}
+{
+pos: [14,37]
+expr: {
+pos: [14,37]
+value: 0
+}
+}
+]}
+}
+{
+pos: [14,41]
+arrayInit: {
+pos: [14,48]
+[
+{
+pos: [14,42]
+expr: {
+pos: [14,42]
+value: 0
+}
+}
+{
+pos: [14,45]
+expr: {
+pos: [14,45]
+value: 1
+}
+}
+{
+pos: [14,48]
+expr: {
+pos: [14,48]
+value: 0
+}
+}
+]}
+}
+{
+pos: [14,52]
+arrayInit: {
+pos: [14,59]
+[
+{
+pos: [14,53]
+expr: {
+pos: [14,53]
+value: 0
+}
+}
+{
+pos: [14,56]
+expr: {
+pos: [14,56]
+value: 0
+}
+}
+{
+pos: [14,59]
+expr: {
+pos: [14,59]
+value: 1
+}
+}
+]}
+}
+]}
+}
+}
+]}
+}
+]}
+}
+}
+}
+{
+pos: [18,1]
+className: {
+pos: [18,7]
+idName: Switch
+}
+body: {
+pos: [18,14]
+methods: {
+pos: [19,5]
+[
+{
+pos: [19,5]
+return: {
+pos: [19,12]
+type: {
+pos: [19,12]
+name: string
+numBrackets: 0
+}
+}
+methodName: {
+pos: [19,19]
+idName: map
+}
+params: {
+pos: [19,23]
+[
+{
+pos: [19,23]
+val: 1
+type: {
+pos: [19,27]
+name: int
+numBrackets: 0
+}
+ids: {
+pos: [19,31]
+[
+{
+pos: [19,31]
+idName: key
+}
+]}
+}
+]}
+block: {
+pos: [19,34]
+stmts: {
+pos: [31,9]
+[
+{
+pos: [20,9]
+what: switchStmt
+expr: {
+pos: [20,16]
+id: {
+pos: [20,16]
+idName: key
+}
+}
+caseList: {
+pos: [24,13]
+[
+{
+pos: [21,13]
+what: case
+expr: {
+pos: [21,18]
+value: 1
+}
+stmts: {
+pos: [22,17]
+[
+{
+pos: [22,17]
+stmt: return
+expr: {
+pos: [22,24]
+value: "A"
+}
+}
+]}
+}
+{
+pos: [24,13]
+what: case
+expr: {
+pos: [24,18]
+value: 2
+}
+stmts: {
+pos: [25,17]
+[
+{
+pos: [25,17]
+stmt: return
+expr: {
+pos: [25,24]
+value: "B"
+}
+}
+]}
+}
+]}
+defaultStmts{
+pos: [28,17]
+[
+{
+pos: [28,17]
+stmt: return
+expr: {
+pos: [28,24]
+value: "Invalid"
+}
+}
+]}
+}
+{
+pos: [31,9]
+what: printStmt
+expr: {
+pos: [31,15]
+value: "Finished."
+}
+}
+]}
+}
+}
+]}
+}
+}
+{
+pos: [34,1]
+className: {
+pos: [34,7]
+idName: Expr
+}
+body: {
+pos: [34,12]
+decls: {
+pos: [35,5]
+fields: {
+pos: [38,9]
+[
+{
+pos: [36,9]
+type: {
+pos: [36,9]
+name: MyClass
+numBrackets: 2
+}
+varsDecls: {
+pos: [36,21]
+[
+{
+pos: [36,21]
+varDeclId: {
+pos: [36,21]
+id: {
+pos: [36,21]
+idName: v
+}
+numBrackets: 0
+}
+varInit: {
+pos: [36,25]
+type: {
+pos: [36,26]
+name: MyClass
+numBrackets: 0
+}
+dims: {
+pos: [36,37]
+[
+{
+pos: [36,34]
+value: 10
+}
+{
+pos: [36,38]
+value: 10
+}
+]}
+}
+}
+]}
+}
+{
+pos: [37,9]
+type: {
+pos: [37,9]
+name: int
+numBrackets: 0
+}
+varsDecls: {
+pos: [37,16]
+[
+{
+pos: [37,13]
+varDeclId: {
+pos: [37,13]
+id: {
+pos: [37,13]
+idName: a
+}
+numBrackets: 0
+}
+}
+{
+pos: [37,16]
+varDeclId: {
+pos: [37,16]
+id: {
+pos: [37,16]
+idName: b
+}
+numBrackets: 0
+}
+}
+]}
+}
+{
+pos: [38,9]
+type: {
+pos: [38,9]
+name: int
+numBrackets: 0
+}
+varsDecls: {
+pos: [38,13]
+[
+{
+pos: [38,13]
+varDeclId: {
+pos: [38,13]
+id: {
+pos: [38,13]
+idName: bool
+}
+numBrackets: 0
+}
+}
+]}
+}
+]}
+}
+methods: {
+pos: [40,5]
+[
+{
+pos: [40,5]
+return: {
+pos: [40,12]
+}
+methodName: {
+pos: [40,17]
+idName: makeExpr
+}
+block: {
+pos: [40,26]
+stmts: {
+pos: [46,9]
+[
+{
+pos: [41,9]
+what: readStmt
+id: {
+pos: [41,14]
+idName: a
+}
+}
+{
+pos: [42,9]
+what: assignStmt
+var: {
+pos: [42,9]
+id: {
+pos: [42,9]
+idName: bool
+}
+}
+expr: {
+pos: [42,17]
+op: not
+expr: {
+pos: [42,21]
+op: ||
+lhs: {
+pos: [42,31]
+op: &&
+lhs: {
+pos: [42,22]
+op: !=
+lhs{
+pos: [42,23]
+id: {
+pos: [42,23]
+idName: a
+}
+}
+rhs{
+pos: [42,28]
+id: {
+pos: [42,28]
+idName: b
+}
+}
+}
+rhs: {
+pos: [42,34]
+id: {
+pos: [42,34]
+idName: b
+}
+}
+}
+rhs: {
+pos: [42,39]
+op: ||
+lhs: {
+pos: [42,40]
+id: {
+pos: [42,40]
+idName: a
+}
+}
+rhs: {
+pos: [42,45]
+id: {
+pos: [42,45]
+idName: b
+}
+}
+}
+}
+}
+}
+{
+pos: [43,9]
+what: assignStmt
+var: {
+pos: [43,9]
+id: {
+pos: [43,9]
+idName: bool
+}
+}
+expr: {
+pos: [43,43]
+op: +
+lhs: {
+pos: [43,39]
+op: +
+lhs: {
+pos: [43,23]
+op: -
+lhs: {
+pos: [43,19]
+op: +
+lhs: {
+pos: [43,17]
+id: {
+pos: [43,17]
+idName: a
+}
+}
+rhs: {
+pos: [43,21]
+id: {
+pos: [43,21]
+idName: b
+}
+}
+}
+rhs: {
+pos: [43,35]
+op: %
+lhs: {
+pos: [43,31]
+op: /
+lhs: {
+pos: [43,27]
+op: *
+lhs: {
+pos: [43,25]
+id: {
+pos: [43,25]
+idName: a
+}
+}
+rhs: {
+pos: [43,29]
+id: {
+pos: [43,29]
+idName: b
+}
+}
+}
+rhs: {
+pos: [43,33]
+id: {
+pos: [43,33]
+idName: a
+}
+}
+}
+rhs: {
+pos: [43,37]
+id: {
+pos: [43,37]
+idName: b
+}
+}
+}
+}
+rhs: {
+pos: [43,41]
+id: {
+pos: [43,41]
+idName: a
+}
+}
+}
+rhs: {
+pos: [43,45]
+id: {
+pos: [43,45]
+idName: v
+}
+accessOp: {
+pos: [43,46]
+exprList: {
+pos: [43,49]
+[
+{
+pos: [43,47]
+value: 2
+}
+{
+pos: [43,49]
+value: 3
+}
+]}
+accessOp: {
+pos: [43,51]
+id: {
+pos: [43,52]
+idName: name
+}
+accessOp: {
+pos: [43,56]
+exprList: {
+pos: [43,57]
+[
+{
+pos: [43,57]
+value: 19
+}
+]}
+}
+}
+}
+}
+}
+}
+{
+pos: [44,9]
+what: assignStmt
+var: {
+pos: [44,9]
+id: {
+pos: [44,9]
+idName: a
+}
+}
+expr: {
+pos: [44,14]
+op: -
+expr: {
+pos: [44,15]
+value: 2
+}
+}
+}
+{
+pos: [45,9]
+what: assignStmt
+var: {
+pos: [45,9]
+id: {
+pos: [45,9]
+idName: a
+}
+}
+expr: {
+pos: [45,14]
+op: +
+expr: {
+pos: [45,15]
+value: 2
+}
+}
+}
+{
+pos: [46,9]
+what: functionCallStmt
+var: {
+pos: [46,9]
+id: {
+pos: [46,9]
+idName: makeExpr
+}
+}
+}
+]}
+}
+}
+]}
+}
+}
+]}
+}

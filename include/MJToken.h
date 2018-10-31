@@ -2,6 +2,8 @@
 #define __TOKEN__
 
 #include <string>
+#include "ast/Node.h"
+#include "ast/Expr.h"
 #include "y.tab.h"
 
 typedef int MJToken;
