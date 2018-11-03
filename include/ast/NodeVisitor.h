@@ -27,7 +27,7 @@ class NodeVisitor {
         virtual void visitFunctionCallExpr(FunctionCallExpr *) = 0;
         virtual void visitStmt(Stmt *) = 0;
         virtual void visitAssignStmt(AssignStmt *) = 0;
-        virtual void visitFunctionCallStmt(FunctionCallExpr *) = 0;
+        virtual void visitFunctionCallStmt(FunctionCallStmt *) = 0;
         virtual void visitReadStmt(ReadStmt *) = 0;
         virtual void visitPrintStmt(PrintStmt *) = 0;
         virtual void visitCase(Case *) = 0;

@@ -449,6 +449,8 @@ class Stmt : public Node {
             return "";
         }
         void computeLevel() override {};
+
+        void accept(NodeVisitor &) override;
 };
 
 class AssignStmt : public Stmt {
