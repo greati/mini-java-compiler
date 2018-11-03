@@ -21,9 +21,10 @@ class Id : public Node {
         }
 
         void computeLevel() override {};
+
+        void accept(NodeVisitor & visitor) override;
 };
 
-template<typename T>
 class ConstructList : public Node {
     protected:
         std::deque<std::shared_ptr<Node>> constructs;
@@ -31,11 +32,11 @@ class ConstructList : public Node {
         ConstructList (Position _pos, std::deque<std::shared_ptr<Node>> _constructs) 
         : Node {_pos}, constructs {_constructs} {}
         
-        void push_back(std::shared_ptr<T> elem) {
+        void push_back(std::shared_ptr<Node> elem) {
             this->constructs.push_back(elem);
         }
 
-        void push_front(std::shared_ptr<T> elem) {
+        void push_front(std::shared_ptr<Node> elem) {
             this->constructs.push_front(elem);
         }
 
@@ -60,6 +61,8 @@ class ConstructList : public Node {
                 }
             }
         }
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class Expr : public Node {
@@ -71,6 +74,8 @@ class Expr : public Node {
             return "";
         }
         void computeLevel() override {};
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class AlExpr : public Expr {
@@ -78,6 +83,7 @@ class AlExpr : public Expr {
     public:
         AlExpr(Position _pos) : Expr {_pos} {};
 
+        void accept(NodeVisitor & visitor) override;
 };
 
 class ExprParen : public AlExpr {
@@ -96,6 +102,7 @@ class ExprParen : public AlExpr {
             expr->computeLevel();
         };
 
+        void accept(NodeVisitor & visitor) override;
 };
 
 class RelExpr : public Expr {
@@ -156,6 +163,7 @@ class RelExpr : public Expr {
             rhs->computeLevel();
         };
 
+        void accept(NodeVisitor & visitor) override;
 };
 
 
@@ -221,6 +229,8 @@ class AlBinExpr : public AlExpr {
             lhs->computeLevel();
             rhs->computeLevel();
         };
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class AlUnExpr : public AlExpr {
@@ -265,6 +275,8 @@ class AlUnExpr : public AlExpr {
             alexpr->level = this->level + 1;
             alexpr->computeLevel();
         };
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 template<typename T>
@@ -283,6 +295,8 @@ class LitExpr : public AlExpr {
         }
 
         void computeLevel() override {}
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 
@@ -296,18 +310,20 @@ class AccessOperation : public Node {
         }
 
         void computeLevel() override {};
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class BracketAccess : public AccessOperation {
     
     protected:
-        std::shared_ptr<ConstructList<Expr>> expressionList; 
+        std::shared_ptr<ConstructList> expressionList; 
         std::shared_ptr<AccessOperation> accessOperation;
 
     public:
         BracketAccess(
                 Position _pos, 
-                std::shared_ptr<ConstructList<Expr>> _expressionList,
+                std::shared_ptr<ConstructList> _expressionList,
                 std::shared_ptr<AccessOperation> _accessOperation) 
             : AccessOperation{_pos}, expressionList{_expressionList}, accessOperation{_accessOperation} {}
 
@@ -327,6 +343,8 @@ class BracketAccess : public AccessOperation {
                 accessOperation->computeLevel();
             }
         }
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class DotAccess : public AccessOperation {
@@ -356,6 +374,8 @@ class DotAccess : public AccessOperation {
                 accessOperation->computeLevel();
             }
         }
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class Var : public AlExpr {
@@ -385,17 +405,19 @@ class Var : public AlExpr {
                 accessOperation->computeLevel();
             }
         }
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class FunctionCallExpr : public AlExpr {
     protected:
         std::shared_ptr<Var> var;
-        std::shared_ptr<ConstructList<Expr>> actualParams;
+        std::shared_ptr<ConstructList> actualParams;
     public:
         FunctionCallExpr(
                 Position _pos,
                 std::shared_ptr<Var> _var,
-                std::shared_ptr<ConstructList<Expr>> _actualParams) 
+                std::shared_ptr<ConstructList> _actualParams) 
         : AlExpr{_pos}, var{_var}, actualParams{_actualParams}{}
 
         std::string show() const override {
@@ -414,6 +436,8 @@ class FunctionCallExpr : public AlExpr {
                 actualParams->computeLevel();
             }
         }
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 
@@ -452,17 +476,19 @@ class AssignStmt : public Stmt {
             var->computeLevel();
             expr->computeLevel();
         }
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class FunctionCallStmt : public Stmt {
     protected:
         std::shared_ptr<Var> var;
-        std::shared_ptr<ConstructList<Expr>> actualParams;
+        std::shared_ptr<ConstructList> actualParams;
     public:
         FunctionCallStmt(
                 Position _pos,
                 std::shared_ptr<Var> _var,
-                std::shared_ptr<ConstructList<Expr>> _actualParams) 
+                std::shared_ptr<ConstructList> _actualParams) 
         : Stmt{_pos}, var{_var}, actualParams{_actualParams}{}
 
         std::string show() const override {
@@ -482,6 +508,8 @@ class FunctionCallStmt : public Stmt {
                 actualParams->computeLevel();
             }
         }
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class ReadStmt : public Stmt {
@@ -502,6 +530,7 @@ class ReadStmt : public Stmt {
             id->computeLevel();
         }
 
+        void accept(NodeVisitor & visitor) override;
 };
 
 class PrintStmt : public Stmt {
@@ -521,17 +550,19 @@ class PrintStmt : public Stmt {
             expr->level = this->level + 1;
             expr->computeLevel();
         }
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class Case : public Node {
     protected:
         std::shared_ptr<Expr> expr;
-        std::shared_ptr<ConstructList<Stmt>> stmts;
+        std::shared_ptr<ConstructList> stmts;
     public:
         Case(
                 Position _pos,
                 std::shared_ptr<Expr> _expr,
-                std::shared_ptr<ConstructList<Stmt>> _stmts)
+                std::shared_ptr<ConstructList> _stmts)
             : Node {_pos}, expr {_expr}, stmts {_stmts} {}
 
         std::string show() const override {
@@ -548,19 +579,20 @@ class Case : public Node {
             stmts->computeLevel();
         };
 
+        void accept(NodeVisitor & visitor) override;
 };
 
 class SwitchStmt : public Stmt {
     protected:
         std::shared_ptr<Expr> expr;
-        std::shared_ptr<ConstructList<Case>> caseList;
-        std::shared_ptr<ConstructList<Stmt>> defaultStmts;
+        std::shared_ptr<ConstructList> caseList;
+        std::shared_ptr<ConstructList> defaultStmts;
     public:
         SwitchStmt(
                 Position _pos,
                 std::shared_ptr<Expr> _expr,
-                std::shared_ptr<ConstructList<Case>> _caseList,
-                std::shared_ptr<ConstructList<Stmt>> _defaultsStmts) 
+                std::shared_ptr<ConstructList> _caseList,
+                std::shared_ptr<ConstructList> _defaultsStmts) 
         : Stmt{_pos}, expr {_expr}, defaultStmts {_defaultsStmts} {
 
             if (_caseList->empty()) 
@@ -589,17 +621,19 @@ class SwitchStmt : public Stmt {
                 defaultStmts->computeLevel();
             }
         }
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class WhileStmt : public Stmt {
     protected:
         std::shared_ptr<Expr> expr;
-        std::shared_ptr<ConstructList<Stmt>> stmts;
+        std::shared_ptr<ConstructList> stmts;
     public:
         WhileStmt(
                 Position _pos,
                 std::shared_ptr<Expr> _expr,
-                std::shared_ptr<ConstructList<Stmt>> _stmts)
+                std::shared_ptr<ConstructList> _stmts)
             : Stmt {_pos}, expr {_expr}, stmts {_stmts} {}
 
         std::string show() const override {
@@ -615,6 +649,8 @@ class WhileStmt : public Stmt {
             expr->computeLevel();
             stmts->computeLevel();
         }
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class ForStmt : public Stmt {
@@ -623,7 +659,7 @@ class ForStmt : public Stmt {
         std::shared_ptr<Expr> assignExpr;
         std::shared_ptr<Expr> toExpr;
         std::shared_ptr<Expr> stepExpr;
-        std::shared_ptr<ConstructList<Stmt>> stmts;
+        std::shared_ptr<ConstructList> stmts;
     public:
         ForStmt(
                 Position _pos,
@@ -631,7 +667,7 @@ class ForStmt : public Stmt {
                 std::shared_ptr<Expr> _assignExpr,
                 std::shared_ptr<Expr> _toExpr,
                 std::shared_ptr<Expr> _stepExpr,
-                std::shared_ptr<ConstructList<Stmt>> _stmts)
+                std::shared_ptr<ConstructList> _stmts)
             : Stmt {_pos}, id {_id}, assignExpr {_assignExpr}, 
             toExpr{_toExpr}, stepExpr{_stepExpr}, stmts {_stmts} {}
 
@@ -661,6 +697,8 @@ class ForStmt : public Stmt {
             stmts->level = this->level + 1;
             stmts->computeLevel();
         }
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class ElsePart : public Node {
@@ -670,16 +708,19 @@ class ElsePart : public Node {
         std::string show() const override {
             return "";
         }
+
         void computeLevel() override {};
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class Else : public ElsePart {
     protected:
-        std::shared_ptr<ConstructList<Stmt>> stmts;
+        std::shared_ptr<ConstructList> stmts;
     public:
         Else (
                 Position _pos,
-                std::shared_ptr<ConstructList<Stmt>> _stmts) 
+                std::shared_ptr<ConstructList> _stmts) 
             : ElsePart {_pos}, stmts {_stmts} {}
 
         std::string show() const override {
@@ -691,18 +732,20 @@ class Else : public ElsePart {
             stmts->level = this->level + 1;
             stmts->computeLevel();
         }
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class IfStmt : public Stmt {
     protected:
 	std::shared_ptr<Expr> expr;
-	std::shared_ptr<ConstructList<Stmt>> stmts;
+	std::shared_ptr<ConstructList> stmts;
 	std::shared_ptr<ElsePart> elsePart;
     public:
 	IfStmt (
 		Position _pos,
 		std::shared_ptr<Expr> _expr,
-		std::shared_ptr<ConstructList<Stmt>> _stmts,
+		std::shared_ptr<ConstructList> _stmts,
 		std::shared_ptr<ElsePart> _elsePart)
 	    : Stmt {_pos}, expr {_expr}, stmts {_stmts}, elsePart {_elsePart} {}
 
@@ -726,6 +769,7 @@ class IfStmt : public Stmt {
             }
         }
 
+        void accept(NodeVisitor & visitor) override;
 };
 
 class ElseIf : public ElsePart {
@@ -747,6 +791,8 @@ class ElseIf : public ElsePart {
             ifStmt->level = this->level + 1; 
             ifStmt->computeLevel();
         }
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class ReturnStmt : public Stmt {
@@ -772,6 +818,8 @@ class ReturnStmt : public Stmt {
                 expr->computeLevel();
             }
         }
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 
@@ -795,6 +843,8 @@ class Type : public Node {
         }
 
         void computeLevel() override {}
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class VarDeclId : public Node {
@@ -817,6 +867,8 @@ class VarDeclId : public Node {
             id->computeLevel();
         }
 
+
+        void accept(NodeVisitor & visitor) override;
 };
 
 class VarInit : public Node {
@@ -827,6 +879,7 @@ class VarInit : public Node {
             return "";
         }
         void computeLevel() override {};
+        void accept(NodeVisitor & visitor) override;
 };
 
 class FieldDeclVar : public Node {
@@ -860,17 +913,18 @@ class FieldDeclVar : public Node {
             }
         }
 
+        void accept(NodeVisitor & visitor) override;
 };
 
 class FieldDecl : public Node {
     protected:
         std::shared_ptr<Type> type;
-        std::shared_ptr<ConstructList<FieldDeclVar>> varsDecls;
+        std::shared_ptr<ConstructList> varsDecls;
     public:
         FieldDecl (
             Position _pos,
             std::shared_ptr<Type> _type,
-            std::shared_ptr<ConstructList<FieldDeclVar>> _varDecls) 
+            std::shared_ptr<ConstructList> _varDecls) 
         : Node {_pos}, type {_type}, varsDecls {_varDecls} {} 
 
         std::string show() const override {
@@ -886,15 +940,16 @@ class FieldDecl : public Node {
             type->computeLevel();
             varsDecls->computeLevel();
         }
+        void accept(NodeVisitor & visitor) override;
 };
 
 class Decls : public Node {
     protected:
-        std::shared_ptr<ConstructList<FieldDecl>> fields;
+        std::shared_ptr<ConstructList> fields;
     public:
         Decls(
             Position _pos,
-            std::shared_ptr<ConstructList<FieldDecl>> _fields)
+            std::shared_ptr<ConstructList> _fields)
         : Node {_pos}, fields{_fields} {}
 
         std::string show() const override {
@@ -911,6 +966,7 @@ class Decls : public Node {
             }
         }
 
+        void accept(NodeVisitor & visitor) override;
 };
 
 class FormalParams : public Node {
@@ -918,14 +974,14 @@ class FormalParams : public Node {
     protected:
         bool val;
         std::shared_ptr<Type> type;
-        std::shared_ptr<ConstructList<Id>> ids;
+        std::shared_ptr<ConstructList> ids;
 
     public:
         FormalParams (
             Position _pos,
 	    bool _val,
             std::shared_ptr<Type> _type,
-            std::shared_ptr<ConstructList<Id>> _ids) 
+            std::shared_ptr<ConstructList> _ids) 
         : Node {_pos}, val {_val}, type {_type}, ids{_ids} {}
 
         std::string show() const override {
@@ -942,18 +998,19 @@ class FormalParams : public Node {
             type->computeLevel();
             ids->computeLevel();
         }
+        void accept(NodeVisitor & visitor) override;
 };
 
 class Block : public Node {
 
     protected:
         std::shared_ptr<Decls> decls;
-        std::shared_ptr<ConstructList<Stmt>> stmts;
+        std::shared_ptr<ConstructList> stmts;
     public:
         Block(
             Position _pos,
             std::shared_ptr<Decls> _decls,
-            std::shared_ptr<ConstructList<Stmt>> _stmts) 
+            std::shared_ptr<ConstructList> _stmts) 
         : Node {_pos}, decls {_decls}, stmts {_stmts} {}
 
         std::string show() const override {
@@ -976,6 +1033,7 @@ class Block : public Node {
                 stmts->computeLevel();
             }
         }
+        void accept(NodeVisitor & visitor) override;
 };
 
 class MethodReturnType : public Node {
@@ -998,20 +1056,21 @@ class MethodReturnType : public Node {
                 type->computeLevel();
             }
         }
+        void accept(NodeVisitor & visitor) override;
 };
 
 class MethodDecl : public Node {
     protected:
         std::shared_ptr<MethodReturnType> returnType;
         std::shared_ptr<Id> id;
-        std::shared_ptr<ConstructList<FormalParams>> params;
+        std::shared_ptr<ConstructList> params;
         std::shared_ptr<Block> block;
     public:
         MethodDecl(
             Position _pos,
             std::shared_ptr<MethodReturnType> _returnType,
             std::shared_ptr<Id> _id,
-            std::shared_ptr<ConstructList<FormalParams>> _params,
+            std::shared_ptr<ConstructList> _params,
             std::shared_ptr<Block> _block) 
         : Node {_pos}, returnType {_returnType}, id {_id}, params {_params}, block {_block} {}
 
@@ -1047,17 +1106,18 @@ class MethodDecl : public Node {
                 block->computeLevel();
             }
         }
+        void accept(NodeVisitor & visitor) override;
 };
 
 class ClassBody : public Node {
     protected:
         std::shared_ptr<Decls> decls;
-        std::shared_ptr<ConstructList<MethodDecl>> methods;
+        std::shared_ptr<ConstructList> methods;
     public:
         ClassBody (
             Position _pos,
             std::shared_ptr<Decls> _decls,
-            std::shared_ptr<ConstructList<MethodDecl>> _methods) 
+            std::shared_ptr<ConstructList> _methods) 
         : Node {_pos}, decls {_decls}, methods {_methods} {}
 
         std::string show() const override {
@@ -1082,6 +1142,7 @@ class ClassBody : public Node {
                 methods->computeLevel();
             }
         }
+        void accept(NodeVisitor & visitor) override;
 };
 
 class ClassDecl : public Node {
@@ -1113,17 +1174,18 @@ class ClassDecl : public Node {
                 body->computeLevel();
             }
         }
+        void accept(NodeVisitor & visitor) override;
 };
 
 class Program : public Node {
     protected:
         std::shared_ptr<Id> id;
-        std::shared_ptr<ConstructList<ClassDecl>> classes;
+        std::shared_ptr<ConstructList> classes;
     public:
         Program (
             Position _pos,
             std::shared_ptr<Id> _id,
-            std::shared_ptr<ConstructList<ClassDecl>> _classes) 
+            std::shared_ptr<ConstructList> _classes) 
         : Node {_pos}, id {_id}, classes {_classes} {}
     
         std::string show() const override {
@@ -1144,6 +1206,7 @@ class Program : public Node {
                 classes->computeLevel();
             }
         }
+        void accept(NodeVisitor & visitor) override;
 };
 
 class ExprVarInit : public VarInit {
@@ -1162,14 +1225,15 @@ class ExprVarInit : public VarInit {
             expr->level = this->level + 1;
             expr->computeLevel();
         }
+        void accept(NodeVisitor & visitor) override;
 };
 
 class ArrayInitVarInit : public VarInit {
     protected:
-        std::shared_ptr<ConstructList<VarInit>> arrayInit;
+        std::shared_ptr<ConstructList> arrayInit;
     public:
         ArrayInitVarInit (Position _pos,
-			std::shared_ptr<ConstructList<VarInit>> _arrayInit) 
+			std::shared_ptr<ConstructList> _arrayInit) 
         : VarInit {_pos}, arrayInit {_arrayInit} {}
 
         std::string show() const override {
@@ -1181,17 +1245,18 @@ class ArrayInitVarInit : public VarInit {
             arrayInit->level = this->level + 1;
             arrayInit->computeLevel();
         }
+        void accept(NodeVisitor & visitor) override;
 };
 
 class ArrayCreation : public VarInit {
     protected:
 	std::shared_ptr<Type> type;
-	std::shared_ptr<ConstructList<Expr>> dims;
+	std::shared_ptr<ConstructList> dims;
     public:
         ArrayCreation(
             Position _pos, 
             std::shared_ptr<Type> _type, 
-            std::shared_ptr<ConstructList<Expr>> _dims)
+            std::shared_ptr<ConstructList> _dims)
         : VarInit {_pos}, type {_type}, dims {_dims} {}
 
         std::string show() const override {
@@ -1206,6 +1271,7 @@ class ArrayCreation : public VarInit {
             type->computeLevel();
             dims->computeLevel();
         }
+        void accept(NodeVisitor & visitor) override;
 };
 
 class ArrayCreationVarInit : public VarInit {
@@ -1225,6 +1291,7 @@ class ArrayCreationVarInit : public VarInit {
             arrayInit.level = this->level + 1;
             arrayInit.computeLevel();
         }
+        void accept(NodeVisitor & visitor) override;
 };
 
 #endif
