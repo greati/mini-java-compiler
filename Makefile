@@ -74,6 +74,16 @@ lalrparserast:
 	bison -o $(SRCDIR)/y.tab.c $(SRCDIR)/MJLALRParser.y --defines=include/y.tab.h
 	g++ $(SRCDIR)/ast/Expr.cpp $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJMessage.cpp -o $(BINDIR)/mjclalr $(SRCDIR)/y.tab.c $(SRCDIR)/lex.yy.c $(INCFLAG) -std=c++11
 
+lalrcodegen:
+	@echo "Making lexer...";
+	@mkdir -p $(BUILDDIR)
+	@mkdir -p $(BINDIR)
+	lex -o $(SRCDIR)/lex.yy.c $(SRCDIR)/mjclexer.l
+	bison -o $(SRCDIR)/y.tab.c $(SRCDIR)/MJLALRParser.y --defines=include/y.tab.h
+	g++ $(SRCDIR)/code-generation/NodeVisitorCodeGen.cpp $(SRCDIR)/ast/Expr.cpp $(SRCDIR)/MJToken.cpp $(SRCDIR)/MJMessage.cpp -o $(BINDIR)/mjccodegen $(SRCDIR)/y.tab.c $(SRCDIR)/lex.yy.c $(INCFLAG) -std=c++11
+
+
+
 lexer:
 	@echo "Building lexer...";
 	@mkdir -p $(BUILDDIR)

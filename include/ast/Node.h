@@ -33,8 +33,6 @@ class Node {
             return os << dt.print();
         }
 
-    protected:
-
         /**
          * From the Visitor pattern. Allows
          * operations to be performed over the tree

@@ -108,7 +108,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 27 "src/MJLALRParser.y" /* yacc.c:1913  */
+#line 28 "src/MJLALRParser.y" /* yacc.c:1913  */
 
     Var *var;
     Type *type;

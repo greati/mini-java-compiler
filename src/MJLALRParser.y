@@ -6,6 +6,7 @@
 #include "ast/Expr.h"
 #include "MJMessage.h"
 #include "y.tab.h"
+#include "../src/code-generation/MJCodeGenerator.cpp"
 
 extern int current_line;
 extern int offset;
@@ -423,14 +424,17 @@ void yyerror(char *s) {
     MJMessage::print(MJMessage::Type::ERROR, parse_error, Lexer::Position {current_line, offset});
 }
 
+
 int main() {
     auto ret = yyparse();
     if (root != nullptr) {
-        root->computeLevel();
-        std::cout << root->print() << std::endl;
+        //root->computeLevel();
+        //std::cout << root->print() << std::endl;
+        generateCode(root);
     }
     return ret;
 }
+
 
 int yywrap() {
     return 1;
