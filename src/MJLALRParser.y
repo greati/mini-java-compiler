@@ -6,6 +6,7 @@
 #include "ast/Expr.h"
 #include "MJMessage.h"
 #include "y.tab.h"
+#include "../src/code-generation/MJCodeGenerator.cpp"
 
 extern int current_line;
 extern int offset;
@@ -34,12 +35,7 @@ std::shared_ptr<Program> root;
     ArrayInitVarInit *arrayInit;
     ArrayCreation* arrayCreation;
     AccessOperation *accessOp;
-    ConstructList<Expr>* constructList;
-    ConstructList<Case>* caseList;
-    ConstructList<Stmt>* stmtList;
-    ConstructList<VarInit>* varInitList;
-    ConstructList<FormalParams> *formalParamsList;
-    ConstructList<FieldDeclVar> *fieldDeclVarList;
+    ConstructList* constructList;
     Stmt* stmt;
     ReadStmt* readStmt;
     PrintStmt* printStmt;
@@ -54,7 +50,6 @@ std::shared_ptr<Program> root;
     char* id;
     char* litString;
     int litInt;
-    ConstructList<Id>* stringList;
     MethodReturnType* methodReturnType;
     MethodDecl* methodDecl;
     Block* block;
@@ -64,9 +59,6 @@ std::shared_ptr<Program> root;
     Program* program;
     ClassDecl* classDecl;
     ClassBody* classBody;
-    ConstructList<ClassDecl>* classDeclList;
-    ConstructList<MethodDecl>* methodDeclList;
-    ConstructList<FieldDecl>* fieldDeclList;
 }
 
 %type <expr> expr
@@ -75,9 +67,9 @@ std::shared_ptr<Program> root;
 %type <constructList> expr_list_comma
 %type <constructList> actual_params_list
 %type <constructList> array_dim_decl_list
-%type <stmtList> stmt_list
-%type <stmtList> stmt_list_semicolon
-%type <caseList> case_list
+%type <constructList> stmt_list
+%type <constructList> stmt_list_semicolon
+%type <constructList> case_list
 %type <alExpr> al_expr
 %type <case_> case
 %type <stmt> stmt
@@ -91,29 +83,29 @@ std::shared_ptr<Program> root;
 %type <arrayCreation> array_creation_expr
 %type <type> type
 %type <varInit> var_init
-%type <varInitList> var_init_list_comma
+%type <constructList> var_init_list_comma
 %type <arrayInit> array_init
 %type <varDeclId> var_decl_id
 %type <litInt> brackets_opt
 %type <litString> type_aux
-%type <formalParamsList> formal_params_list_opt
-%type <formalParamsList> formal_params_list
+%type <constructList> formal_params_list_opt
+%type <constructList> formal_params_list
 %type <formalParams> formal_params
-%type <stringList> id_list_comma
+%type <constructList> id_list_comma
 %type <methodReturnType> method_return_type
 %type <methodDecl> method_decl
 %type <block> block
 %type <decls> decls
 %type <decls> decls_opt
 %type <fieldDecl> field_decl
-%type <fieldDeclVarList> field_decl_list
+%type <constructList> field_decl_list
 %type <fieldDeclVar> field_decl_aux
 %type <program> program
-%type <classDeclList> class_decl_list
+%type <constructList> class_decl_list
 %type <classDecl> class_decl
 %type <classBody> class_body
-%type <methodDeclList> method_decl_list
-%type <fieldDeclList> field_decl_list_decls
+%type <constructList> method_decl_list
+%type <constructList> field_decl_list_decls
 
 %token 
 TOK_PROGRAM 1 
@@ -182,47 +174,47 @@ LAMBDA 55
 %%
 program                 : TOK_PROGRAM TOK_IDENTIFIER TOK_SEMICOLON class_decl_list  {$$ = new Program(getPos(@1), 
                                                                                 std::make_shared<Id>(getPos(@2), $2),
-			                                                                  std::shared_ptr<ConstructList<ClassDecl>>($4)); 
+			                                                                  std::shared_ptr<ConstructList>($4)); 
                                                                                     root = std::shared_ptr<Program>($$);}
 class_decl_list         : class_decl                                                {std::deque<std::shared_ptr<Node>> classes;
 			                                                             classes.push_front(std::shared_ptr<ClassDecl>($1));
-                                                                                     $$ = new ConstructList<ClassDecl>(getPos(@1),classes);}
+                                                                                     $$ = new ConstructList(getPos(@1),classes);}
 			| class_decl class_decl_list                                {auto lst = $2; lst->push_front(std::shared_ptr<ClassDecl>($1));$$=lst;}
 class_decl              : TOK_CLASS TOK_IDENTIFIER class_body                       {$$ = new ClassDecl(getPos(@1), 
                                                                                         std::make_shared<Id>(getPos(@2), std::string($2)),
 			                                                                  std::shared_ptr<ClassBody>($3));}
                         | TOK_CLASS error class_body                                {$$=nullptr;}
 class_body              : TOK_LCURLY decls_opt method_decl_list TOK_RCURLY          {$$ = new ClassBody(getPos(@$), std::shared_ptr<Decls>($2),
-			                                                                  std::shared_ptr<ConstructList<MethodDecl>>($3));}
+			                                                                  std::shared_ptr<ConstructList>($3));}
                         | TOK_LCURLY error TOK_RCURLY                               {$$=nullptr;}
 decls_opt               : /* empty */                                               {$$ = nullptr;}
 			| decls                                                     {$$ = $1;}
 decls                   : TOK_DECLARATIONS field_decl_list_decls TOK_ENDDECLARATIONS{$$ = new Decls(getPos(@1), 
-                                                                                            std::shared_ptr<ConstructList<FieldDecl>>($2));}
+                                                                                            std::shared_ptr<ConstructList>($2));}
                         | TOK_DECLARATIONS error TOK_ENDDECLARATIONS                                 {$$=nullptr;}
 method_decl_list        : /* empty */                                               {$$ = nullptr;}
 			| method_decl method_decl_list                              {$$=$2; std::deque<std::shared_ptr<Node>> methodDecls;
                                                                                      auto lst = $2 == nullptr
-                                                                                              ? new ConstructList<MethodDecl>(getPos(@1), methodDecls)
+                                                                                              ? new ConstructList(getPos(@1), methodDecls)
                                                                                               : $2;
                                                                                      lst->push_front(std::shared_ptr<MethodDecl>($1));
                                                                                      $$ = lst;}
 field_decl_list_decls   : /* empty */                                               {$$ = nullptr;}
 			| field_decl TOK_SEMICOLON field_decl_list_decls            {$$=$3; std::deque<std::shared_ptr<Node>> fieldDecls;
                                                                                      auto lst = $3 == nullptr
-                                                                                              ? new ConstructList<FieldDecl>(getPos(@1), fieldDecls)
+                                                                                              ? new ConstructList(getPos(@1), fieldDecls)
                                                                                               : $3;
                                                                                      lst->push_front(std::shared_ptr<FieldDecl>($1));
                                                                                      $$ = lst;}
 field_decl              : type field_decl_list                                      {$$ = new FieldDecl(getPos(@$), std::shared_ptr<Type>($1),
-			                                                                  std::shared_ptr<ConstructList<FieldDeclVar>>($2));}
+			                                                                  std::shared_ptr<ConstructList>($2));}
 field_decl_aux          : var_decl_id                                               {$$ = new FieldDeclVar(getPos(@1),std::shared_ptr<VarDeclId>($1),
                                                                                         std::shared_ptr<VarInit>(nullptr));}
                         | var_decl_id TOK_EQUALS var_init                           {$$ = new FieldDeclVar(getPos(@1),std::shared_ptr<VarDeclId>($1),
                                                                                           std::shared_ptr<VarInit> ($3));}
 field_decl_list         : field_decl_aux                                            {std::deque<std::shared_ptr<Node>> fieldDeclVars;
 			                                                             fieldDeclVars.push_front(std::shared_ptr<FieldDeclVar>($1));
-                                                                                     $$ = new ConstructList<FieldDeclVar>(getPos(@1),fieldDeclVars);}
+                                                                                     $$ = new ConstructList(getPos(@1),fieldDeclVars);}
                         | field_decl_aux TOK_COMMA field_decl_list                  {auto lst = $3; lst->push_front(std::shared_ptr<FieldDeclVar>($1));
                                                                                      $$ = lst;}
 type                    : type_aux brackets_opt                                     {$$ = new Type(getPos(@1), $2, $1);}
@@ -234,24 +226,24 @@ brackets_opt            : /* empty */                                           
 method_decl             : TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN formal_params_list_opt TOK_RPAREN block
 			                                                            {$$ = new MethodDecl(getPos(@1), std::shared_ptr<MethodReturnType>($2),
                                                                                           std::make_shared<Id>(getPos(@3), std::string($3)), 
-                                                                                          std::shared_ptr<ConstructList<FormalParams>>($5),
+                                                                                          std::shared_ptr<ConstructList>($5),
                                                                                           std::shared_ptr<Block>($7));}
                         | TOK_METHOD method_return_type TOK_IDENTIFIER TOK_LPAREN error TOK_RPAREN block
                                                                                     {$$=nullptr;}
 method_return_type      : TOK_VOID                                                  {$$ = new MethodReturnType(getPos(@1), std::shared_ptr<Type>(nullptr));}
                         | type                                                      {$$ = new MethodReturnType(getPos(@1), std::shared_ptr<Type>($1));}
 formal_params           : TOK_VAL type id_list_comma                                {$$ = new FormalParams(getPos(@1), true, std::shared_ptr<Type>($2),
-			                                                                  std::shared_ptr<ConstructList<Id>>($3));}
+			                                                                  std::shared_ptr<ConstructList>($3));}
                         | type id_list_comma                                        {$$ = new FormalParams(getPos(@$), false, std::shared_ptr<Type>($1),
-                                                                                          std::shared_ptr<ConstructList<Id>>($2));}
+                                                                                          std::shared_ptr<ConstructList>($2));}
 formal_params_list      : formal_params                                             {std::deque<std::shared_ptr<Node>> formalParams;
 		                                                                     formalParams.push_front(std::shared_ptr<FormalParams>($1));
-                                                                                     $$ = new ConstructList<FormalParams>(getPos(@1),formalParams);}
+                                                                                     $$ = new ConstructList(getPos(@1),formalParams);}
                         | formal_params TOK_SEMICOLON formal_params_list            {auto lst = $3; lst->push_front(std::shared_ptr<FormalParams>($1));
                                                                                      $$ = lst;}
 id_list_comma           : TOK_IDENTIFIER                                            {std::deque<std::shared_ptr<Node>> ids;
 			                                                             ids.push_front(std::make_shared<Id>(getPos(@1), std::string($1)));
-                                                                                     $$ = new ConstructList<Id>(getPos(@$),ids);}
+                                                                                     $$ = new ConstructList(getPos(@$),ids);}
                         | TOK_IDENTIFIER TOK_COMMA id_list_comma                    {auto lst = $3; 
                                                                                     lst->push_front(std::make_shared<Id>(getPos(@1), std::string($1)));
                                                                                      $$ = lst;}
@@ -264,33 +256,33 @@ var_init                : expr                                                  
                         | array_init                                                {$$ = $1;}
                         | array_creation_expr                                       {$$ = $1;}
 array_init              : TOK_LCURLY var_init_list_comma TOK_RCURLY                 {$$ = new ArrayInitVarInit(getPos(@$),
-			                                                                      std::shared_ptr<ConstructList<VarInit>>($2));}
+			                                                                      std::shared_ptr<ConstructList>($2));}
                         | error TOK_RCURLY                               {$$=nullptr;}
 var_init_list_comma     : var_init                                                  {std::deque<std::shared_ptr<Node>> varInits;
 		                                                                     varInits.push_front(std::shared_ptr<VarInit>($1));
-                                                                                     $$ = new ConstructList<VarInit>(getPos(@$),varInits);}
+                                                                                     $$ = new ConstructList(getPos(@$),varInits);}
                         | var_init TOK_COMMA var_init_list_comma                    {auto lst = $3; lst->push_front(std::shared_ptr<VarInit>($1));
                                                                                      $$ = lst;}
 array_creation_expr     : TOK_ARROBA type array_dim_decl_list                       {$$ = new ArrayCreation(getPos(@$), std::shared_ptr<Type>($2),
-			                                                                      std::shared_ptr<ConstructList<Expr>>($3));}
+			                                                                      std::shared_ptr<ConstructList>($3));}
 array_dim_decl_list     : TOK_LSQUARE expr TOK_RSQUARE                              {std::deque<std::shared_ptr<Node>> exprs;
 			                                                             exprs.push_front(std::shared_ptr<Expr>($2));
-                                                                                     $$ = new ConstructList<Expr>(getPos(@$),exprs);}
+                                                                                     $$ = new ConstructList(getPos(@$),exprs);}
                         | TOK_LSQUARE expr TOK_RSQUARE array_dim_decl_list          {auto lst = $4; lst->push_front(std::shared_ptr<Expr>($2));
                                                                                      $$ = lst;}
 block                   : decls_opt stmt_list                                       {$$ = new Block(getPos(@$), std::shared_ptr<Decls>($1),
-			                                                                       std::shared_ptr<ConstructList<Stmt>>($2));}
+			                                                                       std::shared_ptr<ConstructList>($2));}
 stmt_list               : TOK_LCURLY stmt_list_semicolon TOK_RCURLY                 {$$ = $2;}
                         | error TOK_RCURLY                               {$$=nullptr;}
 stmt_list_semicolon     : stmt                                                      {std::deque<std::shared_ptr<Node>> stmts;
 			                                                             stmts.push_front(std::shared_ptr<Stmt>($1));
-                                                                                     $$ = new ConstructList<Stmt>(getPos(@$),stmts);}
+                                                                                     $$ = new ConstructList(getPos(@$),stmts);}
                         | stmt TOK_SEMICOLON stmt_list_semicolon                    {$$=$3; auto lst = $3; lst->push_front(std::shared_ptr<Stmt>($1));
                                                                                      $$ = lst;}
 stmt                    : var TOK_ASSIGN expr                                       {$$ = new AssignStmt(getPos(@$), std::shared_ptr<Var>($1),
 			                                                                                 std::shared_ptr<Expr>($3));}
                         | var TOK_LPAREN actual_params_list TOK_RPAREN              {$$ = new FunctionCallStmt(getPos(@$), std::shared_ptr<Var>($1),
-                                                                                                         std::shared_ptr<ConstructList<Expr>>($3));}
+                                                                                                         std::shared_ptr<ConstructList>($3));}
                         | error TOK_RPAREN                           {$$=nullptr;}
                         | return_stmt                                               {$$ = $1;}
                         | if_stmt                                                   {$$ = $1;}
@@ -303,50 +295,50 @@ actual_params_list      : /* empty */                                           
                         | expr_list_comma                                           {$$ = $1;}
 expr_list_comma         : expr                                                      {std::deque<std::shared_ptr<Node>> exps; 
                                                                                      exps.push_front(std::shared_ptr<Expr>($1));
-                                                                                     $$ = new ConstructList<Expr>(getPos(@1),exps);}
+                                                                                     $$ = new ConstructList(getPos(@1),exps);}
                         | expr TOK_COMMA expr_list_comma		            {$$=$3; auto lst = $3; lst->push_front(std::shared_ptr<Expr>($1));
                                                                                      $$ = lst;}
 return_stmt             : TOK_RETURN                                                {$$ = new ReturnStmt(getPos(@1), std::shared_ptr<Expr>(nullptr));}
                         | TOK_RETURN expr                                           {$$ = new ReturnStmt(getPos(@1), std::shared_ptr<Expr>($2));}
 if_stmt                 : TOK_IF expr stmt_list                                     {$$ = new IfStmt(getPos(@1), std::shared_ptr<Expr>($2),
-			                                                                             std::shared_ptr<ConstructList<Stmt>>($3),
+			                                                                             std::shared_ptr<ConstructList>($3),
                                                                                                      nullptr);}
                         | TOK_IF expr stmt_list TOK_ELSE if_stmt                    {$$ = new IfStmt(getPos(@1), std::shared_ptr<Expr>($2),
-                                                                                                     std::shared_ptr<ConstructList<Stmt>>($3),
+                                                                                                     std::shared_ptr<ConstructList>($3),
                                                                                                      std::make_shared<ElseIf>(getPos(@4),
                                                                                                                 std::shared_ptr<IfStmt>($5)));}
                         | TOK_IF expr stmt_list TOK_ELSE stmt_list                  {$$ = new IfStmt(getPos(@1), std::shared_ptr<Expr>($2),
-                                                                                                     std::shared_ptr<ConstructList<Stmt>>($3),
+                                                                                                     std::shared_ptr<ConstructList>($3),
                                                                                                      std::make_shared<Else>(getPos(@4),
-                                                                                                       std::shared_ptr<ConstructList<Stmt>>($5)));}
+                                                                                                       std::shared_ptr<ConstructList>($5)));}
 for_stmt                : TOK_FOR TOK_IDENTIFIER TOK_ASSIGN expr TOK_TO expr TOK_STEP expr stmt_list
 			                                                            {$$ = new ForStmt(getPos(@1), std::make_shared<Id>(getPos(@2), std::string($2)), 
                                                                                                     std::shared_ptr<Expr>($4),
                                                                                                       std::shared_ptr<Expr>($6),
                                                                                                       std::shared_ptr<Expr>($8),
-                                                                                                      std::shared_ptr<ConstructList<Stmt>>($9));}
+                                                                                                      std::shared_ptr<ConstructList>($9));}
                         | TOK_FOR TOK_IDENTIFIER TOK_ASSIGN expr TOK_TO expr stmt_list
                                                                                     {$$ = new ForStmt(getPos(@1), 
                                                                                                     std::make_shared<Id>(getPos(@2), std::string($2)), 
                                                                                                     std::shared_ptr<Expr>($4),
                                                                                                       std::shared_ptr<Expr>($6), nullptr,
-                                                                                                      std::shared_ptr<ConstructList<Stmt>>($7));}
+                                                                                                      std::shared_ptr<ConstructList>($7));}
 while_stmt              : TOK_WHILE expr stmt_list                                  {$$ = new WhileStmt(getPos(@1), std::shared_ptr<Expr>($2),
-			                                                                                std::shared_ptr<ConstructList<Stmt>>($3));}
+			                                                                                std::shared_ptr<ConstructList>($3));}
 switch_stmt             : TOK_SWITCH expr TOK_LCURLY case_list TOK_RCURLY           {$$ = new SwitchStmt(getPos(@1), std::shared_ptr<Expr>($2),
-			                                                                             std::shared_ptr<ConstructList<Case>>($4),
+			                                                                             std::shared_ptr<ConstructList>($4),
                                                                                                      nullptr);}
                         | TOK_SWITCH expr TOK_LCURLY case_list TOK_DEFAULT stmt_list TOK_RCURLY
                                                                                     {$$ = new SwitchStmt(getPos(@1), std::shared_ptr<Expr>($2),
-                                                                                                     std::shared_ptr<ConstructList<Case>>($4),
-                                                                                                     std::shared_ptr<ConstructList<Stmt>>($6));}
+                                                                                                     std::shared_ptr<ConstructList>($4),
+                                                                                                     std::shared_ptr<ConstructList>($6));}
                         | error TOK_LCURLY                               {$$=nullptr;}
 case                    : TOK_CASE expr stmt_list                                   {$$ = new Case(getPos(@1), std::shared_ptr<Expr>($2),
-			                                                                           std::shared_ptr<ConstructList<Stmt>>($3));}
+			                                                                           std::shared_ptr<ConstructList>($3));}
                         | error stmt_list                                  {$$=nullptr;}
 case_list               : case                                                      {std::deque<std::shared_ptr<Node>> cases;
 			                                                                                     cases.push_front(std::shared_ptr<Case>($1));
-                                                                                     $$ = new ConstructList<Case>(getPos(@1),cases);}
+                                                                                     $$ = new ConstructList(getPos(@1),cases);}
                         | case case_list                                            {$$=$2; auto lst = $2; lst->push_front(std::shared_ptr<Case>($1));
                                                                                      $$ = lst;}
 print_stmt              : TOK_PRINT expr                                            {$$ = new PrintStmt(getPos(@1), std::shared_ptr<Expr>($2));}
@@ -406,7 +398,7 @@ al_expr                 : TOK_PLUS al_expr %prec TOK_UPLUS                      
                         | var                                                       {$$ = $1;}
                         | var TOK_LPAREN actual_params_list TOK_RPAREN              {$$ = new FunctionCallExpr(getPos(@2),
                                                                                           std::shared_ptr<Var>($1),
-                                                                                          std::shared_ptr<ConstructList<Expr>>($3));}
+                                                                                          std::shared_ptr<ConstructList>($3));}
 var                     : TOK_IDENTIFIER var_aux                                    {$$ = new Var(getPos(@$), 
                                                                                                         std::make_shared<Id>(getPos(@1), std::string($1)), 
                                                                                                         std::shared_ptr<AccessOperation>($2));}
@@ -415,7 +407,7 @@ var_aux                 : /* empty */                                           
                                                                                                         std::make_shared<Id>(getPos(@2), std::string($2)),
                                                                                                         std::shared_ptr<AccessOperation>($3));}
                         | TOK_LSQUARE expr_list_comma TOK_RSQUARE var_aux	    {$$ = new BracketAccess(getPos(@1),
-                                                                                          std::shared_ptr<ConstructList<Expr>>($2),
+                                                                                          std::shared_ptr<ConstructList>($2),
                                                                                           std::shared_ptr<AccessOperation>($4));}
 %%
 
@@ -432,14 +424,17 @@ void yyerror(char *s) {
     MJMessage::print(MJMessage::Type::ERROR, parse_error, Lexer::Position {current_line, offset});
 }
 
+
 int main() {
     auto ret = yyparse();
     if (root != nullptr) {
-        root->computeLevel();
-        std::cout << root->print() << std::endl;
+        //root->computeLevel();
+        //std::cout << root->print() << std::endl;
+        generateCode(root);
     }
     return ret;
 }
+
 
 int yywrap() {
     return 1;

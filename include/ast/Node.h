@@ -33,6 +33,16 @@ class Node {
             return os << dt.print();
         }
 
+        /**
+         * From the Visitor pattern. Allows
+         * operations to be performed over the tree
+         * structure, without changing the node
+         * classes.
+         *
+         * @param visitor The visitor
+         * */
+        virtual void accept(class NodeVisitor &) {};
+
 }; 
 
 #endif

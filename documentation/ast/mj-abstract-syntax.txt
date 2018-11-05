@@ -42,6 +42,6 @@ ClassBody (pos : Pos, decls : Decls*, methods : ConstructList*) <- Node;
 ClassDecl (pos : Pos, id : Id*, body : ClassBody*) <- Node;
 Program (pos : Pos, id : Id*, classes : ConstructList*) <- Node;
 ExprVarInit (pos : Pos, expr : Expr*) <- VarInit;
-ArrayCreationVarInit (pos : Pos, arrayInit : ConstructList*) <- VarInit;
+ArrayInitVarInit (pos : Pos, arrayInit : ConstructList*) <- VarInit;
 ArrayCreation (pos : Pos, type : Type*, dims : ConstructList*) <- VarInit;
 ArrayCreationVarInit (pos : Pos, arrayInit : ArrayCreation*) <- VarInit;
