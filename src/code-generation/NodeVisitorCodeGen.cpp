@@ -111,21 +111,32 @@ void NodeVisitorCodeGen::visitStmt(Stmt *) {}
 void NodeVisitorCodeGen::visitAssignStmt(AssignStmt *) {}
 void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt *) {}
 void NodeVisitorCodeGen::visitReadStmt(ReadStmt *) {}
-void NodeVisitorCodeGen::visitPrintStmt(PrintStmt *) {}
+void NodeVisitorCodeGen::visitPrintStmt(PrintStmt * print) {
+    if (LitExpr<std::string> * v = dynamic_cast<LitExpr<std::string>*>(print->expr.get())) {
+        this->code += std::string("printf(\"%s\",");
+        v->accept(*this);
+        this->code += ")";
+    } else {
+        this->code += std::string("printf(\"%s\", std::to_string(");
+        print->expr->accept(*this);
+        this->code += "))";
+    }
+}
 void NodeVisitorCodeGen::visitCase(Case *) {}
 void NodeVisitorCodeGen::visitSwitchStmt(SwitchStmt *) {}
-void NodeVisitorCodeGen::visitWhileStmt(WhileStmt *) {}
+void NodeVisitorCodeGen::visitWhileStmt(WhileStmt * whilestmt) {
+}
 void NodeVisitorCodeGen::visitForStmt(ForStmt *) {}
 void NodeVisitorCodeGen::visitElsePart(ElsePart *) {}
 void NodeVisitorCodeGen::visitElse(Else *) {}
-void NodeVisitorCodeGen::visitIfStmt(IfStmt *) {}
+void NodeVisitorCodeGen::visitIfStmt(IfStmt *) {
+
+}
 void NodeVisitorCodeGen::visitElseIf(ElseIf *) {} 
 void NodeVisitorCodeGen::visitReturnStmt(ReturnStmt *) {}
 void NodeVisitorCodeGen::visitType(Type *) {}
 void NodeVisitorCodeGen::visitVarDeclId(VarDeclId *) {}
-void NodeVisitorCodeGen::visitVarInit(VarInit * varinit) {
-    
-}
+void NodeVisitorCodeGen::visitVarInit(VarInit * varinit) {}
 void NodeVisitorCodeGen::visitFieldDeclVar(FieldDeclVar * fieldvar) {
     //TODO varDeclId
     fieldvar->varInit->accept(*this);
@@ -138,13 +149,21 @@ void NodeVisitorCodeGen::visitDecls(Decls * decls) {
     decls->fields->accept(*this);
 }
 void NodeVisitorCodeGen::visitFormalParams(FormalParams *) {}
-void NodeVisitorCodeGen::visitBlock(Block *) {}
+void NodeVisitorCodeGen::visitBlock(Block * block) {
+    if (block->decls != nullptr)
+        block->decls->accept(*this);
+    block->stmts->accept(*this);
+}
 void NodeVisitorCodeGen::visitMethodReturnType(MethodReturnType *) {}
-void NodeVisitorCodeGen::visitMethodDecl(MethodDecl *) {}
+void NodeVisitorCodeGen::visitMethodDecl(MethodDecl * metdecl) {
+    // return
+    // id
+    // params
+    metdecl->block->accept(*this); 
+}
 void NodeVisitorCodeGen::visitClassBody(ClassBody * classbody) {
     classbody->decls->accept(*this);
-    //TODO
-    //methods
+    classbody->methods->accept(*this);
 }
 void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
     // id

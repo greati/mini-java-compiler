@@ -526,9 +526,8 @@ class ReadStmt : public Stmt {
 };
 
 class PrintStmt : public Stmt {
-    protected:
-	std::shared_ptr<Expr> expr;
     public:
+	std::shared_ptr<Expr> expr;
         PrintStmt(Position _pos, std::shared_ptr<Expr> _expr)
 		: Stmt {_pos}, expr{_expr} {}
 
@@ -618,10 +617,10 @@ class SwitchStmt : public Stmt {
 };
 
 class WhileStmt : public Stmt {
-    protected:
+    public:
         std::shared_ptr<Expr> expr;
         std::shared_ptr<ConstructList> stmts;
-    public:
+
         WhileStmt(
                 Position _pos,
                 std::shared_ptr<Expr> _expr,
@@ -991,11 +990,10 @@ class FormalParams : public Node {
 };
 
 class Block : public Node {
-
-    protected:
+    public:
         std::shared_ptr<Decls> decls;
         std::shared_ptr<ConstructList> stmts;
-    public:
+
         Block(
             Position _pos,
             std::shared_ptr<Decls> _decls,
@@ -1049,12 +1047,12 @@ class MethodReturnType : public Node {
 };
 
 class MethodDecl : public Node {
-    protected:
+    public:
         std::shared_ptr<MethodReturnType> returnType;
         std::shared_ptr<Id> id;
         std::shared_ptr<ConstructList> params;
         std::shared_ptr<Block> block;
-    public:
+
         MethodDecl(
             Position _pos,
             std::shared_ptr<MethodReturnType> _returnType,

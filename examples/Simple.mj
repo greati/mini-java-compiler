@@ -7,8 +7,11 @@ class Expr {
     enddeclarations
 
     method int a() {
-
-        
+        print "ola";
+        while 1 < 2 {
+            print "oi"
+        }
     }
 
 }
+
