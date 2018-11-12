@@ -7,6 +7,8 @@
 #include "MJMessage.h"
 #include "y.tab.h"
 #include "../src/code-generation/MJCodeGenerator.cpp"
+#include "frames/Frame.h"
+#include "frames/Param.h"
 
 extern int current_line;
 extern int offset;
