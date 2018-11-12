@@ -1,3 +1,14 @@
-program string;
+program Simple;
 
-class Expr {}
+class Expr {
+    declarations
+        int a = not 2 > 2;
+        int b = 2;
+    enddeclarations
+
+    method int a() {
+
+        
+    }
+
+}

@@ -10,6 +10,10 @@
 class NodeVisitorCodeGen : public NodeVisitor {
 
     public:
+
+        std::string fileName;
+        std::string code;
+
         void visitId(Id *) override;
         void visitConstructList(ConstructList *) override;
         void visitExpr(Expr *) override;

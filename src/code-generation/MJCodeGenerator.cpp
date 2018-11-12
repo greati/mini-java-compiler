@@ -8,6 +8,7 @@ int generateCode(std::shared_ptr<Node> root) {
         std::cout << "Generating code..." << std::endl;
         NodeVisitorCodeGen codeGenVisitor;
         root->accept(codeGenVisitor); 
+        std::cout << codeGenVisitor.code << std::endl;
         std::cout << "Done." << std::endl;
     } else {
         std::cout << "Impossible to generate code.";

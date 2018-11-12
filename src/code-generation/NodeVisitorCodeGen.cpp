@@ -1,15 +1,107 @@
 #include "code-generation/NodeVisitorCodeGen.h"
+#include "ast/Expr.h"
 
-void NodeVisitorCodeGen::visitId(Id *) {}
-void NodeVisitorCodeGen::visitConstructList(ConstructList *) {}
+void NodeVisitorCodeGen::visitId(Id * id) {
+    this->fileName = id->id;
+}
+void NodeVisitorCodeGen::visitConstructList(ConstructList * cl) {
+    while (!cl->constructs.empty()) {
+        cl->constructs.front()->accept(*this);
+        this->code += ";\n";
+        cl->constructs.pop_front();
+    }
+}
+
 void NodeVisitorCodeGen::visitExpr(Expr *) {}
 void NodeVisitorCodeGen::visitAlExpr(AlExpr *) {}
-void NodeVisitorCodeGen::visitExprParen(ExprParen *) {}
-void NodeVisitorCodeGen::visitRelExpr(RelExpr *) {}
-void NodeVisitorCodeGen::visitAlBinExpr(AlBinExpr *) {}
-void NodeVisitorCodeGen::visitAlUnExpr(AlUnExpr *) {}
-void NodeVisitorCodeGen::visitLitExprString(LitExpr<std::string> *) {}
-void NodeVisitorCodeGen::visitLitExprInt(LitExpr<int> *) {}
+
+void NodeVisitorCodeGen::visitExprParen(ExprParen * expr) {
+    this->code += "(";
+    expr->expr->accept(*this);
+    this->code += ")";
+}
+
+void NodeVisitorCodeGen::visitRelExpr(RelExpr * expr) {
+    expr->lhs->accept(*this);
+    std::string opstr;
+    switch(expr->op) {
+        case RelExpr::RelOp::LESS:
+            opstr = "<";
+            break;
+        case RelExpr::RelOp::LESS_EQ:
+            opstr = "<=";
+            break;
+        case RelExpr::RelOp::EQEQ:
+            opstr = "==";
+            break;
+        case RelExpr::RelOp::GREATER:
+            opstr = ">";
+            break;
+        case RelExpr::RelOp::GREATER_EQ:
+            opstr = ">=";
+            break;
+        case RelExpr::RelOp::DIFF:
+            opstr = "!=";
+            break;
+    }
+    this->code += opstr;
+    expr->rhs->accept(*this);
+}
+
+void NodeVisitorCodeGen::visitAlBinExpr(AlBinExpr * expr) {
+    expr->lhs->accept(*this);
+    std::string opstr;
+    switch(expr->op) {
+        case AlBinExpr::AlBinOp::PLUS:
+            opstr = "+";
+            break;
+        case AlBinExpr::AlBinOp::MINUS:
+            opstr = "-";
+            break;
+        case AlBinExpr::AlBinOp::TIMES:
+            opstr = "*";
+            break;
+        case AlBinExpr::AlBinOp::DIV:
+            opstr = "/";
+            break;
+        case AlBinExpr::AlBinOp::MOD:
+            opstr = "%";
+            break;
+        case AlBinExpr::AlBinOp::AND:
+            opstr = "&&";
+            break;
+        case AlBinExpr::AlBinOp::OR:
+            opstr = "||";
+            break;
+    }
+    this->code += opstr;
+    expr->rhs->accept(*this);
+}
+
+void NodeVisitorCodeGen::visitAlUnExpr(AlUnExpr * expr) {
+    std::string opstr;
+    switch(expr->op) {
+        case AlUnExpr::AlUnOp::PLUS:
+            opstr = "+";
+            break;
+        case AlUnExpr::AlUnOp::MINUS:
+            opstr = "-";
+            break;
+        case AlUnExpr::AlUnOp::NOT:
+            opstr = "!";
+            break;
+    }
+    this->code += opstr + "(";
+    expr->alexpr->accept(*this);
+    this->code += ")";
+}
+
+void NodeVisitorCodeGen::visitLitExprString(LitExpr<std::string> * strlit) {
+    this->code += strlit->val;
+}
+void NodeVisitorCodeGen::visitLitExprInt(LitExpr<int> * intlit) {
+    this->code += std::to_string(intlit->val);
+}
 void NodeVisitorCodeGen::visitAccessOperation(AccessOperation *) {}
 void NodeVisitorCodeGen::visitBrackAccess(BracketAccess *) {}
 void NodeVisitorCodeGen::visitDotAccess(DotAccess *) {}
@@ -31,18 +123,43 @@ void NodeVisitorCodeGen::visitElseIf(ElseIf *) {}
 void NodeVisitorCodeGen::visitReturnStmt(ReturnStmt *) {}
 void NodeVisitorCodeGen::visitType(Type *) {}
 void NodeVisitorCodeGen::visitVarDeclId(VarDeclId *) {}
-void NodeVisitorCodeGen::visitVarInit(VarInit *) {}
-void NodeVisitorCodeGen::visitFieldDeclVar(FieldDeclVar *) {}
-void NodeVisitorCodeGen::visitFieldDecl(FieldDecl *) {}
-void NodeVisitorCodeGen::visitDecls(Decls *) {}
+void NodeVisitorCodeGen::visitVarInit(VarInit * varinit) {
+    
+}
+void NodeVisitorCodeGen::visitFieldDeclVar(FieldDeclVar * fieldvar) {
+    //TODO varDeclId
+    fieldvar->varInit->accept(*this);
+}
+void NodeVisitorCodeGen::visitFieldDecl(FieldDecl * fielddecl) {
+    //TODO type
+    fielddecl->varsDecls->accept(*this); 
+}
+void NodeVisitorCodeGen::visitDecls(Decls * decls) {
+    decls->fields->accept(*this);
+}
 void NodeVisitorCodeGen::visitFormalParams(FormalParams *) {}
 void NodeVisitorCodeGen::visitBlock(Block *) {}
 void NodeVisitorCodeGen::visitMethodReturnType(MethodReturnType *) {}
 void NodeVisitorCodeGen::visitMethodDecl(MethodDecl *) {}
-void NodeVisitorCodeGen::visitClassBody(ClassBody *) {}
-void NodeVisitorCodeGen::visitClassDecl(ClassDecl *) {}
-void NodeVisitorCodeGen::visitProgram(Program *) {}
-void NodeVisitorCodeGen::visitExprVarInit(ExprVarInit *) {}
+void NodeVisitorCodeGen::visitClassBody(ClassBody * classbody) {
+    classbody->decls->accept(*this);
+    //TODO
+    //methods
+}
+void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
+    // id
+    // TODO
+    classdecl->body->accept(*this);
+     
+}
+void NodeVisitorCodeGen::visitProgram(Program * program) {
+    program->id->accept(*this);
+    program->classes->accept(*this);
+    
+}
+void NodeVisitorCodeGen::visitExprVarInit(ExprVarInit * varinit) {
+    varinit->expr->accept(*this);
+}
 void NodeVisitorCodeGen::visitArrayInitVarInit(ArrayInitVarInit *) {}
 void NodeVisitorCodeGen::visitArrayCreation(ArrayCreation *) {}
 void NodeVisitorCodeGen::visitArrayCreationVarInit(ArrayCreationVarInit *) {}
