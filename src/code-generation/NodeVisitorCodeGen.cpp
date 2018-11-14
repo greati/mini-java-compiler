@@ -131,6 +131,7 @@ void NodeVisitorCodeGen::visitSwitchStmt(SwitchStmt * switchstmt) {
 
     while (!switchstmt->caseList->constructs.empty()) {
         std::string labelcase = makeLabel(LabelType::SWITCH);
+        std::string nextcase = makeLabel(LabelType::SWITCH);
         auto casestmt = 
             std::shared_ptr<Case>(dynamic_cast<Case*>(switchstmt->caseList->constructs.front().get()));
         this->code += "if (";
@@ -139,11 +140,16 @@ void NodeVisitorCodeGen::visitSwitchStmt(SwitchStmt * switchstmt) {
         casestmt->expr->accept(*this);
         this->code += ")";  
         this->code += makeGotoStmt(labelcase);
+        this->code += makeGotoStmt(nextcase);
         this->code += makeLabelStmt(labelcase); 
-        casestmt->accept(*this);
+        casestmt->stmts->accept(*this);
         this->code += makeGotoStmt(labelout);
+        this->code += makeLabelStmt(nextcase);
         switchstmt->caseList->constructs.pop_front();
     }
+    if (switchstmt->defaultStmts != nullptr)
+        switchstmt->defaultStmts->accept(*this);
+    this->code += makeLabelStmt(labelout);
 
 }
 void NodeVisitorCodeGen::visitWhileStmt(WhileStmt * whilestmt) {
@@ -234,8 +240,10 @@ void NodeVisitorCodeGen::visitMethodDecl(MethodDecl * metdecl) {
     metdecl->block->accept(*this); 
 }
 void NodeVisitorCodeGen::visitClassBody(ClassBody * classbody) {
-    classbody->decls->accept(*this);
-    classbody->methods->accept(*this);
+    if (classbody->decls != nullptr)
+        classbody->decls->accept(*this);
+    if (classbody->methods != nullptr)
+        classbody->methods->accept(*this);
 }
 void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
     // id
@@ -245,8 +253,10 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
 }
 void NodeVisitorCodeGen::visitProgram(Program * program) {
     program->id->accept(*this);
+    this->code += "#include <stdio.h>";
+    this->code += "int main(void) {";
     program->classes->accept(*this);
-    
+    this->code += "return 0;}";
 }
 void NodeVisitorCodeGen::visitExprVarInit(ExprVarInit * varinit) {
     varinit->expr->accept(*this);

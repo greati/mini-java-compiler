@@ -40,7 +40,7 @@ class NodeVisitorCodeGen : public NodeVisitor {
         }
 
         std::string makeLabelStmt(std::string label) {
-            return "label: " + label + ";\n";
+            return label + ":\n";
         }
 
         std::string makeGotoStmt(std::string label) {
