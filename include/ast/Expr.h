@@ -546,10 +546,10 @@ class PrintStmt : public Stmt {
 };
 
 class Case : public Node {
-    protected:
+    public:
         std::shared_ptr<Expr> expr;
         std::shared_ptr<ConstructList> stmts;
-    public:
+
         Case(
                 Position _pos,
                 std::shared_ptr<Expr> _expr,
@@ -574,11 +574,11 @@ class Case : public Node {
 };
 
 class SwitchStmt : public Stmt {
-    protected:
+    public:
         std::shared_ptr<Expr> expr;
         std::shared_ptr<ConstructList> caseList;
         std::shared_ptr<ConstructList> defaultStmts;
-    public:
+
         SwitchStmt(
                 Position _pos,
                 std::shared_ptr<Expr> _expr,
@@ -706,9 +706,10 @@ class ElsePart : public Node {
 };
 
 class Else : public ElsePart {
-    protected:
-        std::shared_ptr<ConstructList> stmts;
     public:
+
+        std::shared_ptr<ConstructList> stmts;
+
         Else (
                 Position _pos,
                 std::shared_ptr<ConstructList> _stmts) 
@@ -728,11 +729,11 @@ class Else : public ElsePart {
 };
 
 class IfStmt : public Stmt {
-    protected:
+    public:
 	std::shared_ptr<Expr> expr;
 	std::shared_ptr<ConstructList> stmts;
 	std::shared_ptr<ElsePart> elsePart;
-    public:
+
 	IfStmt (
 		Position _pos,
 		std::shared_ptr<Expr> _expr,
@@ -764,9 +765,8 @@ class IfStmt : public Stmt {
 };
 
 class ElseIf : public ElsePart {
-    protected:
-	std::shared_ptr<IfStmt> ifStmt;
     public:
+	std::shared_ptr<IfStmt> ifStmt;
         ElseIf(
                 Position _pos,
                 std::shared_ptr<IfStmt> _ifStmt) 

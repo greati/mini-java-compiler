@@ -9,7 +9,43 @@
  * */
 class NodeVisitorCodeGen : public NodeVisitor {
 
+    private:
+        unsigned long labelIfCounter = 0;
+        unsigned long labelForCounter = 0;
+        unsigned long labelWhileCounter = 0;
+        unsigned long labelSwitchCounter = 0;
+
     public:
+
+        enum class LabelType {
+            IF, FOR, WHILE, SWITCH
+        };
+
+        std::string makeLabel(LabelType ltype) {
+            switch (ltype) {
+                case LabelType::IF:
+                    return "if"+std::to_string(labelIfCounter++);
+                break;
+                case LabelType::FOR:
+                    return "for"+std::to_string(labelForCounter++);
+                break;
+                case LabelType::WHILE:
+                    return "while"+std::to_string(labelWhileCounter++);
+                break;
+                case LabelType::SWITCH:
+                    return "switch"+std::to_string(labelSwitchCounter++);
+                break;
+            } 
+            return "no label";
+        }
+
+        std::string makeLabelStmt(std::string label) {
+            return "label: " + label + ";\n";
+        }
+
+        std::string makeGotoStmt(std::string label) {
+            return "goto " + label + ";\n";
+        }
 
         std::string fileName;
         std::string code;

@@ -122,17 +122,89 @@ void NodeVisitorCodeGen::visitPrintStmt(PrintStmt * print) {
         this->code += "))";
     }
 }
-void NodeVisitorCodeGen::visitCase(Case *) {}
-void NodeVisitorCodeGen::visitSwitchStmt(SwitchStmt *) {}
-void NodeVisitorCodeGen::visitWhileStmt(WhileStmt * whilestmt) {
+void NodeVisitorCodeGen::visitCase(Case * casesstmt) {
+    casesstmt->stmts->accept(*this);
 }
-void NodeVisitorCodeGen::visitForStmt(ForStmt *) {}
-void NodeVisitorCodeGen::visitElsePart(ElsePart *) {}
-void NodeVisitorCodeGen::visitElse(Else *) {}
-void NodeVisitorCodeGen::visitIfStmt(IfStmt *) {
+void NodeVisitorCodeGen::visitSwitchStmt(SwitchStmt * switchstmt) {
+    
+    std::string labelout = makeLabel(LabelType::SWITCH);
+
+    while (!switchstmt->caseList->constructs.empty()) {
+        std::string labelcase = makeLabel(LabelType::SWITCH);
+        auto casestmt = 
+            std::shared_ptr<Case>(dynamic_cast<Case*>(switchstmt->caseList->constructs.front().get()));
+        this->code += "if (";
+        switchstmt->expr->accept(*this);
+        this->code += "==";
+        casestmt->expr->accept(*this);
+        this->code += ")";  
+        this->code += makeGotoStmt(labelcase);
+        this->code += makeLabelStmt(labelcase); 
+        casestmt->accept(*this);
+        this->code += makeGotoStmt(labelout);
+        switchstmt->caseList->constructs.pop_front();
+    }
 
 }
-void NodeVisitorCodeGen::visitElseIf(ElseIf *) {} 
+void NodeVisitorCodeGen::visitWhileStmt(WhileStmt * whilestmt) {
+    std::string labelWhile = this->makeLabel(LabelType::WHILE);
+    std::string labelIn = this->makeLabel(LabelType::WHILE);
+    std::string labelOut = this->makeLabel(LabelType::WHILE);
+    this->code += makeLabelStmt(labelWhile);
+    this->code += "if (";
+    whilestmt->expr->accept(*this);
+    this->code += ")";
+    this->code += makeGotoStmt(labelIn);
+    this->code += makeGotoStmt(labelOut);
+    this->code += makeLabelStmt(labelIn);
+    whilestmt->stmts->accept(*this);
+    this->code += makeGotoStmt(labelWhile);
+    this->code += makeLabelStmt(labelOut);
+    
+}
+void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
+    //TODO
+    /*
+    std::string labelFor = this->makeLabel(LabelType::FOR);
+    std::string labelIn = this->makeLabel(LabelType::FOR);
+    std::string labelOut = this->makeLabel(LabelType::FOR);
+    forStmt->id->accept(*this);
+    this->code += "=";
+    forStmt->assignExpr->accept(*this);
+    this->code += "; //TODO\n";
+    this->code += makeLabelStmt(labelFor);
+    this->code += "if (";
+    
+    this->code += ")"; */
+}
+void NodeVisitorCodeGen::visitElsePart(ElsePart *) {}
+void NodeVisitorCodeGen::visitElse(Else * elsestmt) {
+    elsestmt->stmts->accept(*this);
+}
+void NodeVisitorCodeGen::visitIfStmt(IfStmt * ifstmt) {
+    std::string labelIn = this->makeLabel(LabelType::IF);
+    std::string labelElse = this->makeLabel(LabelType::IF);
+    std::string labelOut = this->makeLabel(LabelType::IF);
+    this->code += "if (";
+    ifstmt->expr->accept(*this);
+    this->code += ")";
+    this->code += makeGotoStmt(labelIn);
+    this->code += makeGotoStmt(labelElse);
+
+    this->code += makeLabelStmt(labelIn);
+    ifstmt->stmts->accept(*this);
+    this->code += makeGotoStmt(labelOut);
+
+    this->code += makeLabelStmt(labelElse);
+    if (ifstmt->elsePart != nullptr) {
+        ifstmt->elsePart->accept(*this);
+    }
+
+    this->code += makeLabelStmt(labelOut);
+}
+void NodeVisitorCodeGen::visitElseIf(ElseIf * elseifstmt) {
+    elseifstmt->ifStmt->accept(*this);
+} 
 void NodeVisitorCodeGen::visitReturnStmt(ReturnStmt *) {}
 void NodeVisitorCodeGen::visitType(Type *) {}
 void NodeVisitorCodeGen::visitVarDeclId(VarDeclId *) {}
