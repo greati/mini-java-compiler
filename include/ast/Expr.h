@@ -645,13 +645,13 @@ class WhileStmt : public Stmt {
 };
 
 class ForStmt : public Stmt {
-    protected:
+    public:
         std::shared_ptr<Id> id;
         std::shared_ptr<Expr> assignExpr;
         std::shared_ptr<Expr> toExpr;
         std::shared_ptr<Expr> stepExpr;
         std::shared_ptr<ConstructList> stmts;
-    public:
+
         ForStmt(
                 Position _pos,
                 std::shared_ptr<Id> _id,

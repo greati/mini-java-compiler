@@ -170,18 +170,71 @@ void NodeVisitorCodeGen::visitWhileStmt(WhileStmt * whilestmt) {
 }
 void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
     //TODO
-    /*
     std::string labelFor = this->makeLabel(LabelType::FOR);
     std::string labelIn = this->makeLabel(LabelType::FOR);
+    std::string labelEval = this->makeLabel(LabelType::FOR);
     std::string labelOut = this->makeLabel(LabelType::FOR);
+
+    //Evaluates assignment
     forStmt->id->accept(*this);
     this->code += "=";
     forStmt->assignExpr->accept(*this);
     this->code += "; //TODO\n";
+
+    //Evaluates "from" and "to" Expressions detecting
+    //min and max. These expressions are evaluated only
+    //ONCE: before the first iteration.
+    //e.g. for id := E1 to E2
+    std::string min = labelEval + "min";
+    std::string max = labelEval + "max";
+    //Expr1 was previously evaluated
+    this->code += min + "=";
+    forStmt->id->accept(*this);
+    this->code += ";";
+    //Evaluates Expr2
+    this->code += max + "=";
+    forStmt->toExpr->accept(*this);
+    this->code += ";\n";
+    //Swaps min and max if necessary
+    this->code += "if (" + min + ">" + max + ")";
+    this->code += makeGotoStmt(labelEval);
+
+    //Starts For statement loop
+    //TODO: verify operations of id->accept().
+    //does it change the id name? Does it allocate memory?
+    //does it override variable with the same name?
     this->code += makeLabelStmt(labelFor);
     this->code += "if (";
-    
-    this->code += ")"; */
+    this->code += min + "<=";
+    forStmt->id->accept(*this);
+    this->code += " && ";
+    this->code += max + ">=";
+    forStmt->id->accept(*this);
+    this->code += ")";
+    this->code += makeGotoStmt(labelIn);
+    this->code += makeGotoStmt(labelOut);
+
+    //Processes statement list
+    this->code += makeLabelStmt(labelIn);
+    forStmt->stmts->accept(*this);
+
+    //Increments control variable and goes back to condition
+    //TODO: verify operations of id->accept() and its side
+    //effects
+    forStmt->id->accept(*this);
+    this->code += "+ 1;";
+    this->code += makeGotoStmt(labelFor);
+
+    //Adds label and implemantation for min and max swapping
+    this->code += makeLabelStmt(labelEval);
+    std::string swap = labelEval + "swap";
+    this->code += swap + "=" + min + ";";
+    this->code += min + "=" + max + ";";
+    this->code += max + "=" + swap + ";";
+    this->code += makeGotoStmt(labelFor);
+
+    this->code += makeLabelStmt(labelOut);
+
 }
 void NodeVisitorCodeGen::visitElsePart(ElsePart *) {}
 void NodeVisitorCodeGen::visitElse(Else * elsestmt) {

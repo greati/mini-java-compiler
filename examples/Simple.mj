@@ -29,7 +29,11 @@ class Expr {
             default {
                 print "c3"
             }
-        }
+        };
+	for i := 0 to max
+	{
+		print "for1"
+	}
     }
 
 }
