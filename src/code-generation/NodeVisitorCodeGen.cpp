@@ -185,8 +185,8 @@ void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
     //min and max. These expressions are evaluated only
     //ONCE: before the first iteration.
     //e.g. for id := E1 to E2
-    std::string min = labelEval + "min";
-    std::string max = labelEval + "max";
+    std::string min = labelFor + "min";
+    std::string max = labelFor + "max";
     //Expr1 was previously evaluated
     this->code += min + "=";
     forStmt->id->accept(*this);
@@ -195,6 +195,15 @@ void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
     this->code += max + "=";
     forStmt->toExpr->accept(*this);
     this->code += ";\n";
+    //Evaluates step expression
+	std::string step = labelFor + "step";
+    if (forStmt->stepExpr != nullptr) {
+		this->code += step + "=";
+		forStmt->stepExpr->accept(*this);
+		this->code += ";";
+    }
+	else
+		this->code += step + "=1;";
     //Swaps min and max if necessary
     this->code += "if (" + min + ">" + max + ")";
     this->code += makeGotoStmt(labelEval);
@@ -222,7 +231,7 @@ void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
     //TODO: verify operations of id->accept() and its side
     //effects
     forStmt->id->accept(*this);
-    this->code += "+ 1;";
+    this->code += "+" + step + ";";
     this->code += makeGotoStmt(labelFor);
 
     //Adds label and implemantation for min and max swapping
