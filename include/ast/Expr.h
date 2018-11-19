@@ -9,9 +9,8 @@
 #include <deque>
 
 class Id : public Node {
-    protected:
-        std::string id;
     public:
+        std::string id;
         Id (Position _pos, std::string _id) : Node {_pos}, id {_id} {}
 
         std::string show() const override {
@@ -26,9 +25,8 @@ class Id : public Node {
 };
 
 class ConstructList : public Node {
-    protected:
-        std::deque<std::shared_ptr<Node>> constructs;
     public:
+        std::deque<std::shared_ptr<Node>> constructs;
         ConstructList (Position _pos, std::deque<std::shared_ptr<Node>> _constructs) 
         : Node {_pos}, constructs {_constructs} {}
         
@@ -87,9 +85,8 @@ class AlExpr : public Expr {
 };
 
 class ExprParen : public AlExpr {
-    protected:
-        std::shared_ptr<Expr> expr;
     public:
+        std::shared_ptr<Expr> expr;
         ExprParen(Position _pos, std::shared_ptr<Expr> _expr)
         : AlExpr {_pos}, expr {_expr} {}
 
@@ -118,7 +115,6 @@ class RelExpr : public Expr {
             DIFF
         };
 
-   protected:
 
         RelOp op;
         std::shared_ptr<AlExpr> lhs;
@@ -181,13 +177,11 @@ class AlBinExpr : public AlExpr {
             OR            
         };
 
-    protected:
 
         AlBinOp op;
         std::shared_ptr<AlExpr> lhs;
         std::shared_ptr<AlExpr> rhs;
 
-    public:
         AlBinExpr(Position _pos, AlBinOp _op, std::shared_ptr<AlExpr> _lhs, std::shared_ptr<AlExpr> _rhs) 
             : AlExpr {_pos}, op{_op}, lhs{_lhs}, rhs{_rhs} {}
 
@@ -243,12 +237,9 @@ class AlUnExpr : public AlExpr {
             NOT
         };
 
-    protected:
-        
         AlUnOp op;
         std::shared_ptr<AlExpr> alexpr;
 
-    public:
         AlUnExpr(Position _pos, AlUnOp _op, std::shared_ptr<AlExpr> _alexpr) 
             : AlExpr{_pos}, op{_op}, alexpr{_alexpr} {};
 
@@ -282,10 +273,9 @@ class AlUnExpr : public AlExpr {
 template<typename T>
 class LitExpr : public AlExpr {
 
-    protected:
+    public:
         T val;
 
-    public:
         LitExpr(Position _pos, T _val) : AlExpr{_pos}, val {_val} {}
 
         std::string show() const override {
@@ -536,9 +526,8 @@ class ReadStmt : public Stmt {
 };
 
 class PrintStmt : public Stmt {
-    protected:
-	std::shared_ptr<Expr> expr;
     public:
+	std::shared_ptr<Expr> expr;
         PrintStmt(Position _pos, std::shared_ptr<Expr> _expr)
 		: Stmt {_pos}, expr{_expr} {}
 
@@ -557,10 +546,10 @@ class PrintStmt : public Stmt {
 };
 
 class Case : public Node {
-    protected:
+    public:
         std::shared_ptr<Expr> expr;
         std::shared_ptr<ConstructList> stmts;
-    public:
+
         Case(
                 Position _pos,
                 std::shared_ptr<Expr> _expr,
@@ -585,11 +574,11 @@ class Case : public Node {
 };
 
 class SwitchStmt : public Stmt {
-    protected:
+    public:
         std::shared_ptr<Expr> expr;
         std::shared_ptr<ConstructList> caseList;
         std::shared_ptr<ConstructList> defaultStmts;
-    public:
+
         SwitchStmt(
                 Position _pos,
                 std::shared_ptr<Expr> _expr,
@@ -628,10 +617,10 @@ class SwitchStmt : public Stmt {
 };
 
 class WhileStmt : public Stmt {
-    protected:
+    public:
         std::shared_ptr<Expr> expr;
         std::shared_ptr<ConstructList> stmts;
-    public:
+
         WhileStmt(
                 Position _pos,
                 std::shared_ptr<Expr> _expr,
@@ -656,13 +645,13 @@ class WhileStmt : public Stmt {
 };
 
 class ForStmt : public Stmt {
-    protected:
+    public:
         std::shared_ptr<Id> id;
         std::shared_ptr<Expr> assignExpr;
         std::shared_ptr<Expr> toExpr;
         std::shared_ptr<Expr> stepExpr;
         std::shared_ptr<ConstructList> stmts;
-    public:
+
         ForStmt(
                 Position _pos,
                 std::shared_ptr<Id> _id,
@@ -717,9 +706,10 @@ class ElsePart : public Node {
 };
 
 class Else : public ElsePart {
-    protected:
-        std::shared_ptr<ConstructList> stmts;
     public:
+
+        std::shared_ptr<ConstructList> stmts;
+
         Else (
                 Position _pos,
                 std::shared_ptr<ConstructList> _stmts) 
@@ -739,11 +729,11 @@ class Else : public ElsePart {
 };
 
 class IfStmt : public Stmt {
-    protected:
+    public:
 	std::shared_ptr<Expr> expr;
 	std::shared_ptr<ConstructList> stmts;
 	std::shared_ptr<ElsePart> elsePart;
-    public:
+
 	IfStmt (
 		Position _pos,
 		std::shared_ptr<Expr> _expr,
@@ -775,9 +765,8 @@ class IfStmt : public Stmt {
 };
 
 class ElseIf : public ElsePart {
-    protected:
-	std::shared_ptr<IfStmt> ifStmt;
     public:
+	std::shared_ptr<IfStmt> ifStmt;
         ElseIf(
                 Position _pos,
                 std::shared_ptr<IfStmt> _ifStmt) 
@@ -885,10 +874,9 @@ class VarInit : public Node {
 };
 
 class FieldDeclVar : public Node {
-    protected:
+    public:
         std::shared_ptr<VarDeclId> varDeclId;
         std::shared_ptr<VarInit> varInit;
-    public:
         FieldDeclVar (
             Position _pos,
             std::shared_ptr<VarDeclId> _varDeclId,
@@ -919,10 +907,9 @@ class FieldDeclVar : public Node {
 };
 
 class FieldDecl : public Node {
-    protected:
+    public:
         std::shared_ptr<Type> type;
         std::shared_ptr<ConstructList> varsDecls;
-    public:
         FieldDecl (
             Position _pos,
             std::shared_ptr<Type> _type,
@@ -946,9 +933,8 @@ class FieldDecl : public Node {
 };
 
 class Decls : public Node {
-    protected:
-        std::shared_ptr<ConstructList> fields;
     public:
+        std::shared_ptr<ConstructList> fields;
         Decls(
             Position _pos,
             std::shared_ptr<ConstructList> _fields)
@@ -1004,11 +990,10 @@ class FormalParams : public Node {
 };
 
 class Block : public Node {
-
-    protected:
+    public:
         std::shared_ptr<Decls> decls;
         std::shared_ptr<ConstructList> stmts;
-    public:
+
         Block(
             Position _pos,
             std::shared_ptr<Decls> _decls,
@@ -1062,12 +1047,12 @@ class MethodReturnType : public Node {
 };
 
 class MethodDecl : public Node {
-    protected:
+    public:
         std::shared_ptr<MethodReturnType> returnType;
         std::shared_ptr<Id> id;
         std::shared_ptr<ConstructList> params;
         std::shared_ptr<Block> block;
-    public:
+
         MethodDecl(
             Position _pos,
             std::shared_ptr<MethodReturnType> _returnType,
@@ -1112,10 +1097,9 @@ class MethodDecl : public Node {
 };
 
 class ClassBody : public Node {
-    protected:
+    public:
         std::shared_ptr<Decls> decls;
         std::shared_ptr<ConstructList> methods;
-    public:
         ClassBody (
             Position _pos,
             std::shared_ptr<Decls> _decls,
@@ -1148,10 +1132,9 @@ class ClassBody : public Node {
 };
 
 class ClassDecl : public Node {
-    protected:
+    public:
         std::shared_ptr<Id> id;
         std::shared_ptr<ClassBody> body;
-    public:
         ClassDecl (
             Position _pos,
             std::shared_ptr<Id> _id,
@@ -1180,10 +1163,10 @@ class ClassDecl : public Node {
 };
 
 class Program : public Node {
-    protected:
+    public:
         std::shared_ptr<Id> id;
         std::shared_ptr<ConstructList> classes;
-    public:
+
         Program (
             Position _pos,
             std::shared_ptr<Id> _id,
@@ -1212,9 +1195,8 @@ class Program : public Node {
 };
 
 class ExprVarInit : public VarInit {
-    protected:
-        std::shared_ptr<Expr> expr;
     public:
+        std::shared_ptr<Expr> expr;
         ExprVarInit (Position _pos, std::shared_ptr<Expr> _expr) 
         : VarInit {_pos}, expr {_expr} {}
 
