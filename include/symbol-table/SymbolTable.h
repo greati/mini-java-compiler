@@ -2,15 +2,14 @@
 #define __SYMBOLTABLE__
 
 #include <unordered_map>
-#include "ast/Node.h"
 #include <string>
 #include <utility>
+#include "resources/MJResources.h"
 
 /**
  * Represents the symbol table.
  *
  * */
-
 class StaticInfo {
 
    public: 
@@ -41,41 +40,57 @@ class Symbol {
 
     private:
 
+        Symbol (std::string n) {
+            this->name = n;
+        }
+
         std::string name;
         static std::unordered_multimap<std::string, Symbol> dict;
 
     public:
 
-        Symbol (std::string n) {
-            this->name = n;
-        }
 
-        std::string to_string() {
+        std::string to_string() const {
             return this->name;
         }
-        static Symbol symbol(std::string n) {
+
+        static Symbol symbol(const std::string& n) {
             auto s = dict.find(n);
             if (s == dict.end()) {
                 Symbol aux {n};
-                Symbol::dict.insert(std::make_pair<std::string, Symbol>(n,aux));
+                Symbol::dict.insert(std::make_pair(n,aux));
                 return aux;
             }
             return s->second;
         }
 
+        bool operator==(const Symbol& rhs) const {
+            return (to_string() == rhs.to_string());
+        }
+
+        static Symbol getMarker() {
+            return Symbol("#");            
+        }        
+
+};
+
+struct SymbolHash {
+    size_t operator()(const Symbol& key) const {
+        return std::hash<std::string>()(key.to_string());
+    }
 };
 
 class Table {
 
     protected:
 
-        std::unordered_multimap<Symbol, std::shared_ptr<StaticInfo>> table;
+        std::unordered_multimap<Symbol, std::shared_ptr<StaticInfo>, SymbolHash> table;
     
     public:
 
         Table(){}
         void put(Symbol key, std::shared_ptr<StaticInfo> value){
-            table.insert(std::make_pair<Symbol, std::shared_ptr<StaticInfo>>(key, value));
+            table.insert(std::make_pair(key, value));
         }
         StaticInfo get(Symbol key){
             auto value = table.find(key);
