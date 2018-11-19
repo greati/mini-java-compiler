@@ -129,11 +129,13 @@ void NodeVisitorCodeGen::visitSwitchStmt(SwitchStmt * switchstmt) {
     
     std::string labelout = makeLabel(LabelType::SWITCH);
 
+    
     while (!switchstmt->caseList->constructs.empty()) {
         std::string labelcase = makeLabel(LabelType::SWITCH);
         std::string nextcase = makeLabel(LabelType::SWITCH);
         auto casestmt = 
-            std::shared_ptr<Case>(dynamic_cast<Case*>(switchstmt->caseList->constructs.front().get()));
+            dynamic_cast<Case*>(switchstmt->caseList->constructs.front().get());
+        
         this->code += "if (";
         switchstmt->expr->accept(*this);
         this->code += "==";
@@ -145,8 +147,10 @@ void NodeVisitorCodeGen::visitSwitchStmt(SwitchStmt * switchstmt) {
         casestmt->stmts->accept(*this);
         this->code += makeGotoStmt(labelout);
         this->code += makeLabelStmt(nextcase);
+
         switchstmt->caseList->constructs.pop_front();
     }
+
     if (switchstmt->defaultStmts != nullptr)
         switchstmt->defaultStmts->accept(*this);
     this->code += makeLabelStmt(labelout);
@@ -296,9 +300,29 @@ void NodeVisitorCodeGen::visitBlock(Block * block) {
 }
 void NodeVisitorCodeGen::visitMethodReturnType(MethodReturnType *) {}
 void NodeVisitorCodeGen::visitMethodDecl(MethodDecl * metdecl) {
-    // return
-    // id
-    // params
+    std::shared_ptr<Type> retType = metdecl->returnType->type;
+    std::string methodId = metdecl->id->id;
+    
+    if (metdecl->params != nullptr) {
+        while(!metdecl->params->constructs.empty()) {
+            std::shared_ptr<FormalParams> fparams = 
+                std::dynamic_pointer_cast<FormalParams>(metdecl->params->constructs.front()); 
+            // get formal type
+            std::shared_ptr<Type> ftype = fparams->type;
+            // get val modifier
+            bool fval = fparams->val;
+            // get formal ids
+            while (!fparams->ids->constructs.empty()) {
+                // the id
+                std::string fid = std::dynamic_pointer_cast<Id>(fparams->ids->constructs.front())->id;
+                fparams->ids->constructs.pop_front();
+            }
+            metdecl->params->constructs.pop_front();
+        }
+    }
+
+    std::string methodLabel = makeLabel(LabelType::METHOD);
+    this->code += makeLabelStmt(methodLabel);
     metdecl->block->accept(*this); 
 }
 void NodeVisitorCodeGen::visitClassBody(ClassBody * classbody) {

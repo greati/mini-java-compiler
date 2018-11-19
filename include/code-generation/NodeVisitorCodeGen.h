@@ -14,11 +14,12 @@ class NodeVisitorCodeGen : public NodeVisitor {
         unsigned long labelForCounter = 0;
         unsigned long labelWhileCounter = 0;
         unsigned long labelSwitchCounter = 0;
+        unsigned long labelMethodCounter = 0;
 
     public:
 
         enum class LabelType {
-            IF, FOR, WHILE, SWITCH
+            IF, FOR, WHILE, SWITCH, METHOD
         };
 
         std::string makeLabel(LabelType ltype) {
@@ -33,6 +34,9 @@ class NodeVisitorCodeGen : public NodeVisitor {
                     return "while"+std::to_string(labelWhileCounter++);
                 break;
                 case LabelType::SWITCH:
+                    return "switch"+std::to_string(labelSwitchCounter++);
+                break;
+                case LabelType::METHOD:
                     return "switch"+std::to_string(labelSwitchCounter++);
                 break;
             } 

@@ -7,38 +7,44 @@ class Expr {
 #    enddeclarations
 
     method int a() {
-        print "ola";
-        while 1 < 2 {
-            print "oi"
-        };
-        if (1 + 0) < 2 {
-            print "oif";
-            print "ola"
-        } else if 2 < 3 {
-            print "elseif"
-        } else {
-            print "else"
-        };
-        switch exprswitch {
-            case 1 {
-                print "c1"
-            }
-            case 2 {
-                print "c2"
-            }
-            default {
-                print "c3"
-            }
-        };
-	for i := 0 to max
-	{
-		print "for1"
-	};
-	for j := 5 to 20 step 2
-	{
-		print "for2"
-	}
+           print "ola";
+#          while 1 < 2 {
+#              print "oi"
+#          };
+#          if (1 + 0) < 2 {
+#              print "oif";
+#              print "ola"
+#          } else if 2 < 3 {
+#              print "elseif"
+#          } else {
+#              print "else"
+#          };
+      switch exprswitch {
+          case 1 {
+              print "c1"
+          }
+          case 2 {
+              print "c2"
+          }
+          default {
+              print "c3"
+          }
+      };
+       for i := 0 to max
+       {
+           print "for1"
+       };
+       for j := 5 to 20 step 2
+       {
+           print "for2"
+       }
     }
 
+    method int b(int a, b, c; int e)
+    {
+        print a
+    }
 }
+
+
 

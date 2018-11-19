@@ -787,9 +787,8 @@ class ElseIf : public ElsePart {
 };
 
 class ReturnStmt : public Stmt {
-    protected:
-        std::shared_ptr<Expr> expr;
     public:
+        std::shared_ptr<Expr> expr;
         ReturnStmt (
                 Position _pos,
                 std::shared_ptr<Expr> _expr)
@@ -816,10 +815,10 @@ class ReturnStmt : public Stmt {
 
 
 class Type : public Node {
-    protected:
+    public:
+
         int numBrackets;
         std::string typeName;
-    public:
         Type(
             Position _pos,
 	    int _numBrackets,
@@ -958,13 +957,11 @@ class Decls : public Node {
 };
 
 class FormalParams : public Node {
-
-    protected:
+    public:
         bool val;
         std::shared_ptr<Type> type;
         std::shared_ptr<ConstructList> ids;
 
-    public:
         FormalParams (
             Position _pos,
 	    bool _val,
@@ -1024,9 +1021,9 @@ class Block : public Node {
 };
 
 class MethodReturnType : public Node {
-    protected:
-        std::shared_ptr<Type> type;
     public:
+
+        std::shared_ptr<Type> type;
         MethodReturnType(Position _pos, std::shared_ptr<Type> _type)
         : Node {_pos}, type {_type} {}
 
