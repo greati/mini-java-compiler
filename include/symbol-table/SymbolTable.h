@@ -92,6 +92,8 @@ class Table {
 
         inline void remove(Symbol key) {
             auto iterpair = table.equal_range(key);
+            if (iterpair.first != iterpair.second)
+                table.erase(iterpair.first);
         }
 
         StaticInfo get(Symbol key);

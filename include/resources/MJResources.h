@@ -22,9 +22,11 @@ class MJResources {
         }
 
         void endScope() {
-            while (auto s = this->scopeQueue.front() != Symbol::getMarker()) {
-                 
+            Symbol s = this->scopeQueue.front();
+            while (s != Symbol::getMarker()) {
+                this->symbolTable.remove(s);  
                 this->scopeQueue.pop();
+                s = this->scopeQueue.front();
             } 
             // pop the end marker
             this->scopeQueue.pop();
