@@ -1,5 +1,6 @@
 #include "code-generation/NodeVisitorCodeGen.h"
 #include "ast/Expr.h"
+#include "resources/MJResources.h"
 
 void NodeVisitorCodeGen::visitId(Id * id) {
     this->fileName = id->id;

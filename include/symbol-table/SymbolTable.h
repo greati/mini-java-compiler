@@ -4,7 +4,8 @@
 #include <unordered_map>
 #include <string>
 #include <utility>
-#include "resources/MJResources.h"
+#include <memory>
+#include <vector>
 
 /**
  * Represents the symbol table.
@@ -40,7 +41,7 @@ class Symbol {
 
     private:
 
-        Symbol (std::string n) {
+        inline Symbol (std::string n) {
             this->name = n;
         }
 
@@ -49,26 +50,21 @@ class Symbol {
 
     public:
 
-
-        std::string to_string() const {
+        inline std::string to_string() const {
             return this->name;
         }
 
-        static Symbol symbol(const std::string& n) {
-            auto s = dict.find(n);
-            if (s == dict.end()) {
-                Symbol aux {n};
-                Symbol::dict.insert(std::make_pair(n,aux));
-                return aux;
-            }
-            return s->second;
-        }
+        static Symbol symbol(const std::string& n);
 
-        bool operator==(const Symbol& rhs) const {
+        inline bool operator==(const Symbol& rhs) const {
             return (to_string() == rhs.to_string());
         }
 
-        static Symbol getMarker() {
+        inline bool operator!=(const Symbol& rhs) const {
+            return (to_string() != rhs.to_string());
+        }
+
+        inline static Symbol getMarker() {
             return Symbol("#");            
         }        
 
@@ -88,23 +84,17 @@ class Table {
     
     public:
 
-        Table(){}
-        void put(Symbol key, std::shared_ptr<StaticInfo> value){
+        inline Table(){}
+
+        inline void put(Symbol key, std::shared_ptr<StaticInfo> value) {
             table.insert(std::make_pair(key, value));
         }
-        StaticInfo get(Symbol key){
-            auto value = table.find(key);
-            if (value != table.end()){
-                value->second;
-            }
+
+        inline void remove(Symbol key) {
+            auto iterpair = table.equal_range(key);
         }
-        void beginScope(){
-            
-        }
-        void endScope(){
-            
-        }
-        
+
+        StaticInfo get(Symbol key);
 };
 
 #endif
