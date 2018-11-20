@@ -3,7 +3,7 @@
 
 #include "symbol-table/SymbolTable.h"
 #include <memory>
-#include <queue>
+#include <stack>
 
 class MJResources {
 
@@ -15,21 +15,21 @@ class MJResources {
         }
 
         Table symbolTable; 
-        std::queue<Symbol> scopeQueue;
+        std::stack<Symbol> scopeStack;
 
         void beginScope() {
-            this->scopeQueue.push(Symbol::getMarker());
+            this->scopeStack.push(Symbol::getMarker());
         }
 
         void endScope() {
-            Symbol s = this->scopeQueue.front();
+            Symbol s = this->scopeStack.top();
             while (s != Symbol::getMarker()) {
                 this->symbolTable.remove(s);  
-                this->scopeQueue.pop();
-                s = this->scopeQueue.front();
+                this->scopeStack.pop();
+                s = this->scopeStack.top();
             } 
             // pop the end marker
-            this->scopeQueue.pop();
+            this->scopeStack.pop();
         }
 
     private:

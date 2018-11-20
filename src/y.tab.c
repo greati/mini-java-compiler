@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.0.5.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "3.0.4"
+#define YYBISON_VERSION "3.0.5"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -1247,6 +1247,7 @@ yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
       case N:                               \
         yyformat = S;                       \
       break
+    default: /* Avoid compiler warnings. */
       YYCASE_(0, YY_("syntax error"));
       YYCASE_(1, YY_("syntax error, unexpected %s"));
       YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
@@ -1582,804 +1583,805 @@ yyreduce:
      GCC warning that YYVAL may be used uninitialized.  */
   yyval = yyvsp[1-yylen];
 
-  /* Default location.  */
+  /* Default location. */
   YYLLOC_DEFAULT (yyloc, (yylsp - yylen), yylen);
+  yyerror_range[1] = yyloc;
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
         case 2:
-#line 177 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 177 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.program) = new Program(getPos((yylsp[-3])), 
                                                                                 std::make_shared<Id>(getPos((yylsp[-2])), (yyvsp[-2].id)),
 			                                                                  std::shared_ptr<ConstructList>((yyvsp[0].constructList))); 
                                                                                     root = std::shared_ptr<Program>((yyval.program));}
-#line 1597 "src/y.tab.c" /* yacc.c:1646  */
+#line 1599 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 3:
-#line 181 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 181 "src/MJLALRParser.y" /* yacc.c:1648  */
     {std::deque<std::shared_ptr<Node>> classes;
 			                                                             classes.push_front(std::shared_ptr<ClassDecl>((yyvsp[0].classDecl)));
                                                                                      (yyval.constructList) = new ConstructList(getPos((yylsp[0])),classes);}
-#line 1605 "src/y.tab.c" /* yacc.c:1646  */
+#line 1607 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 4:
-#line 184 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 184 "src/MJLALRParser.y" /* yacc.c:1648  */
     {auto lst = (yyvsp[0].constructList); lst->push_front(std::shared_ptr<ClassDecl>((yyvsp[-1].classDecl)));(yyval.constructList)=lst;}
-#line 1611 "src/y.tab.c" /* yacc.c:1646  */
+#line 1613 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 5:
-#line 185 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 185 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.classDecl) = new ClassDecl(getPos((yylsp[-2])), 
                                                                                         std::make_shared<Id>(getPos((yylsp[-1])), std::string((yyvsp[-1].id))),
 			                                                                  std::shared_ptr<ClassBody>((yyvsp[0].classBody)));}
-#line 1619 "src/y.tab.c" /* yacc.c:1646  */
+#line 1621 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 6:
-#line 188 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 188 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.classDecl)=nullptr;}
-#line 1625 "src/y.tab.c" /* yacc.c:1646  */
+#line 1627 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 7:
-#line 189 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 189 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.classBody) = new ClassBody(getPos((yyloc)), std::shared_ptr<Decls>((yyvsp[-2].decls)),
 			                                                                  std::shared_ptr<ConstructList>((yyvsp[-1].constructList)));}
-#line 1632 "src/y.tab.c" /* yacc.c:1646  */
+#line 1634 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 8:
-#line 191 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 191 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.classBody)=nullptr;}
-#line 1638 "src/y.tab.c" /* yacc.c:1646  */
+#line 1640 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 9:
-#line 192 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 192 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.decls) = nullptr;}
-#line 1644 "src/y.tab.c" /* yacc.c:1646  */
+#line 1646 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 10:
-#line 193 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 193 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.decls) = (yyvsp[0].decls);}
-#line 1650 "src/y.tab.c" /* yacc.c:1646  */
+#line 1652 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 11:
-#line 194 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 194 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.decls) = new Decls(getPos((yylsp[-2])), 
                                                                                             std::shared_ptr<ConstructList>((yyvsp[-1].constructList)));}
-#line 1657 "src/y.tab.c" /* yacc.c:1646  */
+#line 1659 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 12:
-#line 196 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 196 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.decls)=nullptr;}
-#line 1663 "src/y.tab.c" /* yacc.c:1646  */
+#line 1665 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 13:
-#line 197 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 197 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.constructList) = nullptr;}
-#line 1669 "src/y.tab.c" /* yacc.c:1646  */
+#line 1671 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 14:
-#line 198 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 198 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.constructList)=(yyvsp[0].constructList); std::deque<std::shared_ptr<Node>> methodDecls;
                                                                                      auto lst = (yyvsp[0].constructList) == nullptr
                                                                                               ? new ConstructList(getPos((yylsp[-1])), methodDecls)
                                                                                               : (yyvsp[0].constructList);
                                                                                      lst->push_front(std::shared_ptr<MethodDecl>((yyvsp[-1].methodDecl)));
                                                                                      (yyval.constructList) = lst;}
-#line 1680 "src/y.tab.c" /* yacc.c:1646  */
+#line 1682 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 15:
-#line 204 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 204 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.constructList) = nullptr;}
-#line 1686 "src/y.tab.c" /* yacc.c:1646  */
+#line 1688 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 16:
-#line 205 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 205 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.constructList)=(yyvsp[0].constructList); std::deque<std::shared_ptr<Node>> fieldDecls;
                                                                                      auto lst = (yyvsp[0].constructList) == nullptr
                                                                                               ? new ConstructList(getPos((yylsp[-2])), fieldDecls)
                                                                                               : (yyvsp[0].constructList);
                                                                                      lst->push_front(std::shared_ptr<FieldDecl>((yyvsp[-2].fieldDecl)));
                                                                                      (yyval.constructList) = lst;}
-#line 1697 "src/y.tab.c" /* yacc.c:1646  */
+#line 1699 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 17:
-#line 211 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 211 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.fieldDecl) = new FieldDecl(getPos((yyloc)), std::shared_ptr<Type>((yyvsp[-1].type)),
 			                                                                  std::shared_ptr<ConstructList>((yyvsp[0].constructList)));}
-#line 1704 "src/y.tab.c" /* yacc.c:1646  */
+#line 1706 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 18:
-#line 213 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 213 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.fieldDeclVar) = new FieldDeclVar(getPos((yylsp[0])),std::shared_ptr<VarDeclId>((yyvsp[0].varDeclId)),
                                                                                         std::shared_ptr<VarInit>(nullptr));}
-#line 1711 "src/y.tab.c" /* yacc.c:1646  */
+#line 1713 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 19:
-#line 215 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 215 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.fieldDeclVar) = new FieldDeclVar(getPos((yylsp[-2])),std::shared_ptr<VarDeclId>((yyvsp[-2].varDeclId)),
                                                                                           std::shared_ptr<VarInit> ((yyvsp[0].varInit)));}
-#line 1718 "src/y.tab.c" /* yacc.c:1646  */
+#line 1720 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 20:
-#line 217 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 217 "src/MJLALRParser.y" /* yacc.c:1648  */
     {std::deque<std::shared_ptr<Node>> fieldDeclVars;
 			                                                             fieldDeclVars.push_front(std::shared_ptr<FieldDeclVar>((yyvsp[0].fieldDeclVar)));
                                                                                      (yyval.constructList) = new ConstructList(getPos((yylsp[0])),fieldDeclVars);}
-#line 1726 "src/y.tab.c" /* yacc.c:1646  */
+#line 1728 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 21:
-#line 220 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 220 "src/MJLALRParser.y" /* yacc.c:1648  */
     {auto lst = (yyvsp[0].constructList); lst->push_front(std::shared_ptr<FieldDeclVar>((yyvsp[-2].fieldDeclVar)));
                                                                                      (yyval.constructList) = lst;}
-#line 1733 "src/y.tab.c" /* yacc.c:1646  */
+#line 1735 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 22:
-#line 222 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 222 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.type) = new Type(getPos((yylsp[-1])), (yyvsp[0].litInt), (yyvsp[-1].litString));}
-#line 1739 "src/y.tab.c" /* yacc.c:1646  */
+#line 1741 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 23:
-#line 223 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 223 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.litString) = (yyvsp[0].id);}
-#line 1745 "src/y.tab.c" /* yacc.c:1646  */
+#line 1747 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 24:
-#line 224 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 224 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.litString) = (yyvsp[0].typeName);}
-#line 1751 "src/y.tab.c" /* yacc.c:1646  */
+#line 1753 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 25:
-#line 225 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 225 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.litString) = (yyvsp[0].typeName);}
-#line 1757 "src/y.tab.c" /* yacc.c:1646  */
+#line 1759 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 26:
-#line 226 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 226 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.litInt) = 0;}
-#line 1763 "src/y.tab.c" /* yacc.c:1646  */
+#line 1765 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 27:
-#line 227 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 227 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.litInt) = 1 + (yyvsp[0].litInt);}
-#line 1769 "src/y.tab.c" /* yacc.c:1646  */
+#line 1771 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 28:
-#line 229 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 229 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.methodDecl) = new MethodDecl(getPos((yylsp[-6])), std::shared_ptr<MethodReturnType>((yyvsp[-5].methodReturnType)),
                                                                                           std::make_shared<Id>(getPos((yylsp[-4])), std::string((yyvsp[-4].id))), 
                                                                                           std::shared_ptr<ConstructList>((yyvsp[-2].constructList)),
                                                                                           std::shared_ptr<Block>((yyvsp[0].block)));}
-#line 1778 "src/y.tab.c" /* yacc.c:1646  */
+#line 1780 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 29:
-#line 234 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 234 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.methodDecl)=nullptr;}
-#line 1784 "src/y.tab.c" /* yacc.c:1646  */
+#line 1786 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 30:
-#line 235 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 235 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.methodReturnType) = new MethodReturnType(getPos((yylsp[0])), std::shared_ptr<Type>(nullptr));}
-#line 1790 "src/y.tab.c" /* yacc.c:1646  */
+#line 1792 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 31:
-#line 236 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 236 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.methodReturnType) = new MethodReturnType(getPos((yylsp[0])), std::shared_ptr<Type>((yyvsp[0].type)));}
-#line 1796 "src/y.tab.c" /* yacc.c:1646  */
+#line 1798 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 32:
-#line 237 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 237 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.formalParams) = new FormalParams(getPos((yylsp[-2])), true, std::shared_ptr<Type>((yyvsp[-1].type)),
 			                                                                  std::shared_ptr<ConstructList>((yyvsp[0].constructList)));}
-#line 1803 "src/y.tab.c" /* yacc.c:1646  */
+#line 1805 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 33:
-#line 239 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 239 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.formalParams) = new FormalParams(getPos((yyloc)), false, std::shared_ptr<Type>((yyvsp[-1].type)),
                                                                                           std::shared_ptr<ConstructList>((yyvsp[0].constructList)));}
-#line 1810 "src/y.tab.c" /* yacc.c:1646  */
+#line 1812 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 34:
-#line 241 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 241 "src/MJLALRParser.y" /* yacc.c:1648  */
     {std::deque<std::shared_ptr<Node>> formalParams;
 		                                                                     formalParams.push_front(std::shared_ptr<FormalParams>((yyvsp[0].formalParams)));
                                                                                      (yyval.constructList) = new ConstructList(getPos((yylsp[0])),formalParams);}
-#line 1818 "src/y.tab.c" /* yacc.c:1646  */
+#line 1820 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 35:
-#line 244 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 244 "src/MJLALRParser.y" /* yacc.c:1648  */
     {auto lst = (yyvsp[0].constructList); lst->push_front(std::shared_ptr<FormalParams>((yyvsp[-2].formalParams)));
                                                                                      (yyval.constructList) = lst;}
-#line 1825 "src/y.tab.c" /* yacc.c:1646  */
+#line 1827 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 36:
-#line 246 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 246 "src/MJLALRParser.y" /* yacc.c:1648  */
     {std::deque<std::shared_ptr<Node>> ids;
 			                                                             ids.push_front(std::make_shared<Id>(getPos((yylsp[0])), std::string((yyvsp[0].id))));
                                                                                      (yyval.constructList) = new ConstructList(getPos((yyloc)),ids);}
-#line 1833 "src/y.tab.c" /* yacc.c:1646  */
+#line 1835 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 37:
-#line 249 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 249 "src/MJLALRParser.y" /* yacc.c:1648  */
     {auto lst = (yyvsp[0].constructList); 
                                                                                     lst->push_front(std::make_shared<Id>(getPos((yylsp[-2])), std::string((yyvsp[-2].id))));
                                                                                      (yyval.constructList) = lst;}
-#line 1841 "src/y.tab.c" /* yacc.c:1646  */
+#line 1843 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 38:
-#line 252 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 252 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.constructList) = nullptr;}
-#line 1847 "src/y.tab.c" /* yacc.c:1646  */
+#line 1849 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 39:
-#line 253 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 253 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.constructList) = (yyvsp[0].constructList);}
-#line 1853 "src/y.tab.c" /* yacc.c:1646  */
+#line 1855 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 40:
-#line 254 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 254 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.varDeclId) = new VarDeclId(getPos((yyloc)), 
                                                                                                         std::make_shared<Id>(getPos((yylsp[-1])), 
                                                                                                         std::string((yyvsp[-1].id))), (yyvsp[0].litInt));}
-#line 1861 "src/y.tab.c" /* yacc.c:1646  */
+#line 1863 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 41:
-#line 257 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 257 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.varInit) = new ExprVarInit(getPos((yylsp[0])),std::shared_ptr<Expr>((yyvsp[0].expr)));}
-#line 1867 "src/y.tab.c" /* yacc.c:1646  */
+#line 1869 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 42:
-#line 258 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 258 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.varInit) = (yyvsp[0].arrayInit);}
-#line 1873 "src/y.tab.c" /* yacc.c:1646  */
+#line 1875 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 43:
-#line 259 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 259 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.varInit) = (yyvsp[0].arrayCreation);}
-#line 1879 "src/y.tab.c" /* yacc.c:1646  */
+#line 1881 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 44:
-#line 260 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 260 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.arrayInit) = new ArrayInitVarInit(getPos((yyloc)),
 			                                                                      std::shared_ptr<ConstructList>((yyvsp[-1].constructList)));}
-#line 1886 "src/y.tab.c" /* yacc.c:1646  */
+#line 1888 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 45:
-#line 262 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 262 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.arrayInit)=nullptr;}
-#line 1892 "src/y.tab.c" /* yacc.c:1646  */
+#line 1894 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 46:
-#line 263 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 263 "src/MJLALRParser.y" /* yacc.c:1648  */
     {std::deque<std::shared_ptr<Node>> varInits;
 		                                                                     varInits.push_front(std::shared_ptr<VarInit>((yyvsp[0].varInit)));
                                                                                      (yyval.constructList) = new ConstructList(getPos((yyloc)),varInits);}
-#line 1900 "src/y.tab.c" /* yacc.c:1646  */
+#line 1902 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 47:
-#line 266 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 266 "src/MJLALRParser.y" /* yacc.c:1648  */
     {auto lst = (yyvsp[0].constructList); lst->push_front(std::shared_ptr<VarInit>((yyvsp[-2].varInit)));
                                                                                      (yyval.constructList) = lst;}
-#line 1907 "src/y.tab.c" /* yacc.c:1646  */
+#line 1909 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 48:
-#line 268 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 268 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.arrayCreation) = new ArrayCreation(getPos((yyloc)), std::shared_ptr<Type>((yyvsp[-1].type)),
 			                                                                      std::shared_ptr<ConstructList>((yyvsp[0].constructList)));}
-#line 1914 "src/y.tab.c" /* yacc.c:1646  */
+#line 1916 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 49:
-#line 270 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 270 "src/MJLALRParser.y" /* yacc.c:1648  */
     {std::deque<std::shared_ptr<Node>> exprs;
 			                                                             exprs.push_front(std::shared_ptr<Expr>((yyvsp[-1].expr)));
                                                                                      (yyval.constructList) = new ConstructList(getPos((yyloc)),exprs);}
-#line 1922 "src/y.tab.c" /* yacc.c:1646  */
+#line 1924 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 50:
-#line 273 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 273 "src/MJLALRParser.y" /* yacc.c:1648  */
     {auto lst = (yyvsp[0].constructList); lst->push_front(std::shared_ptr<Expr>((yyvsp[-2].expr)));
                                                                                      (yyval.constructList) = lst;}
-#line 1929 "src/y.tab.c" /* yacc.c:1646  */
+#line 1931 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 51:
-#line 275 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 275 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.block) = new Block(getPos((yyloc)), std::shared_ptr<Decls>((yyvsp[-1].decls)),
 			                                                                       std::shared_ptr<ConstructList>((yyvsp[0].constructList)));}
-#line 1936 "src/y.tab.c" /* yacc.c:1646  */
+#line 1938 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 52:
-#line 277 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 277 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.constructList) = (yyvsp[-1].constructList);}
-#line 1942 "src/y.tab.c" /* yacc.c:1646  */
+#line 1944 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 53:
-#line 278 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 278 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.constructList)=nullptr;}
-#line 1948 "src/y.tab.c" /* yacc.c:1646  */
+#line 1950 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 54:
-#line 279 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 279 "src/MJLALRParser.y" /* yacc.c:1648  */
     {std::deque<std::shared_ptr<Node>> stmts;
 			                                                             stmts.push_front(std::shared_ptr<Stmt>((yyvsp[0].stmt)));
                                                                                      (yyval.constructList) = new ConstructList(getPos((yyloc)),stmts);}
-#line 1956 "src/y.tab.c" /* yacc.c:1646  */
+#line 1958 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 55:
-#line 282 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 282 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.constructList)=(yyvsp[0].constructList); auto lst = (yyvsp[0].constructList); lst->push_front(std::shared_ptr<Stmt>((yyvsp[-2].stmt)));
                                                                                      (yyval.constructList) = lst;}
-#line 1963 "src/y.tab.c" /* yacc.c:1646  */
+#line 1965 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 56:
-#line 284 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 284 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.stmt) = new AssignStmt(getPos((yyloc)), std::shared_ptr<Var>((yyvsp[-2].var)),
 			                                                                                 std::shared_ptr<Expr>((yyvsp[0].expr)));}
-#line 1970 "src/y.tab.c" /* yacc.c:1646  */
+#line 1972 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 57:
-#line 286 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 286 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.stmt) = new FunctionCallStmt(getPos((yyloc)), std::shared_ptr<Var>((yyvsp[-3].var)),
                                                                                                          std::shared_ptr<ConstructList>((yyvsp[-1].constructList)));}
-#line 1977 "src/y.tab.c" /* yacc.c:1646  */
+#line 1979 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 58:
-#line 288 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 288 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.stmt)=nullptr;}
-#line 1983 "src/y.tab.c" /* yacc.c:1646  */
+#line 1985 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 59:
-#line 289 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 289 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.stmt) = (yyvsp[0].returnStmt);}
-#line 1989 "src/y.tab.c" /* yacc.c:1646  */
+#line 1991 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 60:
-#line 290 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 290 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.stmt) = (yyvsp[0].ifStmt);}
-#line 1995 "src/y.tab.c" /* yacc.c:1646  */
+#line 1997 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 61:
-#line 291 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 291 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.stmt) = (yyvsp[0].whileStmt);}
-#line 2001 "src/y.tab.c" /* yacc.c:1646  */
+#line 2003 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 62:
-#line 292 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 292 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.stmt) = (yyvsp[0].forStmt);}
-#line 2007 "src/y.tab.c" /* yacc.c:1646  */
+#line 2009 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 63:
-#line 293 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 293 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.stmt) = (yyvsp[0].switchStmt);}
-#line 2013 "src/y.tab.c" /* yacc.c:1646  */
+#line 2015 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 64:
-#line 294 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 294 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.stmt) = (yyvsp[0].printStmt);}
-#line 2019 "src/y.tab.c" /* yacc.c:1646  */
+#line 2021 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 65:
-#line 295 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 295 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.stmt) = (yyvsp[0].readStmt);}
-#line 2025 "src/y.tab.c" /* yacc.c:1646  */
+#line 2027 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 66:
-#line 296 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 296 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.constructList) = nullptr;}
-#line 2031 "src/y.tab.c" /* yacc.c:1646  */
+#line 2033 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 67:
-#line 297 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 297 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.constructList) = (yyvsp[0].constructList);}
-#line 2037 "src/y.tab.c" /* yacc.c:1646  */
+#line 2039 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 68:
-#line 298 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 298 "src/MJLALRParser.y" /* yacc.c:1648  */
     {std::deque<std::shared_ptr<Node>> exps; 
                                                                                      exps.push_front(std::shared_ptr<Expr>((yyvsp[0].expr)));
                                                                                      (yyval.constructList) = new ConstructList(getPos((yylsp[0])),exps);}
-#line 2045 "src/y.tab.c" /* yacc.c:1646  */
+#line 2047 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 69:
-#line 301 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 301 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.constructList)=(yyvsp[0].constructList); auto lst = (yyvsp[0].constructList); lst->push_front(std::shared_ptr<Expr>((yyvsp[-2].expr)));
                                                                                      (yyval.constructList) = lst;}
-#line 2052 "src/y.tab.c" /* yacc.c:1646  */
+#line 2054 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 70:
-#line 303 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 303 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.returnStmt) = new ReturnStmt(getPos((yylsp[0])), std::shared_ptr<Expr>(nullptr));}
-#line 2058 "src/y.tab.c" /* yacc.c:1646  */
+#line 2060 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 71:
-#line 304 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 304 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.returnStmt) = new ReturnStmt(getPos((yylsp[-1])), std::shared_ptr<Expr>((yyvsp[0].expr)));}
-#line 2064 "src/y.tab.c" /* yacc.c:1646  */
+#line 2066 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 72:
-#line 305 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 305 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.ifStmt) = new IfStmt(getPos((yylsp[-2])), std::shared_ptr<Expr>((yyvsp[-1].expr)),
 			                                                                             std::shared_ptr<ConstructList>((yyvsp[0].constructList)),
                                                                                                      nullptr);}
-#line 2072 "src/y.tab.c" /* yacc.c:1646  */
+#line 2074 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 73:
-#line 308 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 308 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.ifStmt) = new IfStmt(getPos((yylsp[-4])), std::shared_ptr<Expr>((yyvsp[-3].expr)),
                                                                                                      std::shared_ptr<ConstructList>((yyvsp[-2].constructList)),
                                                                                                      std::make_shared<ElseIf>(getPos((yylsp[-1])),
                                                                                                                 std::shared_ptr<IfStmt>((yyvsp[0].ifStmt))));}
-#line 2081 "src/y.tab.c" /* yacc.c:1646  */
+#line 2083 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 74:
-#line 312 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 312 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.ifStmt) = new IfStmt(getPos((yylsp[-4])), std::shared_ptr<Expr>((yyvsp[-3].expr)),
                                                                                                      std::shared_ptr<ConstructList>((yyvsp[-2].constructList)),
                                                                                                      std::make_shared<Else>(getPos((yylsp[-1])),
                                                                                                        std::shared_ptr<ConstructList>((yyvsp[0].constructList))));}
-#line 2090 "src/y.tab.c" /* yacc.c:1646  */
+#line 2092 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 75:
-#line 317 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 317 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.forStmt) = new ForStmt(getPos((yylsp[-8])), std::make_shared<Id>(getPos((yylsp[-7])), std::string((yyvsp[-7].id))), 
                                                                                                     std::shared_ptr<Expr>((yyvsp[-5].expr)),
                                                                                                       std::shared_ptr<Expr>((yyvsp[-3].expr)),
                                                                                                       std::shared_ptr<Expr>((yyvsp[-1].expr)),
                                                                                                       std::shared_ptr<ConstructList>((yyvsp[0].constructList)));}
-#line 2100 "src/y.tab.c" /* yacc.c:1646  */
+#line 2102 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 76:
-#line 323 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 323 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.forStmt) = new ForStmt(getPos((yylsp[-6])), 
                                                                                                     std::make_shared<Id>(getPos((yylsp[-5])), std::string((yyvsp[-5].id))), 
                                                                                                     std::shared_ptr<Expr>((yyvsp[-3].expr)),
                                                                                                       std::shared_ptr<Expr>((yyvsp[-1].expr)), nullptr,
                                                                                                       std::shared_ptr<ConstructList>((yyvsp[0].constructList)));}
-#line 2110 "src/y.tab.c" /* yacc.c:1646  */
+#line 2112 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 77:
-#line 328 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 328 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.whileStmt) = new WhileStmt(getPos((yylsp[-2])), std::shared_ptr<Expr>((yyvsp[-1].expr)),
 			                                                                                std::shared_ptr<ConstructList>((yyvsp[0].constructList)));}
-#line 2117 "src/y.tab.c" /* yacc.c:1646  */
+#line 2119 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 78:
-#line 330 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 330 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.switchStmt) = new SwitchStmt(getPos((yylsp[-4])), std::shared_ptr<Expr>((yyvsp[-3].expr)),
 			                                                                             std::shared_ptr<ConstructList>((yyvsp[-1].constructList)),
                                                                                                      nullptr);}
-#line 2125 "src/y.tab.c" /* yacc.c:1646  */
+#line 2127 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 79:
-#line 334 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 334 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.switchStmt) = new SwitchStmt(getPos((yylsp[-6])), std::shared_ptr<Expr>((yyvsp[-5].expr)),
                                                                                                      std::shared_ptr<ConstructList>((yyvsp[-3].constructList)),
                                                                                                      std::shared_ptr<ConstructList>((yyvsp[-1].constructList)));}
-#line 2133 "src/y.tab.c" /* yacc.c:1646  */
+#line 2135 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 80:
-#line 337 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 337 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.switchStmt)=nullptr;}
-#line 2139 "src/y.tab.c" /* yacc.c:1646  */
+#line 2141 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 81:
-#line 338 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 338 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.case_) = new Case(getPos((yylsp[-2])), std::shared_ptr<Expr>((yyvsp[-1].expr)),
 			                                                                           std::shared_ptr<ConstructList>((yyvsp[0].constructList)));}
-#line 2146 "src/y.tab.c" /* yacc.c:1646  */
+#line 2148 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 82:
-#line 340 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 340 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.case_)=nullptr;}
-#line 2152 "src/y.tab.c" /* yacc.c:1646  */
+#line 2154 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 83:
-#line 341 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 341 "src/MJLALRParser.y" /* yacc.c:1648  */
     {std::deque<std::shared_ptr<Node>> cases;
 			                                                                                     cases.push_front(std::shared_ptr<Case>((yyvsp[0].case_)));
                                                                                      (yyval.constructList) = new ConstructList(getPos((yylsp[0])),cases);}
-#line 2160 "src/y.tab.c" /* yacc.c:1646  */
+#line 2162 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 84:
-#line 344 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 344 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.constructList)=(yyvsp[0].constructList); auto lst = (yyvsp[0].constructList); lst->push_front(std::shared_ptr<Case>((yyvsp[-1].case_)));
                                                                                      (yyval.constructList) = lst;}
-#line 2167 "src/y.tab.c" /* yacc.c:1646  */
+#line 2169 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 85:
-#line 346 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 346 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.printStmt) = new PrintStmt(getPos((yylsp[-1])), std::shared_ptr<Expr>((yyvsp[0].expr)));}
-#line 2173 "src/y.tab.c" /* yacc.c:1646  */
+#line 2175 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 86:
-#line 347 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 347 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.readStmt) = new ReadStmt(getPos((yylsp[-1])), 
                                                                                                     std::make_shared<Id>(getPos((yylsp[0])), std::string((yyvsp[0].id))));}
-#line 2180 "src/y.tab.c" /* yacc.c:1646  */
+#line 2182 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 87:
-#line 349 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 349 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.expr) = new RelExpr(getPos((yylsp[-1])), RelExpr::RelOp::EQEQ,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2188 "src/y.tab.c" /* yacc.c:1646  */
+#line 2190 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 88:
-#line 352 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 352 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.expr) = new RelExpr(getPos((yylsp[-1])), RelExpr::RelOp::LESS,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2196 "src/y.tab.c" /* yacc.c:1646  */
+#line 2198 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 89:
-#line 355 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 355 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.expr) = new RelExpr(getPos((yylsp[-1])), RelExpr::RelOp::LESS_EQ,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2204 "src/y.tab.c" /* yacc.c:1646  */
+#line 2206 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 90:
-#line 358 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 358 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.expr) = new RelExpr(getPos((yylsp[-1])), RelExpr::RelOp::GREATER_EQ,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2212 "src/y.tab.c" /* yacc.c:1646  */
+#line 2214 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 91:
-#line 361 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 361 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.expr) = new RelExpr(getPos((yylsp[-1])), RelExpr::RelOp::GREATER,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2220 "src/y.tab.c" /* yacc.c:1646  */
+#line 2222 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 92:
-#line 364 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 364 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.expr) = new RelExpr(getPos((yylsp[-1])), RelExpr::RelOp::DIFF,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2228 "src/y.tab.c" /* yacc.c:1646  */
+#line 2230 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 93:
-#line 367 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 367 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.expr) = (yyvsp[0].alExpr);}
-#line 2234 "src/y.tab.c" /* yacc.c:1646  */
+#line 2236 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 94:
-#line 369 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 369 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = new AlUnExpr(getPos((yylsp[-1])), AlUnExpr::AlUnOp::PLUS,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2241 "src/y.tab.c" /* yacc.c:1646  */
+#line 2243 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 95:
-#line 371 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 371 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = new AlUnExpr(getPos((yylsp[-1])), AlUnExpr::AlUnOp::MINUS,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2248 "src/y.tab.c" /* yacc.c:1646  */
+#line 2250 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 96:
-#line 373 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 373 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = new AlUnExpr(getPos((yylsp[-1])), AlUnExpr::AlUnOp::NOT,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2255 "src/y.tab.c" /* yacc.c:1646  */
+#line 2257 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 97:
-#line 375 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 375 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = new AlBinExpr(getPos((yylsp[-1])), AlBinExpr::AlBinOp::PLUS,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2263 "src/y.tab.c" /* yacc.c:1646  */
+#line 2265 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 98:
-#line 378 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 378 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = new AlBinExpr(getPos((yylsp[-1])), AlBinExpr::AlBinOp::MINUS,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2271 "src/y.tab.c" /* yacc.c:1646  */
+#line 2273 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 99:
-#line 381 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 381 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = new AlBinExpr(getPos((yylsp[-1])), AlBinExpr::AlBinOp::OR,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2279 "src/y.tab.c" /* yacc.c:1646  */
+#line 2281 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 100:
-#line 384 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 384 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = new AlBinExpr(getPos((yylsp[-1])), AlBinExpr::AlBinOp::TIMES,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2287 "src/y.tab.c" /* yacc.c:1646  */
+#line 2289 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 101:
-#line 387 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 387 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = new AlBinExpr(getPos((yylsp[-1])), AlBinExpr::AlBinOp::DIV,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2295 "src/y.tab.c" /* yacc.c:1646  */
+#line 2297 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 102:
-#line 390 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 390 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = new AlBinExpr(getPos((yylsp[-1])), AlBinExpr::AlBinOp::AND,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2303 "src/y.tab.c" /* yacc.c:1646  */
+#line 2305 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 103:
-#line 393 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 393 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = new AlBinExpr(getPos((yylsp[-1])), AlBinExpr::AlBinOp::MOD,
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[-2].alExpr)),
                                                                                                         std::shared_ptr<AlExpr>((yyvsp[0].alExpr)));}
-#line 2311 "src/y.tab.c" /* yacc.c:1646  */
+#line 2313 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 104:
-#line 396 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 396 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = new ExprParen(getPos((yylsp[-2])), std::shared_ptr<Expr>((yyvsp[-1].expr)));}
-#line 2317 "src/y.tab.c" /* yacc.c:1646  */
+#line 2319 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 105:
-#line 397 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 397 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr)=nullptr;}
-#line 2323 "src/y.tab.c" /* yacc.c:1646  */
+#line 2325 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 106:
-#line 398 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 398 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = new LitExpr<int>(getPos((yylsp[0])), (yyvsp[0].litInt));}
-#line 2329 "src/y.tab.c" /* yacc.c:1646  */
+#line 2331 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 107:
-#line 399 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 399 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = new LitExpr<std::string>(getPos((yylsp[0])), std::string((yyvsp[0].litString)));}
-#line 2335 "src/y.tab.c" /* yacc.c:1646  */
+#line 2337 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 108:
-#line 400 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 400 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = (yyvsp[0].var);}
-#line 2341 "src/y.tab.c" /* yacc.c:1646  */
+#line 2343 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 109:
-#line 401 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 401 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.alExpr) = new FunctionCallExpr(getPos((yylsp[-2])),
                                                                                           std::shared_ptr<Var>((yyvsp[-3].var)),
                                                                                           std::shared_ptr<ConstructList>((yyvsp[-1].constructList)));}
-#line 2349 "src/y.tab.c" /* yacc.c:1646  */
+#line 2351 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 110:
-#line 404 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 404 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.var) = new Var(getPos((yyloc)), 
                                                                                                         std::make_shared<Id>(getPos((yylsp[-1])), std::string((yyvsp[-1].id))), 
                                                                                                         std::shared_ptr<AccessOperation>((yyvsp[0].accessOp)));}
-#line 2357 "src/y.tab.c" /* yacc.c:1646  */
+#line 2359 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 111:
-#line 407 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 407 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.accessOp) = nullptr;}
-#line 2363 "src/y.tab.c" /* yacc.c:1646  */
+#line 2365 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 112:
-#line 408 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 408 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.accessOp) = new DotAccess(getPos((yylsp[-2])), 
                                                                                                         std::make_shared<Id>(getPos((yylsp[-1])), std::string((yyvsp[-1].id))),
                                                                                                         std::shared_ptr<AccessOperation>((yyvsp[0].accessOp)));}
-#line 2371 "src/y.tab.c" /* yacc.c:1646  */
+#line 2373 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
   case 113:
-#line 411 "src/MJLALRParser.y" /* yacc.c:1646  */
+#line 411 "src/MJLALRParser.y" /* yacc.c:1648  */
     {(yyval.accessOp) = new BracketAccess(getPos((yylsp[-3])),
                                                                                           std::shared_ptr<ConstructList>((yyvsp[-2].constructList)),
                                                                                           std::shared_ptr<AccessOperation>((yyvsp[0].accessOp)));}
-#line 2379 "src/y.tab.c" /* yacc.c:1646  */
+#line 2381 "src/y.tab.c" /* yacc.c:1648  */
     break;
 
 
-#line 2383 "src/y.tab.c" /* yacc.c:1646  */
+#line 2385 "src/y.tab.c" /* yacc.c:1648  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2502,7 +2504,6 @@ yyerrorlab:
   if (/*CONSTCOND*/ 0)
      goto yyerrorlab;
 
-  yyerror_range[1] = yylsp[1-yylen];
   /* Do not reclaim the symbols of the rule whose action triggered
      this YYERROR.  */
   YYPOPSTACK (yylen);
@@ -2614,7 +2615,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 414 "src/MJLALRParser.y" /* yacc.c:1906  */
+#line 414 "src/MJLALRParser.y" /* yacc.c:1907  */
 
 
 

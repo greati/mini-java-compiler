@@ -96,7 +96,7 @@ class Table {
                 table.erase(iterpair.first);
         }
 
-        StaticInfo get(Symbol key);
+	std::shared_ptr<StaticInfo> get(Symbol key);
 };
 
 #endif
