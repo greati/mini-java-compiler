@@ -6,6 +6,8 @@
 #include <utility>
 #include <memory>
 #include <vector>
+#include <map>
+
 
 /**
  * Represents the symbol table.
@@ -17,10 +19,20 @@ class StaticInfo {
         typedef std::pair<std::string, int> Type;
 };
 
+class VarStaticInfo : public StaticInfo {
+    
+    public:
+
+        Type varType;
+        
+};
+
 class MethodStaticInfo : public StaticInfo {
     
     public:
        
+        std::map<std::string, VarStaticInfo> attributes;
+
         // bool: True if Val
         typedef std::tuple<std::string, Type, bool> FormalParam;
         
@@ -29,13 +41,7 @@ class MethodStaticInfo : public StaticInfo {
         std::string codeLabel;
 };
 
-class VarStaticInfo : public StaticInfo {
-    
-    public:
 
-        Type varType;
-        
-};
 
 class Symbol {
 
@@ -64,10 +70,20 @@ class Symbol {
             return (to_string() != rhs.to_string());
         }
 
+        inline bool operator<(const Symbol& rhs) const {
+            return (to_string() < rhs.to_string());
+        }
+
         inline static Symbol getMarker() {
             return Symbol("#");            
         }        
 
+};
+
+class ClassStaticInfo : public StaticInfo {
+    public:
+       std::map<Symbol, std::shared_ptr<MethodStaticInfo>> methods;
+       std::map<Symbol, std::shared_ptr<VarStaticInfo>> attributes;
 };
 
 struct SymbolHash {

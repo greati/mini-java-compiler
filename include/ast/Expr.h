@@ -838,10 +838,9 @@ class Type : public Node {
 };
 
 class VarDeclId : public Node {
-    protected:
+    public:
         std::shared_ptr<Id> id;
         int numBrackets;
-    public:
         VarDeclId(Position _pos, std::shared_ptr<Id> _id, int _numBrackets) 
         : Node {_pos}, id {_id}, numBrackets {_numBrackets} {}
 

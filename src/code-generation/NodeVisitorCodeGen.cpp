@@ -1,7 +1,5 @@
 #include "code-generation/NodeVisitorCodeGen.h"
 #include "ast/Expr.h"
-#include "resources/MJResources.h"
-#include "symbol-table/SymbolTable.h"
 
 void NodeVisitorCodeGen::visitId(Id * id) {
     this->fileName = id->id;
@@ -112,7 +110,11 @@ void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr *) {}
 void NodeVisitorCodeGen::visitStmt(Stmt *) {}
 void NodeVisitorCodeGen::visitAssignStmt(AssignStmt *) {}
 void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt *) {}
-void NodeVisitorCodeGen::visitReadStmt(ReadStmt *) {}
+
+void NodeVisitorCodeGen::visitReadStmt(ReadStmt * readStmt) {
+    //TODO: frame stack
+}
+
 void NodeVisitorCodeGen::visitPrintStmt(PrintStmt * print) {
     if (LitExpr<std::string> * v = dynamic_cast<LitExpr<std::string>*>(print->expr.get())) {
         this->code += std::string("printf(\"%s\",");
@@ -279,17 +281,18 @@ void NodeVisitorCodeGen::visitIfStmt(IfStmt * ifstmt) {
 void NodeVisitorCodeGen::visitElseIf(ElseIf * elseifstmt) {
     elseifstmt->ifStmt->accept(*this);
 } 
-void NodeVisitorCodeGen::visitReturnStmt(ReturnStmt *) {}
-void NodeVisitorCodeGen::visitType(Type *) {}
+
+void NodeVisitorCodeGen::visitReturnStmt(ReturnStmt *) {
+    //TODO: frame stack
+}
+
+void NodeVisitorCodeGen::visitType(Type * type) {}
+
 void NodeVisitorCodeGen::visitVarDeclId(VarDeclId *) {}
 void NodeVisitorCodeGen::visitVarInit(VarInit * varinit) {}
-void NodeVisitorCodeGen::visitFieldDeclVar(FieldDeclVar * fieldvar) {
-    //TODO varDeclId
-    fieldvar->varInit->accept(*this);
-}
+void NodeVisitorCodeGen::visitFieldDeclVar(FieldDeclVar * fieldvar) {}
 void NodeVisitorCodeGen::visitFieldDecl(FieldDecl * fielddecl) {
-    //TODO type
-    fielddecl->varsDecls->accept(*this); 
+
 }
 void NodeVisitorCodeGen::visitDecls(Decls * decls) {
     decls->fields->accept(*this);
@@ -302,55 +305,7 @@ void NodeVisitorCodeGen::visitBlock(Block * block) {
 }
 void NodeVisitorCodeGen::visitMethodReturnType(MethodReturnType *) {}
 void NodeVisitorCodeGen::visitMethodDecl(MethodDecl * metdecl) {
-	/*
-    std::shared_ptr<Type> retType = metdecl->returnType->type;
-    std::string methodId = metdecl->id->id;
-    
-    if (metdecl->params != nullptr) {
-        while(!metdecl->params->constructs.empty()) {
-            std::shared_ptr<FormalParams> fparams = 
-                std::dynamic_pointer_cast<FormalParams>(metdecl->params->constructs.front()); 
-            // get formal type
-            std::shared_ptr<Type> ftype = fparams->type;
-            // get val modifier
-            bool fval = fparams->val;
-            // get formal ids
-            while (!fparams->ids->constructs.empty()) {
-                // the id
-                std::string fid = std::dynamic_pointer_cast<Id>(fparams->ids->constructs.front())->id;
-                fparams->ids->constructs.pop_front();
-            }
-            metdecl->params->constructs.pop_front();
-        }
-    }
-
-    std::string methodLabel = makeLabel(LabelType::METHOD);
-    this->code += makeLabelStmt(methodLabel);*/
-	//=======
-	//Symbol s = Symbol::symbol(metdecl->id->id) ; //TODO: name conflict
-	std::string methodlabel = makeLabel(LabelType::METHOD);
-	Symbol s = Symbol::symbol(methodlabel + metdecl->id->id);
-
-	MethodStaticInfo msi;
-    // return
-	msi.retType = std::make_pair(metdecl->returnType->type->typeName, 0); //TODO: int = numbrackets?
-    // id
-	msi.codeLabel = methodlabel + metdecl->id->id;
-    // params
-    while (!metdecl->params->constructs.empty()) {
-		//TODO: verify if val and type
-		//new class Param?
-        auto param = std::shared_ptr<FormalParams>(dynamic_cast<FormalParams*>(
-					metdecl->params->constructs.front().get()));
-		MethodStaticInfo::FormalParam fp = make_tuple("test", msi.retType, true);
-		msi.formalParams.push_back(fp);
-        metdecl->params->constructs.pop_front();
-    }
 	
-	//table.put(s, msi);
-	
-	makeLabelStmt(msi.codeLabel);
-    metdecl->block->accept(*this); 
 }
 void NodeVisitorCodeGen::visitClassBody(ClassBody * classbody) {
     if (classbody->decls != nullptr)
@@ -359,10 +314,30 @@ void NodeVisitorCodeGen::visitClassBody(ClassBody * classbody) {
         classbody->methods->accept(*this);
 }
 void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
-    // id
-    // TODO
-    classdecl->body->accept(*this);
-     
+    std::shared_ptr<ClassStaticInfo> csi = std::make_shared<ClassStaticInfo>();
+    Symbol symbol = Symbol::symbol(classdecl->id->id);
+
+    auto decls = classdecl->body->decls;
+    if (decls != nullptr) {
+        while (!decls->fields->constructs.empty()) {
+            std::shared_ptr<FieldDecl> fielddecl = 
+                std::dynamic_pointer_cast<FieldDecl>(decls->fields->constructs.front()); 
+            auto mvsi = generateDeclaredVars(fielddecl);
+            csi->attributes.insert(mvsi.begin(), mvsi.end());    
+        }
+    }
+
+    auto methods = classdecl->body->methods;
+    if (methods != nullptr) {
+        while (!methods->constructs.empty()) {
+            std::shared_ptr<MethodDecl> methodDecl = 
+                std::dynamic_pointer_cast<MethodDecl>(methods->constructs.front()); 
+            auto msi = generateDeclaredMethod(methodDecl);
+            csi->methods.insert(std::make_pair(Symbol::symbol(methodDecl->id->id), msi)); 
+        }
+    }
+
+    MJResources::getInstance()->symbolTable.put(symbol, csi);
 }
 void NodeVisitorCodeGen::visitProgram(Program * program) {
     program->id->accept(*this);
@@ -377,4 +352,63 @@ void NodeVisitorCodeGen::visitExprVarInit(ExprVarInit * varinit) {
 void NodeVisitorCodeGen::visitArrayInitVarInit(ArrayInitVarInit *) {}
 void NodeVisitorCodeGen::visitArrayCreation(ArrayCreation *) {}
 void NodeVisitorCodeGen::visitArrayCreationVarInit(ArrayCreationVarInit *) {}
+
+
+std::map<Symbol, std::shared_ptr<VarStaticInfo>> generateDeclaredVars(std::shared_ptr<FieldDecl> fielddecl) {
+    std::map<Symbol, std::shared_ptr<VarStaticInfo>> declaredVars;
+    std::shared_ptr<Type> type = fielddecl->type;
+    std::shared_ptr<ConstructList> varDecls = fielddecl->varsDecls;
+    while(!varDecls->constructs.empty()) {
+        std::shared_ptr<FieldDeclVar> varDecl =
+                std::dynamic_pointer_cast<FieldDeclVar>(varDecls->constructs.front());
+        std::shared_ptr<VarDeclId> id = varDecl->varDeclId;
+        Symbol symbol = Symbol::symbol(id->id->id); // \o/ =D
+        std::shared_ptr<VarStaticInfo> vsi = std::make_shared<VarStaticInfo>();
+        vsi->varType = std::make_pair(type->typeName, type->numBrackets);
+        //MJResources::getInstance()->symbolTable.put(symbol, vsi);
+        std::shared_ptr<VarInit> varInit = varDecl->varInit;
+        if (varInit != nullptr) {
+            //TODO: frame stack
+        }
+        declaredVars.insert(std::make_pair(symbol, vsi));
+    }
+    return declaredVars;
+}
+
+std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std::shared_ptr<MethodDecl> metdecl) {
+	std::string methodlabel = makeLabel(LabelType::METHOD);
+	//Symbol s = Symbol::symbol(metdecl->id->id);
+    
+    auto msi = std::make_shared<MethodStaticInfo>();
+
+    std::shared_ptr<Type> retType = metdecl->returnType->type;
+    msi->retType = std::make_pair(retType->typeName, retType->numBrackets);
+
+    if (metdecl->params != nullptr) {
+        while(!metdecl->params->constructs.empty()) {
+            std::shared_ptr<FormalParams> fparams = 
+                std::dynamic_pointer_cast<FormalParams>(metdecl->params->constructs.front()); 
+            // get formal type
+            std::shared_ptr<Type> ftype = fparams->type;
+            StaticInfo::Type sfType = std::make_pair(ftype->typeName, ftype->numBrackets);
+            // get val modifier
+            bool fval = fparams->val;
+            // get formal ids
+            while (!fparams->ids->constructs.empty()) {
+                std::string fid = std::dynamic_pointer_cast<Id>(fparams->ids->constructs.front())->id;
+                MethodStaticInfo::FormalParam fp = std::make_tuple(fid, sfType, fval);
+                fparams->ids->constructs.pop_front();
+                msi->formalParams.push_back(fp);
+            }
+            metdecl->params->constructs.pop_front();
+        }
+    }
+
+    //MJResources::getInstance()->symbolTable.put(s, msi);
+	
+	makeLabelStmt(msi->codeLabel);
+    metdecl->block->accept(*this); 
+
+    return msi;
+}
 

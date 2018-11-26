@@ -2,6 +2,8 @@
 #define __NODEVISITORCODE__
 
 #include "ast/NodeVisitor.h"
+#include "resources/MJResources.h"
+#include "symbol-table/SymbolTable.h"
 
 /**
  * Represents a node visitor for code generation.
@@ -15,6 +17,9 @@ class NodeVisitorCodeGen : public NodeVisitor {
         unsigned long labelWhileCounter = 0;
         unsigned long labelSwitchCounter = 0;
         unsigned long labelMethodCounter = 0;
+
+        std::shared_ptr<MethodStaticInfo> generateDeclaredMethod(std::shared_ptr<MethodDecl>);
+        std::map<Symbol, std::shared_ptr<VarStaticInfo>> generateDeclaredVars(std::shared_ptr<FieldDecl>);
 
     public:
 
