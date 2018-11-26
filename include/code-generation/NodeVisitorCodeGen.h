@@ -36,9 +36,8 @@ class NodeVisitorCodeGen : public NodeVisitor {
                 case LabelType::SWITCH:
                     return "switch"+std::to_string(labelSwitchCounter++);
                 break;
-                case LabelType::METHOD:
-                    return "switch"+std::to_string(labelSwitchCounter++);
-                break;
+				case LabelType::METHOD:
+                    return "method"+std::to_string(labelMethodCounter++);
             } 
             return "no label";
         }

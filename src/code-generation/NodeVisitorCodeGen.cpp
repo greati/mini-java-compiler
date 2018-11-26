@@ -1,6 +1,7 @@
 #include "code-generation/NodeVisitorCodeGen.h"
 #include "ast/Expr.h"
 #include "resources/MJResources.h"
+#include "symbol-table/SymbolTable.h"
 
 void NodeVisitorCodeGen::visitId(Id * id) {
     this->fileName = id->id;
@@ -301,6 +302,7 @@ void NodeVisitorCodeGen::visitBlock(Block * block) {
 }
 void NodeVisitorCodeGen::visitMethodReturnType(MethodReturnType *) {}
 void NodeVisitorCodeGen::visitMethodDecl(MethodDecl * metdecl) {
+	/*
     std::shared_ptr<Type> retType = metdecl->returnType->type;
     std::string methodId = metdecl->id->id;
     
@@ -323,7 +325,31 @@ void NodeVisitorCodeGen::visitMethodDecl(MethodDecl * metdecl) {
     }
 
     std::string methodLabel = makeLabel(LabelType::METHOD);
-    this->code += makeLabelStmt(methodLabel);
+    this->code += makeLabelStmt(methodLabel);*/
+	//=======
+	//Symbol s = Symbol::symbol(metdecl->id->id) ; //TODO: name conflict
+	std::string methodlabel = makeLabel(LabelType::METHOD);
+	Symbol s = Symbol::symbol(methodlabel + metdecl->id->id);
+
+	MethodStaticInfo msi;
+    // return
+	msi.retType = std::make_pair(metdecl->returnType->type->typeName, 0); //TODO: int = numbrackets?
+    // id
+	msi.codeLabel = methodlabel + metdecl->id->id;
+    // params
+    while (!metdecl->params->constructs.empty()) {
+		//TODO: verify if val and type
+		//new class Param?
+        auto param = std::shared_ptr<FormalParams>(dynamic_cast<FormalParams*>(
+					metdecl->params->constructs.front().get()));
+		MethodStaticInfo::FormalParam fp = make_tuple("test", msi.retType, true);
+		msi.formalParams.push_back(fp);
+        metdecl->params->constructs.pop_front();
+    }
+	
+	//table.put(s, msi);
+	
+	makeLabelStmt(msi.codeLabel);
     metdecl->block->accept(*this); 
 }
 void NodeVisitorCodeGen::visitClassBody(ClassBody * classbody) {

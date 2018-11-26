@@ -816,9 +816,9 @@ class ReturnStmt : public Stmt {
 
 class Type : public Node {
     public:
-
         int numBrackets;
         std::string typeName;
+
         Type(
             Position _pos,
 	    int _numBrackets,
@@ -1022,8 +1022,8 @@ class Block : public Node {
 
 class MethodReturnType : public Node {
     public:
-
         std::shared_ptr<Type> type;
+
         MethodReturnType(Position _pos, std::shared_ptr<Type> _type)
         : Node {_pos}, type {_type} {}
 
