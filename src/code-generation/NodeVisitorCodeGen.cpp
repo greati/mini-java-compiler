@@ -322,7 +322,7 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
         while (!decls->fields->constructs.empty()) {
             std::shared_ptr<FieldDecl> fielddecl = 
                 std::dynamic_pointer_cast<FieldDecl>(decls->fields->constructs.front()); 
-            auto mvsi = generateDeclaredVars(fielddecl);
+            auto mvsi = this->generateDeclaredVars(fielddecl);
             csi->attributes.insert(mvsi.begin(), mvsi.end());    
         }
     }
@@ -332,7 +332,7 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
         while (!methods->constructs.empty()) {
             std::shared_ptr<MethodDecl> methodDecl = 
                 std::dynamic_pointer_cast<MethodDecl>(methods->constructs.front()); 
-            auto msi = generateDeclaredMethod(methodDecl);
+            auto msi = this->generateDeclaredMethod(methodDecl);
             csi->methods.insert(std::make_pair(Symbol::symbol(methodDecl->id->id), msi)); 
         }
     }
@@ -354,7 +354,7 @@ void NodeVisitorCodeGen::visitArrayCreation(ArrayCreation *) {}
 void NodeVisitorCodeGen::visitArrayCreationVarInit(ArrayCreationVarInit *) {}
 
 
-std::map<Symbol, std::shared_ptr<VarStaticInfo>> generateDeclaredVars(std::shared_ptr<FieldDecl> fielddecl) {
+std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDeclaredVars(std::shared_ptr<FieldDecl> fielddecl) {
     std::map<Symbol, std::shared_ptr<VarStaticInfo>> declaredVars;
     std::shared_ptr<Type> type = fielddecl->type;
     std::shared_ptr<ConstructList> varDecls = fielddecl->varsDecls;
@@ -406,6 +406,16 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 
     //MJResources::getInstance()->symbolTable.put(s, msi);
 	
+    auto decls = metdecl->block->decls;
+    if (decls != nullptr) {
+        while (!decls->fields->constructs.empty()) {
+            std::shared_ptr<FieldDecl> fielddecl = 
+                std::dynamic_pointer_cast<FieldDecl>(decls->fields->constructs.front()); 
+            auto mvsi = this->generateDeclaredVars(fielddecl);
+            msi->variables.insert(mvsi.begin(), mvsi.end());    
+        }
+    }
+
 	makeLabelStmt(msi->codeLabel);
     metdecl->block->accept(*this); 
 

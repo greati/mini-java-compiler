@@ -27,19 +27,6 @@ class VarStaticInfo : public StaticInfo {
         
 };
 
-class MethodStaticInfo : public StaticInfo {
-    
-    public:
-       
-        std::map<std::string, VarStaticInfo> attributes;
-
-        // bool: True if Val
-        typedef std::tuple<std::string, Type, bool> FormalParam;
-        
-        Type retType;
-        std::vector<FormalParam> formalParams;
-        std::string codeLabel;
-};
 
 
 
@@ -78,6 +65,20 @@ class Symbol {
             return Symbol("#");            
         }        
 
+};
+
+class MethodStaticInfo : public StaticInfo {
+    
+    public:
+       
+       std::map<Symbol, std::shared_ptr<VarStaticInfo>> variables;
+
+        // bool: True if Val
+        typedef std::tuple<std::string, Type, bool> FormalParam;
+        
+        Type retType;
+        std::vector<FormalParam> formalParams;
+        std::string codeLabel;
 };
 
 class ClassStaticInfo : public StaticInfo {
