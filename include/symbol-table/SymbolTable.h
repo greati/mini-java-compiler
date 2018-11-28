@@ -16,6 +16,7 @@
 class StaticInfo {
 
    public: 
+
         typedef std::pair<std::string, int> Type;
 };
 

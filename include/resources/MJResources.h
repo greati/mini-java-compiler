@@ -2,6 +2,7 @@
 #define __MJRESOURCES__
 
 #include "symbol-table/SymbolTable.h"
+#include "frames/Frame.h"
 #include <memory>
 #include <stack>
 
@@ -16,6 +17,8 @@ class MJResources {
 
         Table symbolTable; 
         std::stack<Symbol> scopeStack;
+        std::shared_ptr<Frame> frameStack; // nullptr by default
+        std::shared_ptr<ClassStaticInfo> mainClass; // nullptr by default
 
         void beginScope() {
             this->scopeStack.push(Symbol::getMarker());

@@ -473,10 +473,10 @@ class AssignStmt : public Stmt {
 };
 
 class FunctionCallStmt : public Stmt {
-    protected:
+    public:
         std::shared_ptr<Var> var;
         std::shared_ptr<ConstructList> actualParams;
-    public:
+
         FunctionCallStmt(
                 Position _pos,
                 std::shared_ptr<Var> _var,

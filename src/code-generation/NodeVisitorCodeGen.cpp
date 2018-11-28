@@ -109,7 +109,20 @@ void NodeVisitorCodeGen::visitVar(Var *) {}
 void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr *) {}
 void NodeVisitorCodeGen::visitStmt(Stmt *) {}
 void NodeVisitorCodeGen::visitAssignStmt(AssignStmt *) {}
-void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt *) {}
+
+void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
+    
+    std::shared_ptr<Var> var = funcall->var;
+
+    // visit each var member
+    // match the function
+    // new scope
+    // new framestack
+
+    // a.b.c(0)
+
+    std::shared_ptr<ConstructList> actualParams = funcall->actualParams;
+}
 
 void NodeVisitorCodeGen::visitReadStmt(ReadStmt * readStmt) {
     //TODO: frame stack
@@ -314,8 +327,20 @@ void NodeVisitorCodeGen::visitClassBody(ClassBody * classbody) {
         classbody->methods->accept(*this);
 }
 void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
+
     std::shared_ptr<ClassStaticInfo> csi = std::make_shared<ClassStaticInfo>();
-    Symbol symbol = Symbol::symbol(classdecl->id->id);
+
+    std::string classId = classdecl->id->id;
+
+    bool isClassMain = (classId == "Main");
+
+    if (isClassMain and MJResources::getInstance()->mainClass != nullptr) {
+        throw new std::logic_error("A program must have only one Main class"); 
+    } else if (isClassMain) {
+        MJResources::getInstance()->mainClass = csi;
+    }
+
+    Symbol symbol = Symbol::symbol(classId);
 
     auto decls = classdecl->body->decls;
     if (decls != nullptr) {
@@ -329,18 +354,27 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
 
     auto methods = classdecl->body->methods;
     if (methods != nullptr) {
+        bool foundMethodMain = false;
         while (!methods->constructs.empty()) {
             std::shared_ptr<MethodDecl> methodDecl = 
                 std::dynamic_pointer_cast<MethodDecl>(methods->constructs.front()); 
             auto msi = this->generateDeclaredMethod(methodDecl);
             csi->methods.insert(std::make_pair(Symbol::symbol(methodDecl->id->id), msi)); 
+            if (methodDecl->id->id == "Main") 
+                foundMethodMain = true;
         }
+        if (isClassMain and not foundMethodMain) 
+            throw std::logic_error("The Main class must have a main method");
     }
 
     MJResources::getInstance()->symbolTable.put(symbol, csi);
 }
 void NodeVisitorCodeGen::visitProgram(Program * program) {
     program->id->accept(*this);
+
+    if (MJResources::getInstance()->mainClass == nullptr)
+        throw std::logic_error("Missing the Main class");
+
     this->code += "#include <stdio.h>";
     this->code += "int main(void) {";
     program->classes->accept(*this);
@@ -377,7 +411,6 @@ std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDec
 
 std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std::shared_ptr<MethodDecl> metdecl) {
 	std::string methodlabel = makeLabel(LabelType::METHOD);
-	//Symbol s = Symbol::symbol(metdecl->id->id);
     
     auto msi = std::make_shared<MethodStaticInfo>();
 
@@ -403,8 +436,6 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
             metdecl->params->constructs.pop_front();
         }
     }
-
-    //MJResources::getInstance()->symbolTable.put(s, msi);
 	
     auto decls = metdecl->block->decls;
     if (decls != nullptr) {
