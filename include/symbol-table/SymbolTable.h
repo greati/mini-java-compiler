@@ -72,7 +72,7 @@ class MethodStaticInfo : public StaticInfo {
     
     public:
        
-       std::map<Symbol, std::shared_ptr<VarStaticInfo>> variables;
+        std::map<Symbol, std::shared_ptr<VarStaticInfo>> variables;
 
         // bool: True if Val
         typedef std::tuple<std::string, Type, bool> FormalParam;
@@ -98,13 +98,13 @@ class Table {
 
     protected:
 
-        std::unordered_multimap<Symbol, std::shared_ptr<StaticInfo>, SymbolHash> table;
+        std::unordered_multimap<Symbol, std::shared_ptr<ClassStaticInfo>, SymbolHash> table;
     
     public:
 
         inline Table(){}
 
-        inline void put(Symbol key, std::shared_ptr<StaticInfo> value) {
+        inline void put(Symbol key, std::shared_ptr<ClassStaticInfo> value) {
             table.insert(std::make_pair(key, value));
         }
 
@@ -114,7 +114,7 @@ class Table {
                 table.erase(iterpair.first);
         }
 
-	std::shared_ptr<StaticInfo> get(Symbol key);
+        std::shared_ptr<ClassStaticInfo> get(Symbol key);
 };
 
 #endif

@@ -4,6 +4,7 @@
 #include "ast/NodeVisitor.h"
 #include "resources/MJResources.h"
 #include "symbol-table/SymbolTable.h"
+#include "frames/Param.h"
 
 /**
  * Represents a node visitor for code generation.

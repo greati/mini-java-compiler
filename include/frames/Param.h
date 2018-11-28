@@ -11,6 +11,8 @@ class Param {
         std::vector<int> sizes;
         std::shared_ptr<void> content;
 
+        Param() {}
+
         Param(std::vector<int> _sizes, std::shared_ptr<void> _content)
             : sizes {_sizes}, content {_content} {} 
 

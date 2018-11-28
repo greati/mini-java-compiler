@@ -3,7 +3,7 @@
 
 std::unordered_multimap<std::string, Symbol> Symbol::dict;
 
-std::shared_ptr<StaticInfo> Table::get(Symbol key) {
+std::shared_ptr<ClassStaticInfo> Table::get(Symbol key) {
     auto value = this->table.find(key);
     if (value != this->table.end()){
         return value->second;

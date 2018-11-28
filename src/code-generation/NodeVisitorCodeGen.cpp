@@ -113,8 +113,51 @@ void NodeVisitorCodeGen::visitAssignStmt(AssignStmt *) {}
 void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
     
     std::shared_ptr<Var> var = funcall->var;
+    std::shared_ptr<ConstructList> actuals = funcall->actualParams;
 
     // visit each var member
+    
+    std::shared_ptr<AccessOperation> itAccessOp = var->accessOperation;
+
+    std::string varId = var->id->id;
+
+    std::shared_ptr<ClassStaticInfo> csi = MJResources::getInstance()->symbolTable.get(Symbol::symbol("$"));
+
+    if (itAccessOp == nullptr) {
+
+        try {
+            std::shared_ptr<MethodStaticInfo> msi = csi->methods.at(Symbol::symbol(varId));
+
+            std::shared_ptr<Frame> frame = MJResources::getInstance()->newFrame();
+            
+            frame->label = msi->codeLabel;   
+
+            for (auto & formalParam : msi->formalParams) {
+                std::string name = std::get<0>(formalParam);
+                StaticInfo::Type type = std::get<1>(formalParam);
+                bool val = std::get<2>(formalParam);
+
+                Param p;
+
+                frame->formals.insert(std::make_pair(name, p));
+            }
+
+            //TODO frame->classFrame = ?;
+
+        } catch (const std::out_of_range & out) {
+            throw std::logic_error("Subprogram not found");
+        }
+    }
+
+    /*if (csi != nullptr) {
+        while (itAccessOp != nullptr) {
+            
+            
+            itAccessOp = itAccessOp->accessOperation; 
+        }
+    } else throw std::logic_error("Variable " + varId + " not declared");
+    */
+
     // match the function
     // new scope
     // new framestack

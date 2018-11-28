@@ -293,7 +293,13 @@ class LitExpr : public AlExpr {
 
 class AccessOperation : public Node {
     public:
-        AccessOperation(Position _pos) : Node {_pos} {};
+
+        std::shared_ptr<AccessOperation> accessOperation;
+
+        AccessOperation(Position _pos, 
+                std::shared_ptr<AccessOperation> _accessOperation) 
+            : Node {_pos}, accessOperation {_accessOperation} {}
+
 
         std::string show() const override {
             return "";
@@ -306,16 +312,14 @@ class AccessOperation : public Node {
 
 class BracketAccess : public AccessOperation {
     
-    protected:
-        std::shared_ptr<ConstructList> expressionList; 
-        std::shared_ptr<AccessOperation> accessOperation;
-
     public:
+        std::shared_ptr<ConstructList> expressionList; 
+
         BracketAccess(
                 Position _pos, 
                 std::shared_ptr<ConstructList> _expressionList,
                 std::shared_ptr<AccessOperation> _accessOperation) 
-            : AccessOperation{_pos}, expressionList{_expressionList}, accessOperation{_accessOperation} {}
+            : AccessOperation{_pos, _accessOperation}, expressionList{_expressionList} {}
 
         std::string show() const override {
             std::stringstream ss;
@@ -338,15 +342,14 @@ class BracketAccess : public AccessOperation {
 };
 
 class DotAccess : public AccessOperation {
-    protected:
-        std::shared_ptr<Id> id;
-        std::shared_ptr<AccessOperation> accessOperation;
     public:
+        std::shared_ptr<Id> id;
+
         DotAccess(
                 Position _pos, 
                 std::shared_ptr<Id> _id,
                 std::shared_ptr<AccessOperation> _accessOperation) 
-            : AccessOperation{_pos}, id{_id}, accessOperation{_accessOperation} {}
+            : AccessOperation{_pos, _accessOperation}, id{_id} {}
 
         std::string show() const override {
             std::stringstream ss;
@@ -369,10 +372,10 @@ class DotAccess : public AccessOperation {
 };
 
 class Var : public AlExpr {
-    protected:
+    public:
         std::shared_ptr<Id> id;
         std::shared_ptr<AccessOperation> accessOperation;
-    public:
+
         Var(
                 Position _pos, 
                 std::shared_ptr<Id> _id,

@@ -20,6 +20,14 @@ class MJResources {
         std::shared_ptr<Frame> frameStack; // nullptr by default
         std::shared_ptr<ClassStaticInfo> mainClass; // nullptr by default
 
+        std::shared_ptr<Frame> newFrame() {
+            std::shared_ptr<Frame> frame = std::make_shared<Frame>();
+            frameStack->next = frame;
+            frame->prev = frameStack;
+            frameStack = frame;
+        }
+
+
         void beginScope() {
             this->scopeStack.push(Symbol::getMarker());
         }
