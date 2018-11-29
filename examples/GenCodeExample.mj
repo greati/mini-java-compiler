@@ -1,0 +1,39 @@
+program P;
+
+class A {
+    declarations
+        int a = 2, z;
+        string b = "";
+    enddeclarations
+    method void m1(int a; val int b) 
+        declarations
+            int c, d;
+        enddeclarations 
+    {
+        print "a"
+    }
+
+    method int m2(int b) 
+        declarations
+        enddeclarations
+    {
+        print "b"
+    }
+}
+
+class B {
+    declarations
+        int a = 4;
+        int x;
+    enddeclarations
+    method void m1(val int a) 
+    {
+        print "c"
+    }
+}
+
+class Main {
+    method void main() {
+        print "a"
+    }
+}

@@ -19,8 +19,8 @@ class NodeVisitorCodeGen : public NodeVisitor {
         unsigned long labelSwitchCounter = 0;
         unsigned long labelMethodCounter = 0;
 
-        std::shared_ptr<MethodStaticInfo> generateDeclaredMethod(std::shared_ptr<MethodDecl>);
-        std::map<Symbol, std::shared_ptr<VarStaticInfo>> generateDeclaredVars(std::shared_ptr<FieldDecl>);
+        std::shared_ptr<MethodStaticInfo> generateDeclaredMethod(std::shared_ptr<MethodDecl>, std::string&);
+        std::map<Symbol, std::shared_ptr<VarStaticInfo>> generateDeclaredVars(std::shared_ptr<FieldDecl>, std::string&);
 
     public:
 
@@ -58,6 +58,9 @@ class NodeVisitorCodeGen : public NodeVisitor {
 
         std::string fileName;
         std::string code;
+        std::string frameStructDefinitions;
+        std::string frameTypesEnum;
+        std::string baseFrameDefinition;
 
         void visitId(Id *) override;
         void visitConstructList(ConstructList *) override;

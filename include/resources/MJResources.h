@@ -25,6 +25,7 @@ class MJResources {
             frameStack->next = frame;
             frame->prev = frameStack;
             frameStack = frame;
+            return frame;
         }
 
 

@@ -371,9 +371,11 @@ void NodeVisitorCodeGen::visitClassBody(ClassBody * classbody) {
 }
 void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
 
-    std::shared_ptr<ClassStaticInfo> csi = std::make_shared<ClassStaticInfo>();
-
     std::string classId = classdecl->id->id;
+
+    std::cout << "star class" << classId << std::endl;
+
+    std::shared_ptr<ClassStaticInfo> csi = std::make_shared<ClassStaticInfo>();
 
     bool isClassMain = (classId == "Main");
 
@@ -385,43 +387,83 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
 
     Symbol symbol = Symbol::symbol(classId);
 
+    std::string structClass = "struct class$" + classId + "{\n"; 
+
+    frameTypesEnum += "class$"+classId+","; // add field to frame types enum
+    baseFrameDefinition += "class$" + classId + " *" + classId + ";\n"; // add to union in a frame
+
     auto decls = classdecl->body->decls;
-    if (decls != nullptr) {
+    std::string genDeclsStructFields = "";
+    if (decls != nullptr && decls->fields != nullptr) {
         while (!decls->fields->constructs.empty()) {
             std::shared_ptr<FieldDecl> fielddecl = 
                 std::dynamic_pointer_cast<FieldDecl>(decls->fields->constructs.front()); 
-            auto mvsi = this->generateDeclaredVars(fielddecl);
+            auto mvsi = this->generateDeclaredVars(fielddecl, genDeclsStructFields);
             csi->attributes.insert(mvsi.begin(), mvsi.end());    
+            decls->fields->constructs.pop_front();
         }
     }
+    structClass += genDeclsStructFields;
+    structClass += "};\n";
+    
+    this->frameStructDefinitions += structClass;
 
+    std::cout << "start methods" << classId << std::endl;
     auto methods = classdecl->body->methods;
     if (methods != nullptr) {
         bool foundMethodMain = false;
+
         while (!methods->constructs.empty()) {
             std::shared_ptr<MethodDecl> methodDecl = 
                 std::dynamic_pointer_cast<MethodDecl>(methods->constructs.front()); 
-            auto msi = this->generateDeclaredMethod(methodDecl);
+
+            std::string structMethod = "struct method$" + classId + "$" + methodDecl->id->id + "{\n"; 
+            auto msi = this->generateDeclaredMethod(methodDecl, structMethod);
+            structMethod += "};\n";
+
+            this->frameStructDefinitions += structMethod;
+
             csi->methods.insert(std::make_pair(Symbol::symbol(methodDecl->id->id), msi)); 
             if (methodDecl->id->id == "Main") 
                 foundMethodMain = true;
+            methods->constructs.pop_front();
         }
         if (isClassMain and not foundMethodMain) 
             throw std::logic_error("The Main class must have a main method");
     }
 
+    std::cout << "end class" << classId << std::endl;
     MJResources::getInstance()->symbolTable.put(symbol, csi);
 }
 void NodeVisitorCodeGen::visitProgram(Program * program) {
-    program->id->accept(*this);
 
-    if (MJResources::getInstance()->mainClass == nullptr)
-        throw std::logic_error("Missing the Main class");
+    program->id->accept(*this); // no matter what
+
+    this->baseFrameDefinition += "struct Frame {\n";
+    this->baseFrameDefinition += "FType ftype;\n";
+    this->baseFrameDefinition += "Frame* next;\n";
+    this->baseFrameDefinition += "Frame* prev;\n";
+    this->baseFrameDefinition += "union mframe {\n";
+
+    this->frameTypesEnum += "enum FType {\n";
 
     this->code += "#include <stdio.h>";
     this->code += "int main(void) {";
     program->classes->accept(*this);
     this->code += "return 0;}";
+
+    // close union and base frame definition
+    this->baseFrameDefinition += "};\n";
+    this->baseFrameDefinition += "} frame;\n";
+    this->baseFrameDefinition += " Frame * stackFrame = &frame;";
+
+    // close frame Types enum
+    this->frameTypesEnum += "};\n";
+
+    this->code = frameTypesEnum + baseFrameDefinition + frameStructDefinitions + this->code;
+
+    if (MJResources::getInstance()->mainClass == nullptr)
+        throw std::logic_error("Missing the Main class");
 }
 void NodeVisitorCodeGen::visitExprVarInit(ExprVarInit * varinit) {
     varinit->expr->accept(*this);
@@ -431,66 +473,94 @@ void NodeVisitorCodeGen::visitArrayCreation(ArrayCreation *) {}
 void NodeVisitorCodeGen::visitArrayCreationVarInit(ArrayCreationVarInit *) {}
 
 
-std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDeclaredVars(std::shared_ptr<FieldDecl> fielddecl) {
+std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDeclaredVars(
+        std::shared_ptr<FieldDecl> fielddecl, std::string & structFields) {
+
     std::map<Symbol, std::shared_ptr<VarStaticInfo>> declaredVars;
     std::shared_ptr<Type> type = fielddecl->type;
     std::shared_ptr<ConstructList> varDecls = fielddecl->varsDecls;
-    while(!varDecls->constructs.empty()) {
-        std::shared_ptr<FieldDeclVar> varDecl =
-                std::dynamic_pointer_cast<FieldDeclVar>(varDecls->constructs.front());
-        std::shared_ptr<VarDeclId> id = varDecl->varDeclId;
-        Symbol symbol = Symbol::symbol(id->id->id); // \o/ =D
-        std::shared_ptr<VarStaticInfo> vsi = std::make_shared<VarStaticInfo>();
-        vsi->varType = std::make_pair(type->typeName, type->numBrackets);
-        //MJResources::getInstance()->symbolTable.put(symbol, vsi);
-        std::shared_ptr<VarInit> varInit = varDecl->varInit;
-        if (varInit != nullptr) {
-            //TODO: frame stack
+    if (varDecls != nullptr) {
+        while(!varDecls->constructs.empty()) {
+            std::shared_ptr<FieldDeclVar> varDecl =
+                    std::dynamic_pointer_cast<FieldDeclVar>(varDecls->constructs.front());
+            std::shared_ptr<VarDeclId> id = varDecl->varDeclId;
+            structFields += type->typeName + " " + id->id->id + ";";
+            Symbol symbol = Symbol::symbol(id->id->id); // \o/ =D
+            std::shared_ptr<VarStaticInfo> vsi = std::make_shared<VarStaticInfo>();
+            vsi->varType = std::make_pair(type->typeName, type->numBrackets);
+            //MJResources::getInstance()->symbolTable.put(symbol, vsi);
+            std::shared_ptr<VarInit> varInit = varDecl->varInit;
+            if (varInit != nullptr) {
+                //TODO: frame stack
+            }
+            declaredVars.insert(std::make_pair(symbol, vsi));
+            varDecls->constructs.pop_front();
         }
-        declaredVars.insert(std::make_pair(symbol, vsi));
     }
     return declaredVars;
 }
 
-std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std::shared_ptr<MethodDecl> metdecl) {
+std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std::shared_ptr<MethodDecl> metdecl,
+        std::string & genCode) {
 	std::string methodlabel = makeLabel(LabelType::METHOD);
     
+    std::cout << methodlabel << std::endl;
+
     auto msi = std::make_shared<MethodStaticInfo>();
 
+    std::cout << "start return" << methodlabel << std::endl;
+
     std::shared_ptr<Type> retType = metdecl->returnType->type;
-    msi->retType = std::make_pair(retType->typeName, retType->numBrackets);
+
+    if (retType != nullptr)
+        msi->retType = std::make_pair(retType->typeName, retType->numBrackets);
+
+	this->code += makeLabelStmt(msi->codeLabel);
+    this->code += "Frame* methodFrame = stackHead;";
+    this->code += "Frame* classFrame = methodFrame->mframe.classFrame";
+
+    std::cout << "start formals" << methodlabel << std::endl;
 
     if (metdecl->params != nullptr) {
         while(!metdecl->params->constructs.empty()) {
             std::shared_ptr<FormalParams> fparams = 
                 std::dynamic_pointer_cast<FormalParams>(metdecl->params->constructs.front()); 
-            // get formal type
-            std::shared_ptr<Type> ftype = fparams->type;
-            StaticInfo::Type sfType = std::make_pair(ftype->typeName, ftype->numBrackets);
-            // get val modifier
-            bool fval = fparams->val;
-            // get formal ids
-            while (!fparams->ids->constructs.empty()) {
-                std::string fid = std::dynamic_pointer_cast<Id>(fparams->ids->constructs.front())->id;
-                MethodStaticInfo::FormalParam fp = std::make_tuple(fid, sfType, fval);
-                fparams->ids->constructs.pop_front();
-                msi->formalParams.push_back(fp);
+            if (fparams != nullptr) {
+                // get formal type
+                std::shared_ptr<Type> ftype = fparams->type;
+                StaticInfo::Type sfType = std::make_pair(ftype->typeName, ftype->numBrackets);
+                // get val modifier
+                bool fval = fparams->val;
+                // get formal ids
+                while (!fparams->ids->constructs.empty()) {
+                    std::string fid = std::dynamic_pointer_cast<Id>(fparams->ids->constructs.front())->id;
+
+                    genCode += ftype->typeName + " " + (fval ? "" : "*") + fid + ";";
+
+                    MethodStaticInfo::FormalParam fp = std::make_tuple(fid, sfType, fval);
+                    msi->formalParams.push_back(fp);
+                    fparams->ids->constructs.pop_front();
+                }
+                metdecl->params->constructs.pop_front();
             }
-            metdecl->params->constructs.pop_front();
-        }
-    }
-	
-    auto decls = metdecl->block->decls;
-    if (decls != nullptr) {
-        while (!decls->fields->constructs.empty()) {
-            std::shared_ptr<FieldDecl> fielddecl = 
-                std::dynamic_pointer_cast<FieldDecl>(decls->fields->constructs.front()); 
-            auto mvsi = this->generateDeclaredVars(fielddecl);
-            msi->variables.insert(mvsi.begin(), mvsi.end());    
         }
     }
 
-	makeLabelStmt(msi->codeLabel);
+    std::cout << "end formals" << methodlabel << std::endl;
+	
+    auto decls = metdecl->block->decls;
+    if (decls != nullptr && decls->fields != nullptr) {
+        while (!decls->fields->constructs.empty()) {
+            std::shared_ptr<FieldDecl> fielddecl = 
+                std::dynamic_pointer_cast<FieldDecl>(decls->fields->constructs.front()); 
+            auto mvsi = this->generateDeclaredVars(fielddecl, genCode);
+            msi->variables.insert(mvsi.begin(), mvsi.end());    
+            decls->fields->constructs.pop_front();
+        }
+    }
+
+    std::cout << "end method" << methodlabel << std::endl;
+
     metdecl->block->accept(*this); 
 
     return msi;
