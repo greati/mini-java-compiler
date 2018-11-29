@@ -19,14 +19,25 @@ class NodeVisitorCodeGen : public NodeVisitor {
         unsigned long labelSwitchCounter = 0;
         unsigned long labelMethodCounter = 0;
 
-        std::shared_ptr<MethodStaticInfo> generateDeclaredMethod(std::shared_ptr<MethodDecl>, std::string&);
-        std::map<Symbol, std::shared_ptr<VarStaticInfo>> generateDeclaredVars(std::shared_ptr<FieldDecl>, std::string&);
-
     public:
+
+        enum class EntityType {
+            METHOD, CLASS
+        };
 
         enum class LabelType {
             IF, FOR, WHILE, SWITCH, METHOD
         };
+
+   private:
+        std::shared_ptr<MethodStaticInfo> generateDeclaredMethod(std::shared_ptr<MethodDecl>, std::string&,
+                std::shared_ptr<ClassStaticInfo> &);
+        std::map<Symbol, std::shared_ptr<VarStaticInfo>> generateDeclaredVars(std::shared_ptr<FieldDecl>, 
+                std::string&,
+                EntityType entityType = EntityType::METHOD,
+                std::string entityName = "");
+   
+   public:
 
         std::string makeLabel(LabelType ltype) {
             switch (ltype) {
