@@ -351,7 +351,8 @@ void NodeVisitorCodeGen::visitFieldDecl(FieldDecl * fielddecl) {
 
 }
 void NodeVisitorCodeGen::visitDecls(Decls * decls) {
-    decls->fields->accept(*this);
+    if (decls->fields != nullptr)
+        decls->fields->accept(*this);
 }
 void NodeVisitorCodeGen::visitFormalParams(FormalParams *) {}
 void NodeVisitorCodeGen::visitBlock(Block * block) {
@@ -373,7 +374,6 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
 
     std::string classId = classdecl->id->id;
 
-    std::cout << "star class" << classId << std::endl;
 
     std::shared_ptr<ClassStaticInfo> csi = std::make_shared<ClassStaticInfo>();
 
@@ -389,7 +389,7 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
 
     std::string structClass = "struct class$" + classId + "{\n"; 
 
-    frameTypesEnum += "class$"+classId+","; // add field to frame types enum
+    frameTypesEnum += "class$"+classId+",\n"; // add field to frame types enum
     baseFrameDefinition += "class$" + classId + " *" + classId + ";\n"; // add to union in a frame
 
     auto decls = classdecl->body->decls;
@@ -408,7 +408,6 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
     
     this->frameStructDefinitions += structClass;
 
-    std::cout << "start methods" << classId << std::endl;
     auto methods = classdecl->body->methods;
     if (methods != nullptr) {
         bool foundMethodMain = false;
@@ -424,7 +423,7 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
             this->frameStructDefinitions += structMethod;
 
             csi->methods.insert(std::make_pair(Symbol::symbol(methodDecl->id->id), msi)); 
-            if (methodDecl->id->id == "Main") 
+            if (methodDecl->id->id == "main") 
                 foundMethodMain = true;
             methods->constructs.pop_front();
         }
@@ -432,7 +431,6 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
             throw std::logic_error("The Main class must have a main method");
     }
 
-    std::cout << "end class" << classId << std::endl;
     MJResources::getInstance()->symbolTable.put(symbol, csi);
 }
 void NodeVisitorCodeGen::visitProgram(Program * program) {
@@ -447,15 +445,15 @@ void NodeVisitorCodeGen::visitProgram(Program * program) {
 
     this->frameTypesEnum += "enum FType {\n";
 
-    this->code += "#include <stdio.h>";
-    this->code += "int main(void) {";
+    this->code += "#include <stdio.h>\n";
+    this->code += "int main(void) {\n";
     program->classes->accept(*this);
-    this->code += "return 0;}";
+    this->code += "return 0;\n}\n";
 
     // close union and base frame definition
     this->baseFrameDefinition += "};\n";
     this->baseFrameDefinition += "} frame;\n";
-    this->baseFrameDefinition += " Frame * stackFrame = &frame;";
+    this->baseFrameDefinition += " Frame * stackFrame = &frame;\n";
 
     // close frame Types enum
     this->frameTypesEnum += "};\n";
@@ -484,7 +482,7 @@ std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDec
             std::shared_ptr<FieldDeclVar> varDecl =
                     std::dynamic_pointer_cast<FieldDeclVar>(varDecls->constructs.front());
             std::shared_ptr<VarDeclId> id = varDecl->varDeclId;
-            structFields += type->typeName + " " + id->id->id + ";";
+            structFields += type->typeName + " " + id->id->id + ";\n";
             Symbol symbol = Symbol::symbol(id->id->id); // \o/ =D
             std::shared_ptr<VarStaticInfo> vsi = std::make_shared<VarStaticInfo>();
             vsi->varType = std::make_pair(type->typeName, type->numBrackets);
@@ -503,23 +501,20 @@ std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDec
 std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std::shared_ptr<MethodDecl> metdecl,
         std::string & genCode) {
 	std::string methodlabel = makeLabel(LabelType::METHOD);
-    
-    std::cout << methodlabel << std::endl;
 
     auto msi = std::make_shared<MethodStaticInfo>();
 
-    std::cout << "start return" << methodlabel << std::endl;
+    genCode += "Frame* classFrame;\n";
 
     std::shared_ptr<Type> retType = metdecl->returnType->type;
 
     if (retType != nullptr)
         msi->retType = std::make_pair(retType->typeName, retType->numBrackets);
 
-	this->code += makeLabelStmt(msi->codeLabel);
-    this->code += "Frame* methodFrame = stackHead;";
-    this->code += "Frame* classFrame = methodFrame->mframe.classFrame";
+	this->code += makeLabelStmt(methodlabel);
+    this->code += "Frame* methodFrame = stackHead;\n";
+    this->code += "Frame* classFrame = methodFrame->mframe.classFrame\n";
 
-    std::cout << "start formals" << methodlabel << std::endl;
 
     if (metdecl->params != nullptr) {
         while(!metdecl->params->constructs.empty()) {
@@ -535,7 +530,7 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
                 while (!fparams->ids->constructs.empty()) {
                     std::string fid = std::dynamic_pointer_cast<Id>(fparams->ids->constructs.front())->id;
 
-                    genCode += ftype->typeName + " " + (fval ? "" : "*") + fid + ";";
+                    genCode += ftype->typeName + " " + (fval ? "" : "*") + fid + ";\n";
 
                     MethodStaticInfo::FormalParam fp = std::make_tuple(fid, sfType, fval);
                     msi->formalParams.push_back(fp);
@@ -546,7 +541,6 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
         }
     }
 
-    std::cout << "end formals" << methodlabel << std::endl;
 	
     auto decls = metdecl->block->decls;
     if (decls != nullptr && decls->fields != nullptr) {
@@ -559,7 +553,6 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
         }
     }
 
-    std::cout << "end method" << methodlabel << std::endl;
 
     metdecl->block->accept(*this); 
 
