@@ -148,8 +148,9 @@ struct Frame* classFrame = methodFrame->mframe.Main$main->classFrame;
 printf("%s","a");
 methodFrame->prev->next = NULL;
 stackFrame = methodFrame->prev;
-free(methodFrame);
 currentReturn = methodFrame->mframe.Main$main->retLabel;
+free(methodFrame->mframe.Main$main);
+free(methodFrame);
 }
 goto retSwitch;
 ;
