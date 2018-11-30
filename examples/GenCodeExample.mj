@@ -17,7 +17,8 @@ class A {
         declarations
         enddeclarations
     {
-        print "b"
+        print "b";
+        m1(2, 3)
     }
 }
 

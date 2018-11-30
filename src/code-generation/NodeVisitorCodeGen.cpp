@@ -112,7 +112,7 @@ void NodeVisitorCodeGen::visitStmt(Stmt *) {}
 void NodeVisitorCodeGen::visitAssignStmt(AssignStmt *) {}
 
 void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
-    
+
     std::shared_ptr<Var> var = funcall->var;
     std::shared_ptr<ConstructList> actuals = funcall->actualParams;
 
@@ -122,29 +122,47 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
 
     std::string varId = var->id->id;
 
-    std::shared_ptr<ClassStaticInfo> csi = MJResources::getInstance()->symbolTable.get(Symbol::symbol("$"));
+    std::shared_ptr<ClassStaticInfo> csi = 
+        std::static_pointer_cast<ClassStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol("$")));
 
     if (itAccessOp == nullptr) {
 
         try {
-            std::shared_ptr<MethodStaticInfo> msi = csi->methods.at(Symbol::symbol(varId));
+            std::string newMFrameName = "newMFrame";
+            std::string mFrameName = "method$" +csi->className+"$"+varId;
+            std::string newFrameName = "newFrame";
+            std::string unionName = csi->className + "$" + varId;
+            this->code += "struct "+ mFrameName + " *"+ newMFrameName +"= malloc(sizeof(struct "+mFrameName + "));\n";
+            this->code += "struct Frame * " + newFrameName + " = malloc(sizeof(struct Frame));\n";
+            this->code += newFrameName + "->mframe."+unionName + " = " + newMFrameName + ";\n";
+            this->code += newFrameName + "->ftype = " + mFrameName + ";\n";
+            this->code += newFrameName + "->prev = " + "stackFrame;\n"; 
+            this->code += newFrameName + "->next = " + "NULL;\n"; 
+            this->code += "stackFrame->next = " + newFrameName + ";\n";
 
+            //TODO first load methods
+            /*std::shared_ptr<MethodStaticInfo> msi = csi->methods.at(Symbol::symbol(varId));
+            auto itFormals = msi->formalParams.begin();
+            auto itActuals = actuals->constructs.begin();
+
+            while (itFormals != msi->formalParams.end()) {
+                std::string name = std::get<0>(*itFormals);
+                StaticInfo::Type type = std::get<1>(*itFormals);
+                bool val = std::get<2>(*itFormals);
+                this->code += newFrameName + "->mframe." + unionName + "->" + name + "=";
+                (*itActuals)->accept(*this);
+                this->code += ";\n";
+            }
+*/
+            /*
             std::shared_ptr<Frame> frame = MJResources::getInstance()->newFrame();
             
             frame->label = msi->codeLabel;   
 
-            for (auto & formalParam : msi->formalParams) {
-                std::string name = std::get<0>(formalParam);
-                StaticInfo::Type type = std::get<1>(formalParam);
-                bool val = std::get<2>(formalParam);
 
-                Param p;
-
-                frame->formals.insert(std::make_pair(name, p));
-            }
 
             //TODO frame->classFrame = ?;
-
+            */
         } catch (const std::out_of_range & out) {
             throw std::logic_error("Subprogram not found");
         }
@@ -375,9 +393,12 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
 
     std::string classId = classdecl->id->id;
 
-
     std::shared_ptr<ClassStaticInfo> csi = std::make_shared<ClassStaticInfo>();
     csi->className = classId;
+
+    auto res = MJResources::getInstance();
+    res->beginScope();
+    res->symbolTable.put(Symbol::symbol("$"), csi);
 
     bool isClassMain = (classId == "Main");
 
@@ -436,13 +457,17 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
                 foundMethodMain = true;
             methods->constructs.pop_front();
         }
+
         if (isClassMain and not foundMethodMain) 
             throw std::logic_error("The Main class must have a main method");
     }
 
-    MJResources::getInstance()->symbolTable.put(symbol, csi);
+    res->endScope();
+
+    MJResources::getInstance()->staticInfoTable.put(symbol, csi);
 }
 void NodeVisitorCodeGen::visitProgram(Program * program) {
+
 
     program->id->accept(*this); // no matter what
 
@@ -454,7 +479,6 @@ void NodeVisitorCodeGen::visitProgram(Program * program) {
 
     this->frameTypesEnum += "enum FType {\n";
 
-    this->code += "#include <stdio.h>\n";
     this->code += "int main(void) {\n";
     program->classes->accept(*this);
     this->code += "return 0;\n}\n";
@@ -467,7 +491,10 @@ void NodeVisitorCodeGen::visitProgram(Program * program) {
     // close frame Types enum
     this->frameTypesEnum += "};\n";
 
-    this->code = frameTypesEnum + baseFrameDefinition + frameStructDefinitions + this->code;
+    std::string includePart = "#include <stdio.h>\n";
+    includePart += "#include <stdlib.h>\n";
+
+    this->code = includePart + frameTypesEnum + baseFrameDefinition + frameStructDefinitions + this->code;
 
     if (MJResources::getInstance()->mainClass == nullptr)
         throw std::logic_error("Missing the Main class");
@@ -504,7 +531,7 @@ std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDec
             Symbol symbol = Symbol::symbol(id->id->id); // \o/ =D
             std::shared_ptr<VarStaticInfo> vsi = std::make_shared<VarStaticInfo>();
             vsi->varType = std::make_pair(getCType(type->typeName), type->numBrackets);
-            //MJResources::getInstance()->symbolTable.put(symbol, vsi);
+            MJResources::getInstance()->symbolTable.put(symbol, vsi);
             std::shared_ptr<VarInit> varInit = varDecl->varInit;
             if (varInit != nullptr) {
                 //TODO: frame stack
@@ -523,9 +550,14 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 
     std::string methodid = metdecl->id->id;
     
+
 	std::string methodlabel = makeLabel(LabelType::METHOD);
 
     auto msi = std::make_shared<MethodStaticInfo>();
+
+    auto res = MJResources::getInstance();
+    res->beginScope();
+    res->symbolTable.put(Symbol::symbol("$"), msi);
 
     msi->className = csi->className;
 
@@ -597,6 +629,8 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
     metdecl->block->accept(*this); 
 
     this->code += "}\n";
+
+    res->endScope();
     return msi;
 }
 

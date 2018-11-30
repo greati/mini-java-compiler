@@ -1,3 +1,6 @@
+aaaaa:::m1
+#include <stdio.h>
+#include <stdlib.h>
 enum FType {
 class$A,
 method$A$m1,
@@ -54,7 +57,6 @@ struct class$Main
 struct method$Main$main{
 struct Frame* classFrame;
 };
-#include <stdio.h>
 int main(void) {
 method0$body:
 {
@@ -75,6 +77,14 @@ int *b = methodFrame->mframe.A$m2->b;
 int a = classFrame->mframe.A->a;
 int z = classFrame->mframe.A->z;
 printf("%s","b");
+struct method$A$m1 *newMFrame= malloc(sizeof(struct method$A$m1));
+struct Frame * newFrame = malloc(sizeof(struct Frame));
+newFrame->mframe.A$m1 = newMFrame;
+newFrame->ftype = method$A$m1;
+newFrame->prev = stackFrame;
+newFrame->next = NULL;
+stackFrame->next = newFrame;
+;
 }
 ;
 method2$body:
