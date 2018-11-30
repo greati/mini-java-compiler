@@ -106,8 +106,14 @@ void NodeVisitorCodeGen::visitLitExprInt(LitExpr<int> * intlit) {
 void NodeVisitorCodeGen::visitAccessOperation(AccessOperation *) {}
 void NodeVisitorCodeGen::visitBrackAccess(BracketAccess *) {}
 void NodeVisitorCodeGen::visitDotAccess(DotAccess *) {}
-void NodeVisitorCodeGen::visitVar(Var *) {}
+void NodeVisitorCodeGen::visitVar(Var * var) {
+
+    this->code += var->id->id;
+
+    // TODO: access operation
+}
 void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr *) {}
+
 void NodeVisitorCodeGen::visitStmt(Stmt *) {}
 void NodeVisitorCodeGen::visitAssignStmt(AssignStmt *) {}
 
@@ -147,7 +153,6 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
             this->codeSwitchReturns += "goto "+ labelReturn +";\n";
             this->codeSwitchReturns += "}\n";
 
-            this->code += labelReturn + ":\n";
 
             //TODO first load methods
             std::shared_ptr<MethodStaticInfo> msi = csi->methods.at(Symbol::symbol(varId));
@@ -166,6 +171,8 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
             }
             
             this->code += "goto " + msi->codeLabel + ";\n";
+
+            this->code += labelReturn + ":\n";
             /*
             std::shared_ptr<Frame> frame = MJResources::getInstance()->newFrame();
             
@@ -206,9 +213,10 @@ void NodeVisitorCodeGen::visitPrintStmt(PrintStmt * print) {
         v->accept(*this);
         this->code += ")";
     } else {
-        this->code += std::string("printf(\"%s\", std::to_string(");
+        this->code += std::string("printf(\"%d\", ");
+        //this->code += std::string("printf(\"%s\", std::to_string(");
         print->expr->accept(*this);
-        this->code += "))";
+        this->code += ")";
     }
 }
 void NodeVisitorCodeGen::visitCase(Case * casesstmt) {
@@ -673,7 +681,9 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
     this->code += "methodFrame->prev->next = NULL;\n";
     this->code += "stackFrame = methodFrame->prev;\n";
     this->code += "free(methodFrame);\n";
-    this->code += "currentReturn = methodFrame->mframe." + csi->className+"$"+ methodid + "->retLabel;\n";
+    this->code += "int n = strlen(methodFrame->mframe." + csi->className+"$"+ methodid + "->retLabel);\n";
+    this->code += "currentReturn = (char *) realloc(currentReturn, n+1);\n";
+    this->code += "strcpy(currentReturn, methodFrame->mframe." + csi->className+"$"+ methodid + "->retLabel);\n";
     this->code += "}\n";
     this->code += "goto retSwitch;\n";
 

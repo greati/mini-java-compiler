@@ -34,7 +34,12 @@ class B {
 }
 
 class Main {
+
+    method void m1(val int a; val int b) {
+        print a+b
+    }
     method void main() {
-        print "a"
+        print "a";
+        m1(2,4)
     }
 }

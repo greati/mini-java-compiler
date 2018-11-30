@@ -8,6 +8,7 @@ method$A$m2,
 class$B,
 method$B$m1,
 class$Main,
+method$Main$m1,
 method$Main$main,
 };
 struct Frame {
@@ -21,6 +22,7 @@ struct method$A$m2 *A$m2;
 struct class$B *B;
 struct method$B$m1 *B$m1;
 struct class$Main *Main;
+struct method$Main$m1 *Main$m1;
 struct method$Main$main *Main$main;
 } mframe;
 };
@@ -56,6 +58,12 @@ int a;
 struct class$Main
 {
 };
+struct method$Main$m1{
+char * retLabel;
+struct Frame* classFrame;
+int a;
+int b;
+};
 struct method$Main$main{
 char * retLabel;
 struct Frame* classFrame;
@@ -83,6 +91,9 @@ return 0;
 if (strcmp(currentReturn,"A$m1$c0$ret") == 0) {
 goto A$m1$c0$ret;
 }
+if (strcmp(currentReturn,"Main$m1$c1$ret") == 0) {
+goto Main$m1$c1$ret;
+}
 A$m1$body:
 {
 struct Frame* methodFrame = stackFrame;
@@ -96,7 +107,9 @@ printf("%s","a");
 methodFrame->prev->next = NULL;
 stackFrame = methodFrame->prev;
 free(methodFrame);
-currentReturn = methodFrame->mframe.A$m1->retLabel;
+int n = strlen(methodFrame->mframe.A$m1->retLabel);
+currentReturn = (char *) realloc(currentReturn, n+1);
+strcpy(currentReturn, methodFrame->mframe.A$m1->retLabel);
 }
 goto retSwitch;
 A$m2$body:
@@ -115,15 +128,17 @@ newFrame->prev = stackFrame;
 newFrame->next = NULL;
 stackFrame->next = newFrame;
 stackFrame = newFrame;
-A$m1$c0$ret:
 newFrame->mframe.A$m1->a=2;
 newFrame->mframe.A$m1->b=3;
 goto A$m1$body;
+A$m1$c0$ret:
 ;
 methodFrame->prev->next = NULL;
 stackFrame = methodFrame->prev;
 free(methodFrame);
-currentReturn = methodFrame->mframe.A$m2->retLabel;
+int n = strlen(methodFrame->mframe.A$m2->retLabel);
+currentReturn = (char *) realloc(currentReturn, n+1);
+strcpy(currentReturn, methodFrame->mframe.A$m2->retLabel);
 }
 goto retSwitch;
 ;
@@ -137,20 +152,51 @@ printf("%s","c");
 methodFrame->prev->next = NULL;
 stackFrame = methodFrame->prev;
 free(methodFrame);
-currentReturn = methodFrame->mframe.B$m1->retLabel;
+int n = strlen(methodFrame->mframe.B$m1->retLabel);
+currentReturn = (char *) realloc(currentReturn, n+1);
+strcpy(currentReturn, methodFrame->mframe.B$m1->retLabel);
 }
 goto retSwitch;
 ;
+Main$m1$body:
+{
+struct Frame* methodFrame = stackFrame;
+struct Frame* classFrame = methodFrame->mframe.Main$m1->classFrame;
+int a = methodFrame->mframe.Main$m1->a;
+int b = methodFrame->mframe.Main$m1->b;
+printf("%d", a+b);
+methodFrame->prev->next = NULL;
+stackFrame = methodFrame->prev;
+int n = strlen(methodFrame->mframe.Main$m1->retLabel);
+currentReturn = (char *) realloc(currentReturn, n+1);
+strcpy(currentReturn, methodFrame->mframe.Main$m1->retLabel);
+free(methodFrame);
+}
+goto retSwitch;
 Main$main$body:
 {
 struct Frame* methodFrame = stackFrame;
 struct Frame* classFrame = methodFrame->mframe.Main$main->classFrame;
 printf("%s","a");
+struct method$Main$m1 *newMFrame= malloc(sizeof(struct method$Main$m1));
+struct Frame * newFrame = malloc(sizeof(struct Frame));
+newFrame->mframe.Main$m1 = newMFrame;
+newFrame->ftype = method$Main$m1;
+newFrame->prev = stackFrame;
+newFrame->next = NULL;
+stackFrame->next = newFrame;
+stackFrame = newFrame;
+newFrame->mframe.Main$m1->a=2;
+newFrame->mframe.Main$m1->b=4;
+goto Main$m1$body;
+Main$m1$c1$ret:
+;
 methodFrame->prev->next = NULL;
 stackFrame = methodFrame->prev;
-currentReturn = methodFrame->mframe.Main$main->retLabel;
-free(methodFrame->mframe.Main$main);
 free(methodFrame);
+int n = strlen(methodFrame->mframe.Main$main->retLabel);
+currentReturn = (char *) realloc(currentReturn, n+1);
+strcpy(currentReturn, methodFrame->mframe.Main$main->retLabel);
 }
 goto retSwitch;
 ;
