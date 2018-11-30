@@ -1,6 +1,7 @@
 #ifndef __NODEVISITORCODE__
 #define __NODEVISITORCODE__
 
+#include <set>
 #include "ast/NodeVisitor.h"
 #include "resources/MJResources.h"
 #include "symbol-table/SymbolTable.h"
@@ -33,11 +34,16 @@ class NodeVisitorCodeGen : public NodeVisitor {
         std::shared_ptr<MethodStaticInfo> generateDeclaredMethod(std::shared_ptr<MethodDecl>, std::string&,
                 std::shared_ptr<ClassStaticInfo> &);
         std::map<Symbol, std::shared_ptr<VarStaticInfo>> generateDeclaredVars(std::shared_ptr<FieldDecl>, 
-                std::string&,
+                std::string&,std::set<std::string> & alreadyDeclaredVars,
                 EntityType entityType = EntityType::METHOD,
                 std::string entityName = "");
    
    public:
+        inline std::string getCType(std::string mjtype) const {
+            if (mjtype == "string")
+                return "char *";
+            else return mjtype;
+        }
 
         std::string makeLabel(LabelType ltype) {
             switch (ltype) {

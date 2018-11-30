@@ -71,7 +71,8 @@ class Symbol {
 class MethodStaticInfo : public StaticInfo {
     
     public:
-       
+        std::string className;
+
         std::map<Symbol, std::shared_ptr<VarStaticInfo>> variables;
 
         // bool: True if Val
@@ -84,6 +85,7 @@ class MethodStaticInfo : public StaticInfo {
 
 class ClassStaticInfo : public StaticInfo {
     public:
+       std::string className;
        std::map<Symbol, std::shared_ptr<MethodStaticInfo>> methods;
        std::map<Symbol, std::shared_ptr<VarStaticInfo>> attributes;
 };

@@ -1,5 +1,6 @@
 #include "code-generation/NodeVisitorCodeGen.h"
 #include "ast/Expr.h"
+#include <set>
 
 void NodeVisitorCodeGen::visitId(Id * id) {
     this->fileName = id->id;
@@ -376,6 +377,7 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
 
 
     std::shared_ptr<ClassStaticInfo> csi = std::make_shared<ClassStaticInfo>();
+    csi->className = classId;
 
     bool isClassMain = (classId == "Main");
 
@@ -387,10 +389,10 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
 
     Symbol symbol = Symbol::symbol(classId);
 
-    std::string structClass = "struct class$" + classId + "{\n"; 
+    std::string structClass = "struct class$" + classId + "\n{\n"; 
 
     frameTypesEnum += "class$"+classId+",\n"; // add field to frame types enum
-    baseFrameDefinition += "class$" + classId + " *" + classId + ";\n"; // add to union in a frame
+    baseFrameDefinition += "struct class$" + classId + " *" + classId + ";\n"; // add to union in a frame
 
     auto decls = classdecl->body->decls;
     std::string genDeclsStructFields = "";
@@ -398,7 +400,8 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
         while (!decls->fields->constructs.empty()) {
             std::shared_ptr<FieldDecl> fielddecl = 
                 std::dynamic_pointer_cast<FieldDecl>(decls->fields->constructs.front()); 
-            auto mvsi = this->generateDeclaredVars(fielddecl, genDeclsStructFields, NodeVisitorCodeGen::EntityType::CLASS, classId);
+            std::set<std::string> locals;
+            auto mvsi = this->generateDeclaredVars(fielddecl, genDeclsStructFields, locals, NodeVisitorCodeGen::EntityType::CLASS, classId);
             csi->attributes.insert(mvsi.begin(), mvsi.end());    
             decls->fields->constructs.pop_front();
         }
@@ -418,7 +421,8 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
 
             std::string methodid = methodDecl->id->id;
 
-            baseFrameDefinition += "method$" + classId + "$" + methodid+ " *" + methodid + ";\n"; // add to union in a frame
+            frameTypesEnum += "method$"+classId+"$"+methodid+",\n"; // add field to frame types enum
+            baseFrameDefinition += "struct method$" + classId + "$" + methodid+ " *" +classId + "$"+methodid + ";\n"; // add to union in a frame
 
             std::string structMethod = "struct method$" + classId + "$" + methodid + "{\n"; 
 
@@ -443,10 +447,10 @@ void NodeVisitorCodeGen::visitProgram(Program * program) {
     program->id->accept(*this); // no matter what
 
     this->baseFrameDefinition += "struct Frame {\n";
-    this->baseFrameDefinition += "FType ftype;\n";
-    this->baseFrameDefinition += "Frame* next;\n";
-    this->baseFrameDefinition += "Frame* prev;\n";
-    this->baseFrameDefinition += "union mframe {\n";
+    this->baseFrameDefinition += "enum FType ftype;\n";
+    this->baseFrameDefinition += "struct Frame* next;\n";
+    this->baseFrameDefinition += "struct Frame* prev;\n";
+    this->baseFrameDefinition += "union {\n";
 
     this->frameTypesEnum += "enum FType {\n";
 
@@ -456,9 +460,9 @@ void NodeVisitorCodeGen::visitProgram(Program * program) {
     this->code += "return 0;\n}\n";
 
     // close union and base frame definition
-    this->baseFrameDefinition += "};\n";
+    this->baseFrameDefinition += "} mframe;\n";
     this->baseFrameDefinition += "} frame;\n";
-    this->baseFrameDefinition += " Frame * stackFrame = &frame;\n";
+    this->baseFrameDefinition += "struct Frame * stackFrame = &frame;\n";
 
     // close frame Types enum
     this->frameTypesEnum += "};\n";
@@ -477,7 +481,7 @@ void NodeVisitorCodeGen::visitArrayCreationVarInit(ArrayCreationVarInit *) {}
 
 
 std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDeclaredVars(
-        std::shared_ptr<FieldDecl> fielddecl, std::string & structFields, NodeVisitorCodeGen::EntityType entityType,
+        std::shared_ptr<FieldDecl> fielddecl, std::string & structFields, std::set<std::string> & alreadyDeclaredVars,NodeVisitorCodeGen::EntityType entityType,
         std::string entityName) {
 
     std::map<Symbol, std::shared_ptr<VarStaticInfo>> declaredVars;
@@ -488,13 +492,18 @@ std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDec
             std::shared_ptr<FieldDeclVar> varDecl =
                     std::dynamic_pointer_cast<FieldDeclVar>(varDecls->constructs.front());
             std::shared_ptr<VarDeclId> id = varDecl->varDeclId;
-            structFields += type->typeName + " " + id->id->id + ";\n";
+
+            if (alreadyDeclaredVars.find(id->id->id) != alreadyDeclaredVars.end())
+                throw new std::logic_error("Already defined variable " + id->id->id);
+            else alreadyDeclaredVars.insert(id->id->id);
+
+            structFields += getCType(type->typeName) + " " + id->id->id + ";\n";
 
             if (entityType == NodeVisitorCodeGen::EntityType::METHOD)
-                this->code += type->typeName + " " + id->id->id + " = " + "methodFrame.mframe." + entityName + "->" + id->id->id  + ";\n";
+                this->code += getCType(type->typeName) + " " + id->id->id + " = " + "methodFrame->mframe." + entityName + "->" + id->id->id  + ";\n";
             Symbol symbol = Symbol::symbol(id->id->id); // \o/ =D
             std::shared_ptr<VarStaticInfo> vsi = std::make_shared<VarStaticInfo>();
-            vsi->varType = std::make_pair(type->typeName, type->numBrackets);
+            vsi->varType = std::make_pair(getCType(type->typeName), type->numBrackets);
             //MJResources::getInstance()->symbolTable.put(symbol, vsi);
             std::shared_ptr<VarInit> varInit = varDecl->varInit;
             if (varInit != nullptr) {
@@ -509,22 +518,28 @@ std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDec
 
 std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std::shared_ptr<MethodDecl> metdecl,
         std::string & genCode, std::shared_ptr<ClassStaticInfo> & csi) {
+
+    std::set<std::string> locals;
+
     std::string methodid = metdecl->id->id;
     
 	std::string methodlabel = makeLabel(LabelType::METHOD);
 
     auto msi = std::make_shared<MethodStaticInfo>();
 
-    genCode += "Frame* classFrame;\n";
+    msi->className = csi->className;
+
+    genCode += "struct Frame* classFrame;\n";
 
     std::shared_ptr<Type> retType = metdecl->returnType->type;
 
     if (retType != nullptr)
-        msi->retType = std::make_pair(retType->typeName, retType->numBrackets);
+        msi->retType = std::make_pair(getCType(retType->typeName), retType->numBrackets);
 
 	this->code += makeLabelStmt(methodlabel + "$body");
-    this->code += "Frame* methodFrame = stackHead;\n";
-    this->code += "Frame* classFrame = methodFrame->mframe." + methodid + "->classFrame\n";
+    this->code += "{\n";
+    this->code += "struct Frame* methodFrame = stackFrame;\n";
+    this->code += "struct Frame* classFrame = methodFrame->mframe." + csi->className+"$"+ methodid + "->classFrame;\n";
 
     if (metdecl->params != nullptr) {
         while(!metdecl->params->constructs.empty()) {
@@ -533,16 +548,20 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
             if (fparams != nullptr) {
                 // get formal type
                 std::shared_ptr<Type> ftype = fparams->type;
-                StaticInfo::Type sfType = std::make_pair(ftype->typeName, ftype->numBrackets);
+                StaticInfo::Type sfType = std::make_pair(getCType(ftype->typeName), ftype->numBrackets);
                 // get val modifier
                 bool fval = fparams->val;
                 // get formal ids
                 while (!fparams->ids->constructs.empty()) {
                     std::string fid = std::dynamic_pointer_cast<Id>(fparams->ids->constructs.front())->id;
 
-                    genCode += ftype->typeName + " " + (fval ? "" : "*") + fid + ";\n";
-                    this->code += ftype->typeName + " " + (fval ? "" : "*") + fid + " = " + "methodFrame.mframe." + methodid + "->" + fid  + ";\n";
+                    if (locals.find(fid) != locals.end())
+                        throw new std::logic_error("Multiple defined variable " + fid);
 
+                    locals.insert(fid);
+
+                    genCode += getCType(ftype->typeName) + " " + (fval ? "" : "*") + fid + ";\n";
+                    this->code += getCType(ftype->typeName) + " " + (fval ? "" : "*") + fid + " = " + "methodFrame->mframe." + csi->className + "$" + methodid + "->" + fid  + ";\n";
                     MethodStaticInfo::FormalParam fp = std::make_tuple(fid, sfType, fval);
                     msi->formalParams.push_back(fp);
                     fparams->ids->constructs.pop_front();
@@ -557,7 +576,7 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
         while (!decls->fields->constructs.empty()) {
             std::shared_ptr<FieldDecl> fielddecl = 
                 std::dynamic_pointer_cast<FieldDecl>(decls->fields->constructs.front()); 
-            auto mvsi = this->generateDeclaredVars(fielddecl, genCode, NodeVisitorCodeGen::EntityType::METHOD, methodid);
+            auto mvsi = this->generateDeclaredVars(fielddecl, genCode, locals, NodeVisitorCodeGen::EntityType::METHOD, csi->className + "$" + methodid);
             msi->variables.insert(mvsi.begin(), mvsi.end());    
             decls->fields->constructs.pop_front();
         }
@@ -565,13 +584,19 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 
     for (auto it = csi->attributes.begin(); it != csi->attributes.end(); ++it) {
         std::string id = it->first.to_string();
+
+        if (locals.find(id) != locals.end()) {
+            continue;
+        } else locals.insert(id);
+
         std::shared_ptr<VarStaticInfo> vsi = it->second;     
         StaticInfo::Type type = vsi->varType;
-        this->code += type.first + " " + id + " = " + "classFrame->" + id  + ";\n";
+        this->code += type.first + " " + id + " = " + "classFrame->mframe." +csi->className+"->" + id  + ";\n";
     } 
 
     metdecl->block->accept(*this); 
 
+    this->code += "}\n";
     return msi;
 }
 
