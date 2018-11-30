@@ -19,6 +19,7 @@ class NodeVisitorCodeGen : public NodeVisitor {
         unsigned long labelWhileCounter = 0;
         unsigned long labelSwitchCounter = 0;
         unsigned long labelMethodCounter = 0;
+        unsigned long labelCallReturnCounter = 0;
 
     public:
 
@@ -27,7 +28,7 @@ class NodeVisitorCodeGen : public NodeVisitor {
         };
 
         enum class LabelType {
-            IF, FOR, WHILE, SWITCH, METHOD
+            IF, FOR, WHILE, SWITCH, METHOD, RETURN_CALL
         };
 
    private:
@@ -45,22 +46,20 @@ class NodeVisitorCodeGen : public NodeVisitor {
             else return mjtype;
         }
 
-        std::string makeLabel(LabelType ltype) {
+        std::string makeLabel(LabelType ltype, std::map<std::string, std::string> attrs = {}) {
             switch (ltype) {
                 case LabelType::IF:
                     return "if"+std::to_string(labelIfCounter++);
-                break;
                 case LabelType::FOR:
                     return "for"+std::to_string(labelForCounter++);
-                break;
                 case LabelType::WHILE:
                     return "while"+std::to_string(labelWhileCounter++);
-                break;
                 case LabelType::SWITCH:
                     return "switch"+std::to_string(labelSwitchCounter++);
-                break;
 				case LabelType::METHOD:
-                    return "method"+std::to_string(labelMethodCounter++);
+                    return attrs["class"]+"$"+attrs["method"]+"$body";
+                case LabelType::RETURN_CALL:
+                    return attrs["class"]+"$"+attrs["method"]+"$c"+std::to_string(labelCallReturnCounter++)+"$ret";
             } 
             return "no label";
         }
@@ -78,6 +77,7 @@ class NodeVisitorCodeGen : public NodeVisitor {
         std::string frameStructDefinitions;
         std::string frameTypesEnum;
         std::string baseFrameDefinition;
+        std::string codeSwitchReturns;
 
         void visitId(Id *) override;
         void visitConstructList(ConstructList *) override;

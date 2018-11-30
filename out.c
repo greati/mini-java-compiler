@@ -1,6 +1,11 @@
-aaaaa:::m1
 #include <stdio.h>
 #include <stdlib.h>
+// switch for return points
+retSwitch:
+char * currentReturn;
+if (strcomp(currentReturn,"A$m1$c0$ret") == 0) {
+goto A$m1$c0$ret;
+}
 enum FType {
 class$A,
 method$A$m1,
@@ -32,6 +37,7 @@ int z;
 char * b;
 };
 struct method$A$m1{
+char * retLabel;
 struct Frame* classFrame;
 int *a;
 int b;
@@ -39,6 +45,7 @@ int c;
 int d;
 };
 struct method$A$m2{
+char * retLabel;
 struct Frame* classFrame;
 int *b;
 };
@@ -48,6 +55,7 @@ int a;
 int x;
 };
 struct method$B$m1{
+char * retLabel;
 struct Frame* classFrame;
 int a;
 };
@@ -55,10 +63,11 @@ struct class$Main
 {
 };
 struct method$Main$main{
+char * retLabel;
 struct Frame* classFrame;
 };
 int main(void) {
-method0$body:
+A$m1$body:
 {
 struct Frame* methodFrame = stackFrame;
 struct Frame* classFrame = methodFrame->mframe.A$m1->classFrame;
@@ -68,8 +77,9 @@ int c = methodFrame->mframe.A$m1->c;
 int d = methodFrame->mframe.A$m1->d;
 int z = classFrame->mframe.A->z;
 printf("%s","a");
+currentReturn = methodFrame->mframe.A$m1->retLabel;
 }
-method1$body:
+goto returnSwitch;A$m2$body:
 {
 struct Frame* methodFrame = stackFrame;
 struct Frame* classFrame = methodFrame->mframe.A$m2->classFrame;
@@ -84,25 +94,31 @@ newFrame->ftype = method$A$m1;
 newFrame->prev = stackFrame;
 newFrame->next = NULL;
 stackFrame->next = newFrame;
+newFrame->mframe.A$m1->a=2;
+newFrame->mframe.A$m1->b=3;
+goto A$m1$body;
 ;
+currentReturn = methodFrame->mframe.A$m2->retLabel;
 }
-;
-method2$body:
+goto returnSwitch;;
+B$m1$body:
 {
 struct Frame* methodFrame = stackFrame;
 struct Frame* classFrame = methodFrame->mframe.B$m1->classFrame;
 int a = methodFrame->mframe.B$m1->a;
 int x = classFrame->mframe.B->x;
 printf("%s","c");
+currentReturn = methodFrame->mframe.B$m1->retLabel;
 }
-;
-method3$body:
+goto returnSwitch;;
+Main$main$body:
 {
 struct Frame* methodFrame = stackFrame;
 struct Frame* classFrame = methodFrame->mframe.Main$main->classFrame;
 printf("%s","a");
+currentReturn = methodFrame->mframe.Main$main->retLabel;
 }
-;
+goto returnSwitch;;
 return 0;
 }
 

@@ -140,8 +140,14 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
             this->code += newFrameName + "->next = " + "NULL;\n"; 
             this->code += "stackFrame->next = " + newFrameName + ";\n";
 
+            std::string labelReturn = makeLabel(LabelType::RETURN_CALL, {{"class", csi->className},{"method", varId}});
+
+            this->codeSwitchReturns += "if (strcomp(currentReturn,\""+ labelReturn + "\") == 0) {\n";
+            this->codeSwitchReturns += "goto "+ labelReturn +";\n";
+            this->codeSwitchReturns += "}\n";
+
             //TODO first load methods
-            /*std::shared_ptr<MethodStaticInfo> msi = csi->methods.at(Symbol::symbol(varId));
+            std::shared_ptr<MethodStaticInfo> msi = csi->methods.at(Symbol::symbol(varId));
             auto itFormals = msi->formalParams.begin();
             auto itActuals = actuals->constructs.begin();
 
@@ -152,14 +158,15 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
                 this->code += newFrameName + "->mframe." + unionName + "->" + name + "=";
                 (*itActuals)->accept(*this);
                 this->code += ";\n";
+                itFormals++;
+                itActuals++;
             }
-*/
+            
+            this->code += "goto " + msi->codeLabel + ";\n";
             /*
             std::shared_ptr<Frame> frame = MJResources::getInstance()->newFrame();
             
             frame->label = msi->codeLabel;   
-
-
 
             //TODO frame->classFrame = ?;
             */
@@ -446,6 +453,7 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
             baseFrameDefinition += "struct method$" + classId + "$" + methodid+ " *" +classId + "$"+methodid + ";\n"; // add to union in a frame
 
             std::string structMethod = "struct method$" + classId + "$" + methodid + "{\n"; 
+            structMethod += "char * retLabel;\n";
 
             auto msi = this->generateDeclaredMethod(methodDecl, structMethod, csi);
             structMethod += "};\n";
@@ -468,6 +476,9 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
 }
 void NodeVisitorCodeGen::visitProgram(Program * program) {
 
+    this->codeSwitchReturns += "// switch for return points\n";
+    this->codeSwitchReturns += "retSwitch:\n";
+    this->codeSwitchReturns += "char * currentReturn;\n";
 
     program->id->accept(*this); // no matter what
 
@@ -494,7 +505,8 @@ void NodeVisitorCodeGen::visitProgram(Program * program) {
     std::string includePart = "#include <stdio.h>\n";
     includePart += "#include <stdlib.h>\n";
 
-    this->code = includePart + frameTypesEnum + baseFrameDefinition + frameStructDefinitions + this->code;
+
+    this->code = includePart + codeSwitchReturns + frameTypesEnum + baseFrameDefinition + frameStructDefinitions + this->code;
 
     if (MJResources::getInstance()->mainClass == nullptr)
         throw std::logic_error("Missing the Main class");
@@ -549,11 +561,12 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
     std::set<std::string> locals;
 
     std::string methodid = metdecl->id->id;
-    
 
-	std::string methodlabel = makeLabel(LabelType::METHOD);
+	std::string methodlabel = makeLabel(LabelType::METHOD, {{"class", csi->className},{"method",methodid}});
 
     auto msi = std::make_shared<MethodStaticInfo>();
+
+    msi->codeLabel = methodlabel;
 
     auto res = MJResources::getInstance();
     res->beginScope(MJResources::ScopeType::METHOD);
@@ -568,7 +581,7 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
     if (retType != nullptr)
         msi->retType = std::make_pair(getCType(retType->typeName), retType->numBrackets);
 
-	this->code += makeLabelStmt(methodlabel + "$body");
+	this->code += makeLabelStmt(methodlabel);
     this->code += "{\n";
     this->code += "struct Frame* methodFrame = stackFrame;\n";
     this->code += "struct Frame* classFrame = methodFrame->mframe." + csi->className+"$"+ methodid + "->classFrame;\n";
@@ -628,7 +641,9 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 
     metdecl->block->accept(*this); 
 
+    this->code += "currentReturn = methodFrame->mframe." + csi->className+"$"+ methodid + "->retLabel;\n";
     this->code += "}\n";
+    this->code += "goto returnSwitch;";
 
     res->endScope(MJResources::ScopeType::METHOD);
     return msi;
