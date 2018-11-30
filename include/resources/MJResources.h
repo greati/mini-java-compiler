@@ -19,6 +19,7 @@ class MJResources {
         std::stack<Symbol> scopeStack;
         std::shared_ptr<Frame> frameStack; // nullptr by default
         std::shared_ptr<ClassStaticInfo> mainClass; // nullptr by default
+        std::shared_ptr<MethodStaticInfo> mainMethod; // nullptr by default
         Table staticInfoTable;
 
         std::shared_ptr<Frame> newFrame() {

@@ -5,7 +5,7 @@ class A {
         int a = 2, z;
         string b = "";
     enddeclarations
-    method void m1(int a; val int b) 
+    method void m1(val int a; val int b) 
         declarations
             int c, d;
         enddeclarations 

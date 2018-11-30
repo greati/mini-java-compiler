@@ -139,12 +139,15 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
             this->code += newFrameName + "->prev = " + "stackFrame;\n"; 
             this->code += newFrameName + "->next = " + "NULL;\n"; 
             this->code += "stackFrame->next = " + newFrameName + ";\n";
+            this->code += "stackFrame = " + newFrameName + ";\n";
 
             std::string labelReturn = makeLabel(LabelType::RETURN_CALL, {{"class", csi->className},{"method", varId}});
 
-            this->codeSwitchReturns += "if (strcomp(currentReturn,\""+ labelReturn + "\") == 0) {\n";
+            this->codeSwitchReturns += "if (strcmp(currentReturn,\""+ labelReturn + "\") == 0) {\n";
             this->codeSwitchReturns += "goto "+ labelReturn +";\n";
             this->codeSwitchReturns += "}\n";
+
+            this->code += labelReturn + ":\n";
 
             //TODO first load methods
             std::shared_ptr<MethodStaticInfo> msi = csi->methods.at(Symbol::symbol(varId));
@@ -461,8 +464,10 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
             this->frameStructDefinitions += structMethod;
 
             csi->methods.insert(std::make_pair(Symbol::symbol(methodDecl->id->id), msi)); 
-            if (methodDecl->id->id == "main") 
+            if (methodDecl->id->id == "main") {
+                MJResources::getInstance()->mainMethod = msi;
                 foundMethodMain = true;
+            }
             methods->constructs.pop_front();
         }
 
@@ -476,10 +481,6 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
 }
 void NodeVisitorCodeGen::visitProgram(Program * program) {
 
-    this->codeSwitchReturns += "// switch for return points\n";
-    this->codeSwitchReturns += "retSwitch:\n";
-    this->codeSwitchReturns += "char * currentReturn;\n";
-
     program->id->accept(*this); // no matter what
 
     this->baseFrameDefinition += "struct Frame {\n";
@@ -490,23 +491,51 @@ void NodeVisitorCodeGen::visitProgram(Program * program) {
 
     this->frameTypesEnum += "enum FType {\n";
 
-    this->code += "int main(void) {\n";
+    std::string mainDecl = "int main(void) {\n";
+
+    this->codeSwitchReturns += "// switch for return points\n";
+    mainDecl += "struct Frame * stackFrame = malloc(sizeof(struct Frame));\n";
+    mainDecl += "char * currentReturn = \"exit\";\n";
+    this->codeSwitchReturns += "retSwitch:\n";
+    this->codeSwitchReturns += "if (strcmp(currentReturn,\"exit\") == 0) {\n";
+    this->codeSwitchReturns += "free(stackFrame);\n";
+    this->codeSwitchReturns += "return 0;\n";
+    this->codeSwitchReturns += "}\n";
+
     program->classes->accept(*this);
+
+    std::string newMFrameName = "newMFrame";
+    std::string mFrameName = "method$Main$main";
+    std::string newFrameName = "newFrame";
+    std::string unionName = "Main$main";
+   
+    mainDecl += "{"; 
+    mainDecl += "struct "+ mFrameName + " *"+ newMFrameName +"= malloc(sizeof(struct "+mFrameName + "));\n";
+    mainDecl += "struct Frame * " + newFrameName + " = malloc(sizeof(struct Frame));\n";
+    mainDecl += newMFrameName + "->retLabel = \"exit\";\n";
+    mainDecl += newFrameName + "->mframe."+unionName + " = " + newMFrameName + ";\n";
+    mainDecl += newFrameName + "->ftype = " + mFrameName + ";\n";
+    mainDecl += newFrameName + "->prev = " + "stackFrame;\n"; 
+    mainDecl += newFrameName + "->next = " + "NULL;\n"; 
+    mainDecl += "stackFrame->next = " + newFrameName + ";\n";
+    mainDecl += "stackFrame = " + newFrameName + ";\n";
+    mainDecl += "goto " + MJResources::getInstance()->mainMethod->codeLabel + ";\n";
+    mainDecl += "}\n";
+
     this->code += "return 0;\n}\n";
 
     // close union and base frame definition
     this->baseFrameDefinition += "} mframe;\n";
-    this->baseFrameDefinition += "} frame;\n";
-    this->baseFrameDefinition += "struct Frame * stackFrame = &frame;\n";
+    this->baseFrameDefinition += "};\n";
 
     // close frame Types enum
     this->frameTypesEnum += "};\n";
 
     std::string includePart = "#include <stdio.h>\n";
     includePart += "#include <stdlib.h>\n";
+    includePart += "#include <string.h>\n";
 
-
-    this->code = includePart + codeSwitchReturns + frameTypesEnum + baseFrameDefinition + frameStructDefinitions + this->code;
+    this->code = includePart + frameTypesEnum + baseFrameDefinition + frameStructDefinitions + mainDecl + codeSwitchReturns + this->code;
 
     if (MJResources::getInstance()->mainClass == nullptr)
         throw std::logic_error("Missing the Main class");
@@ -641,9 +670,12 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 
     metdecl->block->accept(*this); 
 
+    this->code += "methodFrame->prev->next = NULL;\n";
+    this->code += "stackFrame = methodFrame->prev;\n";
+    this->code += "free(methodFrame);\n";
     this->code += "currentReturn = methodFrame->mframe." + csi->className+"$"+ methodid + "->retLabel;\n";
     this->code += "}\n";
-    this->code += "goto returnSwitch;";
+    this->code += "goto retSwitch;\n";
 
     res->endScope(MJResources::ScopeType::METHOD);
     return msi;
