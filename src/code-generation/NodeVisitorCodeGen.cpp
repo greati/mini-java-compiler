@@ -123,7 +123,7 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
     std::string varId = var->id->id;
 
     std::shared_ptr<ClassStaticInfo> csi = 
-        std::static_pointer_cast<ClassStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol("$")));
+        std::static_pointer_cast<ClassStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol("$$")));
 
     if (itAccessOp == nullptr) {
 
@@ -397,8 +397,8 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
     csi->className = classId;
 
     auto res = MJResources::getInstance();
-    res->beginScope();
-    res->symbolTable.put(Symbol::symbol("$"), csi);
+    res->beginScope(MJResources::ScopeType::CLASS);
+    res->symbolTable.put(Symbol::symbol("$$"), csi);
 
     bool isClassMain = (classId == "Main");
 
@@ -462,7 +462,7 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
             throw std::logic_error("The Main class must have a main method");
     }
 
-    res->endScope();
+    res->endScope(MJResources::ScopeType::CLASS);
 
     MJResources::getInstance()->staticInfoTable.put(symbol, csi);
 }
@@ -556,7 +556,7 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
     auto msi = std::make_shared<MethodStaticInfo>();
 
     auto res = MJResources::getInstance();
-    res->beginScope();
+    res->beginScope(MJResources::ScopeType::METHOD);
     res->symbolTable.put(Symbol::symbol("$"), msi);
 
     msi->className = csi->className;
@@ -630,7 +630,7 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 
     this->code += "}\n";
 
-    res->endScope();
+    res->endScope(MJResources::ScopeType::METHOD);
     return msi;
 }
 

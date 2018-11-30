@@ -29,14 +29,29 @@ class MJResources {
             return frame;
         }
 
+        enum class ScopeType {
+            CLASS, METHOD
+        };
 
-        void beginScope() {
-            this->scopeStack.push(Symbol::getMarker());
+        Symbol fromScopeType(ScopeType scopeType) {
+            switch (scopeType) {
+                case ScopeType::CLASS:
+                    return Symbol::symbol("$$");
+                case ScopeType::METHOD:
+                    return Symbol::symbol("$");
+                default:
+                    return Symbol::getMarker();
+            }
         }
 
-        void endScope() {
+        void beginScope(ScopeType scopeType) {
+            this->scopeStack.push(fromScopeType(scopeType));
+        }
+
+        void endScope(ScopeType scopeType) {
+            Symbol scopeSymbol = fromScopeType(scopeType);
             Symbol s = this->scopeStack.top();
-            while (s != Symbol::getMarker()) {
+            while (s != scopeSymbol) {
                 this->symbolTable.remove(s);  
                 this->scopeStack.pop();
                 s = this->scopeStack.top();
