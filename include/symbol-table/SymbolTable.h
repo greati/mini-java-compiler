@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 #include <map>
-
+#include <deque>
 
 /**
  * Represents the symbol table.
@@ -27,9 +27,6 @@ class VarStaticInfo : public StaticInfo {
         Type varType;
         
 };
-
-
-
 
 class Symbol {
 
@@ -71,19 +68,21 @@ class Symbol {
 class MethodStaticInfo : public StaticInfo {
     
     public:
-       
+        std::string className;
+
         std::map<Symbol, std::shared_ptr<VarStaticInfo>> variables;
 
         // bool: True if Val
         typedef std::tuple<std::string, Type, bool> FormalParam;
         
         Type retType;
-        std::vector<FormalParam> formalParams;
+        std::deque<FormalParam> formalParams;
         std::string codeLabel;
 };
 
 class ClassStaticInfo : public StaticInfo {
     public:
+       std::string className;
        std::map<Symbol, std::shared_ptr<MethodStaticInfo>> methods;
        std::map<Symbol, std::shared_ptr<VarStaticInfo>> attributes;
 };
@@ -98,13 +97,13 @@ class Table {
 
     protected:
 
-        std::unordered_multimap<Symbol, std::shared_ptr<ClassStaticInfo>, SymbolHash> table;
+        std::unordered_multimap<Symbol, std::shared_ptr<StaticInfo>, SymbolHash> table;
     
     public:
 
         inline Table(){}
 
-        inline void put(Symbol key, std::shared_ptr<ClassStaticInfo> value) {
+        inline void put(Symbol key, std::shared_ptr<StaticInfo> value) {
             table.insert(std::make_pair(key, value));
         }
 
@@ -114,7 +113,7 @@ class Table {
                 table.erase(iterpair.first);
         }
 
-        std::shared_ptr<ClassStaticInfo> get(Symbol key);
+        std::shared_ptr<StaticInfo> get(Symbol key);
 };
 
 #endif

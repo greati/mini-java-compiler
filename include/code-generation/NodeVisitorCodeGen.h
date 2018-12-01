@@ -1,6 +1,7 @@
 #ifndef __NODEVISITORCODE__
 #define __NODEVISITORCODE__
 
+#include <set>
 #include "ast/NodeVisitor.h"
 #include "resources/MJResources.h"
 #include "symbol-table/SymbolTable.h"
@@ -18,32 +19,70 @@ class NodeVisitorCodeGen : public NodeVisitor {
         unsigned long labelWhileCounter = 0;
         unsigned long labelSwitchCounter = 0;
         unsigned long labelMethodCounter = 0;
-
-        std::shared_ptr<MethodStaticInfo> generateDeclaredMethod(std::shared_ptr<MethodDecl>);
-        std::map<Symbol, std::shared_ptr<VarStaticInfo>> generateDeclaredVars(std::shared_ptr<FieldDecl>);
+        unsigned long labelCallReturnCounter = 0;
 
     public:
 
-        enum class LabelType {
-            IF, FOR, WHILE, SWITCH, METHOD
+        enum class EntityType {
+            METHOD, CLASS
         };
 
-        std::string makeLabel(LabelType ltype) {
+        enum class LabelType {
+            IF, FOR, WHILE, SWITCH, METHOD, RETURN_CALL
+        };
+
+   private:
+        std::shared_ptr<MethodStaticInfo> generateDeclaredMethod(std::shared_ptr<MethodDecl>, std::string&,
+                std::shared_ptr<ClassStaticInfo> &);
+        std::map<Symbol, std::shared_ptr<VarStaticInfo>> generateDeclaredVars(std::shared_ptr<FieldDecl>, 
+                std::string&,std::set<std::string> & alreadyDeclaredVars,
+                EntityType entityType = EntityType::METHOD,
+                std::string entityName = "");
+
+        inline std::string startExprProc() {
+            this->code += "{\n";
+            threeAddressesStacks.push(std::make_shared<std::stack<int>>());
+            threeAddressesStacks.top()->push(0);
+            return "t"+std::to_string(0);
+        }
+        inline void endExprProc() {
+            threeAddressesStacks.pop();
+            this->code += "}\n";
+        }
+
+        inline std::string makeVarTAC(int i) {
+            return "t" + std::to_string(i);
+        }
+
+        std::stack<std::shared_ptr<std::stack<int>>> threeAddressesStacks;
+   
+   public:
+        inline std::string getCType(std::string mjtype, int numBrackets = 0) const {
+            std::string typeRes = "";
+            if (mjtype == "string")
+                typeRes += "char *";
+            else if (mjtype == "int")
+                typeRes += "int";
+            else typeRes += "struct class$"+mjtype+"*";
+            if (numBrackets > 0)
+                typeRes += "*";
+            return typeRes;
+        }
+
+        std::string makeLabel(LabelType ltype, std::map<std::string, std::string> attrs = {}) {
             switch (ltype) {
                 case LabelType::IF:
                     return "if"+std::to_string(labelIfCounter++);
-                break;
                 case LabelType::FOR:
                     return "for"+std::to_string(labelForCounter++);
-                break;
                 case LabelType::WHILE:
                     return "while"+std::to_string(labelWhileCounter++);
-                break;
                 case LabelType::SWITCH:
                     return "switch"+std::to_string(labelSwitchCounter++);
-                break;
 				case LabelType::METHOD:
-                    return "method"+std::to_string(labelMethodCounter++);
+                    return attrs["class"]+"$"+attrs["method"]+"$body";
+                case LabelType::RETURN_CALL:
+                    return attrs["class"]+"$"+attrs["method"]+"$c"+std::to_string(labelCallReturnCounter++)+"$ret";
             } 
             return "no label";
         }
@@ -58,6 +97,10 @@ class NodeVisitorCodeGen : public NodeVisitor {
 
         std::string fileName;
         std::string code;
+        std::string frameStructDefinitions;
+        std::string frameTypesEnum;
+        std::string baseFrameDefinition;
+        std::string codeSwitchReturns;
 
         void visitId(Id *) override;
         void visitConstructList(ConstructList *) override;

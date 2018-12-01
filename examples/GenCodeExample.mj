@@ -1,0 +1,63 @@
+program P;
+
+class A {
+    declarations
+        int a = 2, z;
+        string b = "";
+    enddeclarations
+    method void m1(val int a; val int b) 
+        declarations
+            int c, d;
+        enddeclarations 
+    {
+        print "a"
+    }
+
+    method int m2(int b) 
+        declarations
+        enddeclarations
+    {
+        print "b";
+        m1(2, 3)
+    }
+}
+
+class B {
+    declarations
+        int a = 4;
+        int x;
+    enddeclarations
+    method void m1(val int a) 
+    {
+        print "c"
+    }
+}
+
+class Main {
+
+    method void m2(val int a) {
+        print a
+    }
+    method void m1(val int a; val int b) {
+        print a*b;
+        m2(a+b);
+        print "retornou de m2"
+    }
+    method void m0(val int a) {
+        if a == 0 {
+            print "fim da recursão"
+        } else {
+            print a;
+            m0(a - 1)
+        }
+    }
+    method void r0(val int[][] b) {
+        print "oi"
+    }
+    method void main() {
+        #print "a";
+        #m1(2,4);
+        #print "retornou!!!";
+        m0(10)
+    }
+}
