@@ -38,6 +38,23 @@ class NodeVisitorCodeGen : public NodeVisitor {
                 std::string&,std::set<std::string> & alreadyDeclaredVars,
                 EntityType entityType = EntityType::METHOD,
                 std::string entityName = "");
+
+        inline std::string startExprProc() {
+            this->code += "{\n";
+            threeAddressesStacks.push(std::make_shared<std::stack<int>>());
+            threeAddressesStacks.top()->push(0);
+            return "t"+std::to_string(0);
+        }
+        inline void endExprProc() {
+            threeAddressesStacks.pop();
+            this->code += "}\n";
+        }
+
+        inline std::string makeVarTAC(int i) {
+            return "t" + std::to_string(i);
+        }
+
+        std::stack<std::shared_ptr<std::stack<int>>> threeAddressesStacks;
    
    public:
         inline std::string getCType(std::string mjtype, int numBrackets = 0) const {

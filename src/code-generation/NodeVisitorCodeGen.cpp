@@ -24,7 +24,12 @@ void NodeVisitorCodeGen::visitExprParen(ExprParen * expr) {
 }
 
 void NodeVisitorCodeGen::visitRelExpr(RelExpr * expr) {
-    expr->lhs->accept(*this);
+    auto tac = this->threeAddressesStacks.top();
+    int retNumberL = tac->top() + 1;
+    int retNumberR = tac->top() + 2;
+    tac->push(retNumberR); 
+    tac->push(retNumberL); 
+
     std::string opstr;
     switch(expr->op) {
         case RelExpr::RelOp::LESS:
@@ -46,12 +51,20 @@ void NodeVisitorCodeGen::visitRelExpr(RelExpr * expr) {
             opstr = "!=";
             break;
     }
-    this->code += opstr;
+    expr->lhs->accept(*this);
     expr->rhs->accept(*this);
+    //this->code += opstr;
+    this->code += "int " + makeVarTAC(tac->top()) + "=" + makeVarTAC(retNumberL) + opstr + makeVarTAC(retNumberR) + ";\n";
 }
 
 void NodeVisitorCodeGen::visitAlBinExpr(AlBinExpr * expr) {
-    expr->lhs->accept(*this);
+
+    auto tac = this->threeAddressesStacks.top();
+    int retNumberL = tac->top() + 1;
+    int retNumberR = tac->top() + 2;
+    tac->push(retNumberR); 
+    tac->push(retNumberL); 
+
     std::string opstr;
     switch(expr->op) {
         case AlBinExpr::AlBinOp::PLUS:
@@ -76,8 +89,9 @@ void NodeVisitorCodeGen::visitAlBinExpr(AlBinExpr * expr) {
             opstr = "||";
             break;
     }
-    this->code += opstr;
+    expr->lhs->accept(*this);
     expr->rhs->accept(*this);
+    this->code += "int " + makeVarTAC(tac->top()) + "=" + makeVarTAC(retNumberL) + opstr + makeVarTAC(retNumberR) + ";\n";
 }
 
 void NodeVisitorCodeGen::visitAlUnExpr(AlUnExpr * expr) {
@@ -99,17 +113,39 @@ void NodeVisitorCodeGen::visitAlUnExpr(AlUnExpr * expr) {
 }
 
 void NodeVisitorCodeGen::visitLitExprString(LitExpr<std::string> * strlit) {
-    this->code += strlit->val;
+   auto p = this->threeAddressesStacks;
+   if (p.empty())
+      this->code += strlit->val;
+   else {
+      this->code += "char* t"+std::to_string(p.top()->top())+ " = " + strlit->val + ";\n";
+      p.top()->pop();
+   }
 }
 void NodeVisitorCodeGen::visitLitExprInt(LitExpr<int> * intlit) {
-    this->code += std::to_string(intlit->val);
+   // this->code += std::to_string(intlit->val);
+   auto p = this->threeAddressesStacks;
+   if (p.empty())
+     this->code += intlit->val;
+   else {
+     this->code += "int t"+std::to_string(p.top()->top())+ " = " + std::to_string(intlit->val) + ";\n";
+     p.top()->pop();
+   }
 }
 void NodeVisitorCodeGen::visitAccessOperation(AccessOperation *) {}
 void NodeVisitorCodeGen::visitBrackAccess(BracketAccess *) {}
 void NodeVisitorCodeGen::visitDotAccess(DotAccess *) {}
 void NodeVisitorCodeGen::visitVar(Var * var) {
 
-    this->code += var->id->id;
+    
+    auto p = this->threeAddressesStacks;
+    if (!p.empty()) {
+        std::shared_ptr<VarStaticInfo> varDecl = 
+            std::static_pointer_cast<VarStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol(var->id->id)));
+        auto varType = varDecl->varType;
+        this->code += getCType(varType.first, varType.second)+" t"+std::to_string(p.top()->top())+ " = " + var->id->id + ";\n";
+        p.top()->pop();
+    } else 
+        this->code += var->id->id;
 
     // TODO: access operation
 }
@@ -166,9 +202,11 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
                 std::string name = std::get<0>(*itFormals);
                 StaticInfo::Type type = std::get<1>(*itFormals);
                 bool val = std::get<2>(*itFormals);
-                this->code += newFrameName + "->mframe." + unionName + "->" + name + "=";
+                this->startExprProc();
                 (*itActuals)->accept(*this);
+                this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0";
                 this->code += ";\n";
+                this->endExprProc();
                 itFormals++;
                 itActuals++;
             }
@@ -212,14 +250,16 @@ void NodeVisitorCodeGen::visitReadStmt(ReadStmt * readStmt) {
 
 void NodeVisitorCodeGen::visitPrintStmt(PrintStmt * print) {
     if (LitExpr<std::string> * v = dynamic_cast<LitExpr<std::string>*>(print->expr.get())) {
-        this->code += std::string("printf(\"%s\",");
+        std::string retVal = this->startExprProc();
         v->accept(*this);
-        this->code += ")";
+        this->code += std::string("printf(\"%s\"," + retVal + ");");
+        this->endExprProc();
     } else {
-        this->code += std::string("printf(\"%d\", ");
         //this->code += std::string("printf(\"%s\", std::to_string(");
+        std::string retVal = this->startExprProc();
         print->expr->accept(*this);
-        this->code += ")";
+        this->code += std::string("printf(\"%d\"," + retVal + ");");
+        this->endExprProc();
     }
 }
 void NodeVisitorCodeGen::visitCase(Case * casesstmt) {
@@ -357,11 +397,12 @@ void NodeVisitorCodeGen::visitIfStmt(IfStmt * ifstmt) {
     std::string labelIn = this->makeLabel(LabelType::IF);
     std::string labelElse = this->makeLabel(LabelType::IF);
     std::string labelOut = this->makeLabel(LabelType::IF);
-    this->code += "if (";
+    this->startExprProc();
     ifstmt->expr->accept(*this);
-    this->code += ")";
+    this->code += "if (t0) \n";
     this->code += makeGotoStmt(labelIn);
     this->code += makeGotoStmt(labelElse);
+    this->endExprProc();
 
     this->code += makeLabelStmt(labelIn);
     ifstmt->stmts->accept(*this);
@@ -584,7 +625,7 @@ std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDec
             Symbol symbol = Symbol::symbol(id->id->id); // \o/ =D
             std::shared_ptr<VarStaticInfo> vsi = std::make_shared<VarStaticInfo>();
             vsi->varType = std::make_pair(getCType(type->typeName), type->numBrackets);
-            MJResources::getInstance()->symbolTable.put(symbol, vsi);
+            MJResources::getInstance()->declareVar(symbol, vsi);
             std::shared_ptr<VarInit> varInit = varDecl->varInit;
             if (varInit != nullptr) {
                 //TODO: frame stack
@@ -649,6 +690,12 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 
                     genCode += getCType(ftype->typeName, sfType.second) + " " + (fval ? "" : "*") + fid + ";\n";
                     this->code += getCType(ftype->typeName, sfType.second) + " " + (fval ? "" : "*") + fid + " = " + "methodFrame->mframe." + csi->className + "$" + methodid + "->" + fid  + ";\n";
+
+                    // add to symbol table
+                    std::shared_ptr<VarStaticInfo> vsi = std::make_shared<VarStaticInfo>();
+                    vsi->varType = sfType;
+                    MJResources::getInstance()->declareVar(Symbol::symbol(fid), vsi);
+
                     MethodStaticInfo::FormalParam fp = std::make_tuple(fid, sfType, fval);
                     msi->formalParams.push_back(fp);
                     fparams->ids->constructs.pop_front();
@@ -677,6 +724,7 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
         } else locals.insert(id);
 
         std::shared_ptr<VarStaticInfo> vsi = it->second;     
+        MJResources::getInstance()->declareVar(Symbol::symbol(id), vsi);
         StaticInfo::Type type = vsi->varType;
         this->code += type.first + " " + id + " = " + "classFrame->mframe." +csi->className+"->" + id  + ";\n";
     } 
