@@ -24,6 +24,7 @@ char * retLabel;
 struct Frame* classFrame;
 int a;
 int b;
+int i;
 };
 struct method$Main$main{
 char * retLabel;
@@ -59,6 +60,7 @@ struct Frame* methodFrame = stackFrame;
 struct Frame* classFrame = methodFrame->mframe.Main$m1->classFrame;
 int a = methodFrame->mframe.Main$m1->a;
 int b = methodFrame->mframe.Main$m1->b;
+int i = methodFrame->mframe.Main$m1->i;
 {
 struct Frame * frame = stackFrame;
 int t0 = stackFrame->mframe.Main$m1->a;
@@ -128,6 +130,37 @@ switch0:
 {
 int t0 = stackFrame->mframe.Main$m1->a;
 printf("%d",t0);}
+;
+{
+int t0 = 0;
+stackFrame->mframe.Main$m1->i=t0;
+}
+int for0min;
+int for0max;
+for0min=stackFrame->mframe.Main$m1->i;
+{
+int t0 = 2;
+for0max= t0;
+}
+int for0step = 1;
+{
+int t0 = 2;
+for0step= t0;
+}
+if (for0min>for0max)goto for2;
+for0:
+if (for0min<=stackFrame->mframe.Main$m1->i && for0max>=stackFrame->mframe.Main$m1->i)goto for1;
+goto for3;
+for1:
+{
+int t0 = stackFrame->mframe.Main$m1->i;
+printf("%d",t0);}
+;
+stackFrame->mframe.Main$m1->i+=for0step;goto for0;
+for2:
+;int for2swap;
+for2swap=for0min;for0min=for0max;for0max=for2swap;goto for0;
+for3:
 ;
 int n = strlen(stackFrame->mframe.Main$m1->retLabel);
 currentReturn = (char *) realloc(currentReturn, n+1);

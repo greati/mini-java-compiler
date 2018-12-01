@@ -4,7 +4,7 @@ class Main {
 
     method void m1(val int a)
         declarations
-            int b;
+            int b, i;
         enddeclarations
     {
         b := a;
@@ -18,7 +18,10 @@ class Main {
             case 1 { print "aa 1" }
             default { print "DEFAULTAO"}
         };
-        print a
+        print a;
+        for i := 0 to 2 step 2 {
+            print i
+        }
     }
 
 

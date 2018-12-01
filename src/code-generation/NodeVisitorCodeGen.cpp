@@ -363,11 +363,16 @@ void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
     std::string labelEval = this->makeLabel(LabelType::FOR);
     std::string labelOut = this->makeLabel(LabelType::FOR);
 
-    //Evaluates assignment
-    forStmt->id->accept(*this);
-    this->code += "=";
+    std::shared_ptr<Var> var = std::make_shared<Var>(forStmt->pos, forStmt->id, nullptr);
+
+    std::string iterVarPath = "stackFrame->" + findVariableFramePath(var.get());
+
+    this->startExprProc();
     forStmt->assignExpr->accept(*this);
-    this->code += "; //TODO\n";
+    this->code += iterVarPath;
+    this->code += "=";
+    this->code += "t0;\n";
+    this->endExprProc();
 
     //Evaluates "from" and "to" Expressions detecting
     //min and max. These expressions are evaluated only
@@ -375,23 +380,26 @@ void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
     //e.g. for id := E1 to E2
     std::string min = labelFor + "min";
     std::string max = labelFor + "max";
+    this->code += "int " + min + ";\n";
+    this->code += "int " + max + ";\n";
     //Expr1 was previously evaluated
     this->code += min + "=";
-    forStmt->id->accept(*this);
-    this->code += ";";
-    //Evaluates Expr2
-    this->code += max + "=";
-    forStmt->toExpr->accept(*this);
+    this->code += iterVarPath;
     this->code += ";\n";
+    //Evaluates Expr2
+    this->startExprProc();
+    forStmt->toExpr->accept(*this);
+    this->code += max + "= t0;\n";
+    this->endExprProc();
     //Evaluates step expression
 	std::string step = labelFor + "step";
+    this->code += "int "+ step + " = 1;\n";
     if (forStmt->stepExpr != nullptr) {
-		this->code += step + "=";
+        this->startExprProc();
 		forStmt->stepExpr->accept(*this);
-		this->code += ";";
+		this->code += step + "= t0;\n";
+        this->endExprProc();
     }
-	else
-		this->code += step + "=1;";
     //Swaps min and max if necessary
     this->code += "if (" + min + ">" + max + ")";
     this->code += makeGotoStmt(labelEval);
@@ -403,10 +411,10 @@ void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
     this->code += makeLabelStmt(labelFor);
     this->code += "if (";
     this->code += min + "<=";
-    forStmt->id->accept(*this);
+    this->code += iterVarPath;
     this->code += " && ";
     this->code += max + ">=";
-    forStmt->id->accept(*this);
+    this->code += iterVarPath;
     this->code += ")";
     this->code += makeGotoStmt(labelIn);
     this->code += makeGotoStmt(labelOut);
@@ -418,12 +426,12 @@ void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
     //Increments control variable and goes back to condition
     //TODO: verify operations of id->accept() and its side
     //effects
-    forStmt->id->accept(*this);
-    this->code += "+" + step + ";";
+    this->code += iterVarPath + "+=" + step + ";";
     this->code += makeGotoStmt(labelFor);
 
     //Adds label and implemantation for min and max swapping
     this->code += makeLabelStmt(labelEval);
+    this->code += ";int " + labelEval + "swap;\n";
     std::string swap = labelEval + "swap";
     this->code += swap + "=" + min + ";";
     this->code += min + "=" + max + ";";
