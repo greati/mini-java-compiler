@@ -1,0 +1,9 @@
+program P;
+
+class Main {
+
+    method void main() {
+        print "abc"
+    }
+
+}

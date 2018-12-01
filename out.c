@@ -83,7 +83,7 @@ int a;
 struct method$Main$r0{
 char * retLabel;
 struct Frame* classFrame;
-int** b;
+int* b;
 };
 struct method$Main$main{
 char * retLabel;
@@ -131,7 +131,10 @@ int b = methodFrame->mframe.A$m1->b;
 int c = methodFrame->mframe.A$m1->c;
 int d = methodFrame->mframe.A$m1->d;
 int z = classFrame->mframe.A->z;
-printf("%s","a");
+{
+char* t0 = "a";
+printf("%s",t0);}
+;
 int n = strlen(stackFrame->mframe.A$m1->retLabel);
 currentReturn = (char *) realloc(currentReturn, n+1);
 strcpy(currentReturn, stackFrame->mframe.A$m1->retLabel);
@@ -148,7 +151,10 @@ struct Frame* classFrame = methodFrame->mframe.A$m2->classFrame;
 int *b = methodFrame->mframe.A$m2->b;
 int a = classFrame->mframe.A->a;
 int z = classFrame->mframe.A->z;
-printf("%s","b");
+{
+char* t0 = "b";
+printf("%s",t0);}
+;
 {
 struct method$A$m1 *newMFrame= malloc(sizeof(struct method$A$m1));
 struct Frame * newFrame = malloc(sizeof(struct Frame));
@@ -181,7 +187,10 @@ struct Frame* methodFrame = stackFrame;
 struct Frame* classFrame = methodFrame->mframe.B$m1->classFrame;
 int a = methodFrame->mframe.B$m1->a;
 int x = classFrame->mframe.B->x;
-printf("%s","c");
+{
+char* t0 = "c";
+printf("%s",t0);}
+;
 int n = strlen(stackFrame->mframe.B$m1->retLabel);
 currentReturn = (char *) realloc(currentReturn, n+1);
 strcpy(currentReturn, stackFrame->mframe.B$m1->retLabel);
@@ -197,7 +206,9 @@ Main$m2$body:
 struct Frame* methodFrame = stackFrame;
 struct Frame* classFrame = methodFrame->mframe.Main$m2->classFrame;
 int a = methodFrame->mframe.Main$m2->a;
-printf("%d", a);
+{
+aprintf("%d",t0);}
+;
 int n = strlen(stackFrame->mframe.Main$m2->retLabel);
 currentReturn = (char *) realloc(currentReturn, n+1);
 strcpy(currentReturn, stackFrame->mframe.Main$m2->retLabel);
@@ -213,7 +224,9 @@ struct Frame* methodFrame = stackFrame;
 struct Frame* classFrame = methodFrame->mframe.Main$m1->classFrame;
 int a = methodFrame->mframe.Main$m1->a;
 int b = methodFrame->mframe.Main$m1->b;
-printf("%d", a*b);
+{
+a*bprintf("%d",t0);}
+;
 {
 struct method$Main$m2 *newMFrame= malloc(sizeof(struct method$Main$m2));
 struct Frame * newFrame = malloc(sizeof(struct Frame));
@@ -229,7 +242,10 @@ goto Main$m2$body;
 }
 Main$m2$c1$ret:
 ;
-printf("%s","retornou de m2");
+{
+char* t0 = "retornou de m2";
+printf("%s",t0);}
+;
 int n = strlen(stackFrame->mframe.Main$m1->retLabel);
 currentReturn = (char *) realloc(currentReturn, n+1);
 strcpy(currentReturn, stackFrame->mframe.Main$m1->retLabel);
@@ -247,10 +263,15 @@ int a = methodFrame->mframe.Main$m0->a;
 if (a==0)goto if0;
 goto if1;
 if0:
-printf("%s","fim da recursão");
+{
+char* t0 = "fim da recursão";
+printf("%s",t0);}
+;
 goto if2;
 if1:
-printf("%d", a);
+{
+aprintf("%d",t0);}
+;
 {
 struct method$Main$m0 *newMFrame= malloc(sizeof(struct method$Main$m0));
 struct Frame * newFrame = malloc(sizeof(struct Frame));
@@ -281,8 +302,11 @@ Main$r0$body:
 {
 struct Frame* methodFrame = stackFrame;
 struct Frame* classFrame = methodFrame->mframe.Main$r0->classFrame;
-int** b = methodFrame->mframe.Main$r0->b;
-printf("%s","oi");
+int* b = methodFrame->mframe.Main$r0->b;
+{
+char* t0 = "oi";
+printf("%s",t0);}
+;
 int n = strlen(stackFrame->mframe.Main$r0->retLabel);
 currentReturn = (char *) realloc(currentReturn, n+1);
 strcpy(currentReturn, stackFrame->mframe.Main$r0->retLabel);

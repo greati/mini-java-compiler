@@ -51,7 +51,13 @@ void NodeVisitorCodeGen::visitRelExpr(RelExpr * expr) {
 }
 
 void NodeVisitorCodeGen::visitAlBinExpr(AlBinExpr * expr) {
-    expr->lhs->accept(*this);
+
+    auto tac = this->threeAddressesStacks.top();
+    int retNumberL = tac->top() + 1;
+    int retNumberR = tac->top() + 2;
+    tac->push(retNumberR); 
+    tac->push(retNumberL); 
+
     std::string opstr;
     switch(expr->op) {
         case AlBinExpr::AlBinOp::PLUS:
@@ -76,6 +82,7 @@ void NodeVisitorCodeGen::visitAlBinExpr(AlBinExpr * expr) {
             opstr = "||";
             break;
     }
+    expr->lhs->accept(*this);
     this->code += opstr;
     expr->rhs->accept(*this);
 }
@@ -99,7 +106,12 @@ void NodeVisitorCodeGen::visitAlUnExpr(AlUnExpr * expr) {
 }
 
 void NodeVisitorCodeGen::visitLitExprString(LitExpr<std::string> * strlit) {
-    this->code += strlit->val;
+   auto p = this->threeAddressesStacks;
+   if (p.empty())
+      this->code += strlit->val;
+   else {
+      this->code += "char* t"+std::to_string(p.top()->top())+ " = " + strlit->val + ";\n";
+   }
 }
 void NodeVisitorCodeGen::visitLitExprInt(LitExpr<int> * intlit) {
     this->code += std::to_string(intlit->val);
@@ -212,14 +224,16 @@ void NodeVisitorCodeGen::visitReadStmt(ReadStmt * readStmt) {
 
 void NodeVisitorCodeGen::visitPrintStmt(PrintStmt * print) {
     if (LitExpr<std::string> * v = dynamic_cast<LitExpr<std::string>*>(print->expr.get())) {
-        this->code += std::string("printf(\"%s\",");
+        std::string retVal = this->startExprProc();
         v->accept(*this);
-        this->code += ")";
+        this->code += std::string("printf(\"%s\"," + retVal + ");");
+        this->endExprProc();
     } else {
-        this->code += std::string("printf(\"%d\", ");
         //this->code += std::string("printf(\"%s\", std::to_string(");
+        std::string retVal = this->startExprProc();
         print->expr->accept(*this);
-        this->code += ")";
+        this->code += std::string("printf(\"%d\"," + retVal + ");");
+        this->endExprProc();
     }
 }
 void NodeVisitorCodeGen::visitCase(Case * casesstmt) {
