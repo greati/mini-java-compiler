@@ -50,6 +50,10 @@ class NodeVisitorCodeGen : public NodeVisitor {
             this->code += "}\n";
         }
 
+        inline std::string makeVarTAC(int i) {
+            return "t" + std::to_string(i);
+        }
+
         std::stack<std::shared_ptr<std::stack<int>>> threeAddressesStacks;
    
    public:

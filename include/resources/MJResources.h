@@ -45,6 +45,11 @@ class MJResources {
             }
         }
 
+        void declareVar(Symbol symbol, std::shared_ptr<VarStaticInfo> & vsi) {
+            symbolTable.put(symbol, vsi);
+            scopeStack.push(symbol);
+        }
+
         void beginScope(ScopeType scopeType) {
             this->scopeStack.push(fromScopeType(scopeType));
         }
