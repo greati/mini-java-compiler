@@ -38,8 +38,19 @@ class Main {
     method void m2(val int a) {
         print a
     }
-    method void m1(val int a; val int b) {
+    method void m1(val int a; val int b)
+        declarations
+            int c;
+        enddeclarations
+    {
         print a*b;
+        c := 2;
+        print "olha o valor de c antes";
+        print c;
+        c := 4;
+        print "olha o valor agora";
+        print c;
+        #d := 10;
         m2(a+b);
         print "retornou de m2"
     }
@@ -58,6 +69,7 @@ class Main {
         #print "a";
         #m1(2,4);
         #print "retornou!!!";
-        m0(10)
+        m0(10);
+        m1(2,4)
     }
 }

@@ -447,10 +447,9 @@ class Stmt : public Node {
 };
 
 class AssignStmt : public Stmt {
-    protected:
+    public:
 	std::shared_ptr<Var> var;
 	std::shared_ptr<Expr> expr;
-    public:
         AssignStmt(
             Position _pos,
 	    std::shared_ptr<Var> _var,

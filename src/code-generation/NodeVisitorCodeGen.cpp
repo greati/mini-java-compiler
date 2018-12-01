@@ -152,7 +152,36 @@ void NodeVisitorCodeGen::visitVar(Var * var) {
 void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr *) {}
 
 void NodeVisitorCodeGen::visitStmt(Stmt *) {}
-void NodeVisitorCodeGen::visitAssignStmt(AssignStmt *) {}
+void NodeVisitorCodeGen::visitAssignStmt(AssignStmt * assignStmt) {
+
+    auto var = assignStmt->var;
+    auto expr = assignStmt->expr;
+
+    std::shared_ptr<VarStaticInfo> vsi = std::static_pointer_cast<VarStaticInfo>(
+            MJResources::getInstance()->symbolTable.get(Symbol::symbol(var->id->id))
+            );
+
+    std::string entityStruct = vsi->entityName;
+
+   std::shared_ptr<MethodStaticInfo> msi = 
+       std::static_pointer_cast<MethodStaticInfo>(
+               MJResources::getInstance()->symbolTable.get(Symbol::symbol("$")));
+   std::shared_ptr<ClassStaticInfo> csi = 
+       std::static_pointer_cast<ClassStaticInfo>(
+               MJResources::getInstance()->symbolTable.get(Symbol::symbol("$$")));
+
+    std::string methodName = csi->className + "$" + msi->methodName;
+
+    this->startExprProc();
+    this->code += "struct Frame * frame = stackFrame;\n";
+    expr->accept(*this);
+    if (vsi->scope == VarStaticInfo::ScopeType::METHOD)
+        this->code += "frame->mframe." + methodName + "->" + var->id->id + " = t0;";
+    else
+        this->code += "frame->mframe." + methodName + "->classFrame->mframe." + csi->className +"->" + var->id->id + " = t0;";
+
+    this->endExprProc();
+}
 
 void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
 
@@ -625,6 +654,15 @@ std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDec
             Symbol symbol = Symbol::symbol(id->id->id); // \o/ =D
             std::shared_ptr<VarStaticInfo> vsi = std::make_shared<VarStaticInfo>();
             vsi->varType = std::make_pair(getCType(type->typeName), type->numBrackets);
+
+            if (entityType == NodeVisitorCodeGen::EntityType::METHOD) {
+                vsi->scope = VarStaticInfo::ScopeType::METHOD;
+            }
+            else {
+                vsi->scope = VarStaticInfo::ScopeType::CLASS;
+            }
+            vsi->entityName = entityName;
+
             MJResources::getInstance()->declareVar(symbol, vsi);
             std::shared_ptr<VarInit> varInit = varDecl->varInit;
             if (varInit != nullptr) {
@@ -647,6 +685,7 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 	std::string methodlabel = makeLabel(LabelType::METHOD, {{"class", csi->className},{"method",methodid}});
 
     auto msi = std::make_shared<MethodStaticInfo>();
+    msi->methodName = methodid;
 
     csi->methods.insert(std::make_pair(Symbol::symbol(methodid), msi)); 
     msi->codeLabel = methodlabel;
@@ -694,6 +733,7 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
                     // add to symbol table
                     std::shared_ptr<VarStaticInfo> vsi = std::make_shared<VarStaticInfo>();
                     vsi->varType = sfType;
+                    vsi->scope = VarStaticInfo::ScopeType::METHOD;
                     MJResources::getInstance()->declareVar(Symbol::symbol(fid), vsi);
 
                     MethodStaticInfo::FormalParam fp = std::make_tuple(fid, sfType, fval);

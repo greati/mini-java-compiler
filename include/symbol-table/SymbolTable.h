@@ -23,8 +23,13 @@ class StaticInfo {
 class VarStaticInfo : public StaticInfo {
     
     public:
+        enum class ScopeType {
+            CLASS, METHOD
+        };
 
         Type varType;
+        ScopeType scope;
+        std::string entityName; // the class or method struct name
         
 };
 
@@ -69,6 +74,7 @@ class MethodStaticInfo : public StaticInfo {
     
     public:
         std::string className;
+        std::string methodName;
 
         std::map<Symbol, std::shared_ptr<VarStaticInfo>> variables;
 
