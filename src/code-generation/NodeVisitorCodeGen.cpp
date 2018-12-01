@@ -1,6 +1,7 @@
 #include "code-generation/NodeVisitorCodeGen.h"
 #include "ast/Expr.h"
 #include <set>
+#include "resources/MJUtils.h"
 
 void NodeVisitorCodeGen::visitId(Id * id) {
     this->fileName = id->id;
@@ -576,10 +577,10 @@ std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDec
                 throw new std::logic_error("Already defined variable " + id->id->id);
             else alreadyDeclaredVars.insert(id->id->id);
 
-            structFields += getCType(type->typeName) + " " + id->id->id + ";\n";
+            structFields += getCType(type->typeName, type->numBrackets) + " " + id->id->id + ";\n";
 
             if (entityType == NodeVisitorCodeGen::EntityType::METHOD)
-                this->code += getCType(type->typeName) + " " + id->id->id + " = " + "methodFrame->mframe." + entityName + "->" + id->id->id  + ";\n";
+                this->code += getCType(type->typeName, type->numBrackets) + " " + id->id->id + " = " + "methodFrame->mframe." + entityName + "->" + id->id->id  + ";\n";
             Symbol symbol = Symbol::symbol(id->id->id); // \o/ =D
             std::shared_ptr<VarStaticInfo> vsi = std::make_shared<VarStaticInfo>();
             vsi->varType = std::make_pair(getCType(type->typeName), type->numBrackets);
@@ -646,8 +647,8 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 
                     locals.insert(fid);
 
-                    genCode += getCType(ftype->typeName) + " " + (fval ? "" : "*") + fid + ";\n";
-                    this->code += getCType(ftype->typeName) + " " + (fval ? "" : "*") + fid + " = " + "methodFrame->mframe." + csi->className + "$" + methodid + "->" + fid  + ";\n";
+                    genCode += getCType(ftype->typeName, sfType.second) + " " + (fval ? "" : "*") + fid + ";\n";
+                    this->code += getCType(ftype->typeName, sfType.second) + " " + (fval ? "" : "*") + fid + " = " + "methodFrame->mframe." + csi->className + "$" + methodid + "->" + fid  + ";\n";
                     MethodStaticInfo::FormalParam fp = std::make_tuple(fid, sfType, fval);
                     msi->formalParams.push_back(fp);
                     fparams->ids->constructs.pop_front();

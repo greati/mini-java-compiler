@@ -51,6 +51,9 @@ class Main {
             m0(a - 1)
         }
     }
+    method void r0(val int[][] b) {
+        print "oi"
+    }
     method void main() {
         #print "a";
         #m1(2,4);

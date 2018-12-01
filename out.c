@@ -11,6 +11,7 @@ class$Main,
 method$Main$m2,
 method$Main$m1,
 method$Main$m0,
+method$Main$r0,
 method$Main$main,
 };
 struct Frame {
@@ -27,6 +28,7 @@ struct class$Main *Main;
 struct method$Main$m2 *Main$m2;
 struct method$Main$m1 *Main$m1;
 struct method$Main$m0 *Main$m0;
+struct method$Main$r0 *Main$r0;
 struct method$Main$main *Main$main;
 } mframe;
 };
@@ -77,6 +79,11 @@ struct method$Main$m0{
 char * retLabel;
 struct Frame* classFrame;
 int a;
+};
+struct method$Main$r0{
+char * retLabel;
+struct Frame* classFrame;
+int** b;
 };
 struct method$Main$main{
 char * retLabel;
@@ -264,6 +271,21 @@ if2:
 int n = strlen(stackFrame->mframe.Main$m0->retLabel);
 currentReturn = (char *) realloc(currentReturn, n+1);
 strcpy(currentReturn, stackFrame->mframe.Main$m0->retLabel);
+stackFrame->prev->next = NULL;
+struct Frame * toDelete = stackFrame;
+stackFrame = toDelete->prev;
+free(toDelete);
+}
+goto retSwitch;
+Main$r0$body:
+{
+struct Frame* methodFrame = stackFrame;
+struct Frame* classFrame = methodFrame->mframe.Main$r0->classFrame;
+int** b = methodFrame->mframe.Main$r0->b;
+printf("%s","oi");
+int n = strlen(stackFrame->mframe.Main$r0->retLabel);
+currentReturn = (char *) realloc(currentReturn, n+1);
+strcpy(currentReturn, stackFrame->mframe.Main$r0->retLabel);
 stackFrame->prev->next = NULL;
 struct Frame * toDelete = stackFrame;
 stackFrame = toDelete->prev;
