@@ -24,11 +24,15 @@ class Main {
         }
     }
 
+    method int m2() {
+        return 1
+    }
 
     method void main() {
-        print "abc";
-        print 2 + 3*5;
-        m1(3)
+        print m2()
+        #print "abc";
+        #print 2 + 3*5;
+        #m1(3)
     }
 
 }

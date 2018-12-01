@@ -4,6 +4,7 @@
 enum FType {
 class$Main,
 method$Main$m1,
+method$Main$m2,
 method$Main$main,
 };
 struct Frame {
@@ -13,6 +14,7 @@ struct Frame* prev;
 union {
 struct class$Main *Main;
 struct method$Main$m1 *Main$m1;
+struct method$Main$m2 *Main$m2;
 struct method$Main$main *Main$main;
 } mframe;
 };
@@ -26,11 +28,16 @@ int a;
 int b;
 int i;
 };
+struct method$Main$m2{
+char * retLabel;
+struct Frame* classFrame;
+};
 struct method$Main$main{
 char * retLabel;
 struct Frame* classFrame;
 };
 int main(void) {
+void * returnPointer = NULL;
 struct Frame * stackFrame = malloc(sizeof(struct Frame));
 char * currentReturn = (char*) malloc(5*sizeof(char));
 strcpy(currentReturn, "exit");
@@ -51,8 +58,8 @@ if (strcmp(currentReturn,"exit") == 0) {
 free(stackFrame);
 return 0;
 }
-if (strcmp(currentReturn,"Main$m1$c0$ret") == 0) {
-goto Main$m1$c0$ret;
+if (strcmp(currentReturn,"Main$m2$c0$ret") == 0) {
+goto Main$m2$c0$ret;
 }
 Main$m1$body:
 {
@@ -171,39 +178,52 @@ stackFrame = toDelete->prev;
 free(toDelete);
 }
 goto retSwitch;
+Main$m2$body:
+{
+struct Frame* methodFrame = stackFrame;
+struct Frame* classFrame = methodFrame->mframe.Main$m2->classFrame;
+{
+int t0 = 1;
+int * $returnPointerValue = (int *) malloc(sizeof(int));
+*$returnPointerValue = t0;
+returnPointer = $returnPointerValue;
+int n = strlen(stackFrame->mframe.Main$m2->retLabel);
+currentReturn = (char *) realloc(currentReturn, n+1);
+strcpy(currentReturn, stackFrame->mframe.Main$m2->retLabel);
+goto retSwitch;
+}
+;
+int n = strlen(stackFrame->mframe.Main$m2->retLabel);
+currentReturn = (char *) realloc(currentReturn, n+1);
+strcpy(currentReturn, stackFrame->mframe.Main$m2->retLabel);
+stackFrame->prev->next = NULL;
+struct Frame * toDelete = stackFrame;
+stackFrame = toDelete->prev;
+free(toDelete);
+}
+goto retSwitch;
 Main$main$body:
 {
 struct Frame* methodFrame = stackFrame;
 struct Frame* classFrame = methodFrame->mframe.Main$main->classFrame;
 {
-char* t0 = "abc";
-printf("%s",t0);}
-;
 {
-int t1 = 2;
-int t3 = 3;
-int t4 = 5;
-int t2=t3*t4;
-int t0=t1+t2;
-printf("%d",t0);}
-;
-{
-struct method$Main$m1 *newMFrame= malloc(sizeof(struct method$Main$m1));
+struct method$Main$m2 *newMFrame= malloc(sizeof(struct method$Main$m2));
 struct Frame * newFrame = malloc(sizeof(struct Frame));
-newFrame->mframe.Main$m1 = newMFrame;
-newFrame->ftype = method$Main$m1;
+newFrame->mframe.Main$m2 = newMFrame;
+newFrame->ftype = method$Main$m2;
 newFrame->prev = stackFrame;
 newFrame->next = NULL;
 stackFrame->next = newFrame;
 stackFrame = newFrame;
-newMFrame->retLabel = "Main$m1$c0$ret";
-{
-int t0 = 3;
-newFrame->mframe.Main$m1->a= t0;
+newMFrame->retLabel = "Main$m2$c0$ret";
+goto Main$m2$body;
 }
-goto Main$m1$body;
-}
-Main$m1$c0$ret:
+Main$m2$c0$ret:;
+int t0 = *((int*) returnPointer);
+if (returnPointer != NULL) free(returnPointer);
+returnPointer = NULL;
+printf("%d",t0);}
 ;
 int n = strlen(stackFrame->mframe.Main$main->retLabel);
 currentReturn = (char *) realloc(currentReturn, n+1);

@@ -158,7 +158,90 @@ void NodeVisitorCodeGen::visitVar(Var * var) {
 
     // TODO: access operation
 }
-void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr *) {}
+void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr * funcall) {
+
+    std::shared_ptr<Var> var = funcall->var;
+    std::shared_ptr<ConstructList> actuals = funcall->actualParams;
+
+    // visit each var member
+    
+    std::shared_ptr<AccessOperation> itAccessOp = var->accessOperation;
+
+    std::string varId = var->id->id;
+
+    std::shared_ptr<ClassStaticInfo> csi = 
+        std::static_pointer_cast<ClassStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol("$$")));
+
+    if (itAccessOp == nullptr) {
+
+        try {
+            std::string newMFrameName = "newMFrame";
+            std::string mFrameName = "method$" +csi->className+"$"+varId;
+            std::string newFrameName = "newFrame";
+            std::string unionName = csi->className + "$" + varId;
+            this->code += "{\n";
+            this->code += "struct "+ mFrameName + " *"+ newMFrameName +"= malloc(sizeof(struct "+mFrameName + "));\n";
+            this->code += "struct Frame * " + newFrameName + " = malloc(sizeof(struct Frame));\n";
+            this->code += newFrameName + "->mframe."+unionName + " = " + newMFrameName + ";\n";
+            this->code += newFrameName + "->ftype = " + mFrameName + ";\n";
+            this->code += newFrameName + "->prev = " + "stackFrame;\n"; 
+            this->code += newFrameName + "->next = " + "NULL;\n"; 
+            this->code += "stackFrame->next = " + newFrameName + ";\n";
+            this->code += "stackFrame = " + newFrameName + ";\n";
+
+            std::string labelReturn = makeLabel(LabelType::RETURN_CALL, {{"class", csi->className},{"method", varId}});
+
+            this->codeSwitchReturns += "if (strcmp(currentReturn,\""+ labelReturn + "\") == 0) {\n";
+            this->codeSwitchReturns += "goto "+ labelReturn +";\n";
+            this->codeSwitchReturns += "}\n";
+
+            this->code += newMFrameName + "->retLabel = \""+labelReturn+"\";\n";
+
+            //TODO first load methods
+            std::shared_ptr<MethodStaticInfo> msi = csi->methods.at(Symbol::symbol(varId));
+            if (actuals != nullptr) {
+                auto itFormals = msi->formalParams.begin();
+                auto itActuals = actuals->constructs.begin();
+
+                while (itFormals != msi->formalParams.end()) {
+                    std::string name = std::get<0>(*itFormals);
+                    StaticInfo::Type type = std::get<1>(*itFormals);
+                    bool val = std::get<2>(*itFormals);
+                    this->startExprProc();
+                    (*itActuals)->accept(*this);
+                    this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0";
+                    this->code += ";\n";
+                    this->endExprProc();
+                    itFormals++;
+                    itActuals++;
+                }
+            }
+            
+            this->code += "goto " + msi->codeLabel + ";\n";
+            this->code += "}\n";
+            this->code += labelReturn + ":;\n";
+
+            auto p = this->threeAddressesStacks;
+            if (!p.empty()){
+               std::string retType = getCType(msi->retType.first, msi->retType.second);
+               this->code += retType + " t"+std::to_string(p.top()->top())+ " = *(("+retType+"*) returnPointer);\n";
+               this->code += "if (returnPointer != NULL) free(returnPointer);\n";
+               this->code += "returnPointer = NULL;\n";
+               p.top()->pop();
+            }
+        } catch (const std::out_of_range & out) {
+            throw std::logic_error("Subprogram not found");
+        }
+    }
+
+    std::shared_ptr<ConstructList> actualParams = funcall->actualParams;
+
+
+
+
+
+
+}
 
 void NodeVisitorCodeGen::visitStmt(Stmt *) {}
 void NodeVisitorCodeGen::visitAssignStmt(AssignStmt * assignStmt) {
@@ -263,21 +346,6 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
             throw std::logic_error("Subprogram not found");
         }
     }
-
-    /*if (csi != nullptr) {
-        while (itAccessOp != nullptr) {
-            
-            
-            itAccessOp = itAccessOp->accessOperation; 
-        }
-    } else throw std::logic_error("Variable " + varId + " not declared");
-    */
-
-    // match the function
-    // new scope
-    // new framestack
-
-    // a.b.c(0)
 
     std::shared_ptr<ConstructList> actualParams = funcall->actualParams;
 }
@@ -471,8 +539,21 @@ void NodeVisitorCodeGen::visitElseIf(ElseIf * elseifstmt) {
     elseifstmt->ifStmt->accept(*this);
 } 
 
-void NodeVisitorCodeGen::visitReturnStmt(ReturnStmt *) {
-    //TODO: frame stack
+void NodeVisitorCodeGen::visitReturnStmt(ReturnStmt * returnStmt) {
+
+    std::shared_ptr<MethodStaticInfo> msi = 
+        std::static_pointer_cast<MethodStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol("$")));
+    this->startExprProc();
+    returnStmt->expr->accept(*this);
+    std::string retType = getCType(msi->retType.first, msi->retType.second);
+    this->code += retType + " * $returnPointerValue = (" + retType + " *) malloc(sizeof("+ retType +"));\n";
+    this->code += "*$returnPointerValue = t0;\n";
+    this->code += "returnPointer = $returnPointerValue;\n";
+    this->code += "int n = strlen(stackFrame->mframe." + msi->className+"$"+ msi->methodName + "->retLabel);\n";
+    this->code += "currentReturn = (char *) realloc(currentReturn, n+1);\n";
+    this->code += "strcpy(currentReturn, stackFrame->mframe." + msi->className+"$"+ msi->methodName + "->retLabel);\n";
+    this->code += "goto retSwitch;\n";
+    this->endExprProc();
 }
 
 void NodeVisitorCodeGen::visitType(Type * type) {}
@@ -596,6 +677,8 @@ void NodeVisitorCodeGen::visitProgram(Program * program) {
     this->frameTypesEnum += "enum FType {\n";
 
     std::string mainDecl = "int main(void) {\n";
+
+    mainDecl += "void * returnPointer = NULL;\n";
 
     this->codeSwitchReturns += "// switch for return points\n";
     mainDecl += "struct Frame * stackFrame = malloc(sizeof(struct Frame));\n";
