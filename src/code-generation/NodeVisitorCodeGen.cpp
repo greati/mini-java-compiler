@@ -18,9 +18,10 @@ void NodeVisitorCodeGen::visitExpr(Expr *) {}
 void NodeVisitorCodeGen::visitAlExpr(AlExpr *) {}
 
 void NodeVisitorCodeGen::visitExprParen(ExprParen * expr) {
-    this->code += "(";
+    //this->startExprProc();
     expr->expr->accept(*this);
-    this->code += ")";
+    //this->code += "(t0)";
+    //this->endExprProc();
 }
 
 void NodeVisitorCodeGen::visitRelExpr(RelExpr * expr) {
@@ -92,6 +93,7 @@ void NodeVisitorCodeGen::visitAlBinExpr(AlBinExpr * expr) {
     expr->lhs->accept(*this);
     expr->rhs->accept(*this);
     this->code += "int " + makeVarTAC(tac->top()) + "=" + makeVarTAC(retNumberL) + opstr + makeVarTAC(retNumberR) + ";\n";
+    tac->pop();
 }
 
 void NodeVisitorCodeGen::visitAlUnExpr(AlUnExpr * expr) {
@@ -331,11 +333,12 @@ void NodeVisitorCodeGen::visitWhileStmt(WhileStmt * whilestmt) {
     std::string labelIn = this->makeLabel(LabelType::WHILE);
     std::string labelOut = this->makeLabel(LabelType::WHILE);
     this->code += makeLabelStmt(labelWhile);
-    this->code += "if (";
+    this->startExprProc();
     whilestmt->expr->accept(*this);
-    this->code += ")";
+    this->code += "if (t0)\n";
     this->code += makeGotoStmt(labelIn);
     this->code += makeGotoStmt(labelOut);
+    this->endExprProc();
     this->code += makeLabelStmt(labelIn);
     whilestmt->stmts->accept(*this);
     this->code += makeGotoStmt(labelWhile);
