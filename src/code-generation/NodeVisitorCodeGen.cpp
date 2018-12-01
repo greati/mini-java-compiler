@@ -97,6 +97,11 @@ void NodeVisitorCodeGen::visitAlBinExpr(AlBinExpr * expr) {
 }
 
 void NodeVisitorCodeGen::visitAlUnExpr(AlUnExpr * expr) {
+
+    auto tac = this->threeAddressesStacks.top();
+    int retNumberL = tac->top() + 1;
+    tac->push(retNumberL); 
+
     std::string opstr;
     switch(expr->op) {
         case AlUnExpr::AlUnOp::PLUS:
@@ -109,9 +114,10 @@ void NodeVisitorCodeGen::visitAlUnExpr(AlUnExpr * expr) {
             opstr = "!";
             break;
     }
-    this->code += opstr + "(";
+
     expr->alexpr->accept(*this);
-    this->code += ")";
+    this->code += "int " + makeVarTAC(tac->top()) + "=" + opstr + "(" + makeVarTAC(retNumberL) + ")" + ";\n";
+    tac->pop();
 }
 
 void NodeVisitorCodeGen::visitLitExprString(LitExpr<std::string> * strlit) {
