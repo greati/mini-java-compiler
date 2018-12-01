@@ -135,14 +135,15 @@ void NodeVisitorCodeGen::visitAccessOperation(AccessOperation *) {}
 void NodeVisitorCodeGen::visitBrackAccess(BracketAccess *) {}
 void NodeVisitorCodeGen::visitDotAccess(DotAccess *) {}
 void NodeVisitorCodeGen::visitVar(Var * var) {
-
-    
     auto p = this->threeAddressesStacks;
+
+    std::string framePath = "stackFrame->" + findVariableFramePath(var->id->id);
+
     if (!p.empty()) {
         std::shared_ptr<VarStaticInfo> varDecl = 
             std::static_pointer_cast<VarStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol(var->id->id)));
         auto varType = varDecl->varType;
-        this->code += getCType(varType.first, varType.second)+" t"+std::to_string(p.top()->top())+ " = " + var->id->id + ";\n";
+        this->code += getCType(varType.first, varType.second)+" t"+std::to_string(p.top()->top())+ " = " + framePath + ";\n";
         p.top()->pop();
     } else 
         this->code += var->id->id;
@@ -785,3 +786,24 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
     return msi;
 }
 
+std::string NodeVisitorCodeGen::findVariableFramePath(std::string varId) {
+    std::shared_ptr<VarStaticInfo> vsi = std::static_pointer_cast<VarStaticInfo>(
+            MJResources::getInstance()->symbolTable.get(Symbol::symbol(varId))
+            );
+
+    std::string entityStruct = vsi->entityName;
+
+   std::shared_ptr<MethodStaticInfo> msi = 
+       std::static_pointer_cast<MethodStaticInfo>(
+               MJResources::getInstance()->symbolTable.get(Symbol::symbol("$")));
+   std::shared_ptr<ClassStaticInfo> csi = 
+       std::static_pointer_cast<ClassStaticInfo>(
+               MJResources::getInstance()->symbolTable.get(Symbol::symbol("$$")));
+
+    std::string methodName = csi->className + "$" + msi->methodName;
+
+    if (vsi->scope == VarStaticInfo::ScopeType::METHOD)
+        return "mframe." + methodName + "->" + varId;
+    else
+        return "mframe." + methodName + "->classFrame->mframe." + csi->className +"->" + varId;
+}

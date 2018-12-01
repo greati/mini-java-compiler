@@ -38,6 +38,7 @@ class NodeVisitorCodeGen : public NodeVisitor {
                 std::string&,std::set<std::string> & alreadyDeclaredVars,
                 EntityType entityType = EntityType::METHOD,
                 std::string entityName = "");
+        std::string findVariableFramePath(std::string varId);
 
         inline std::string startExprProc() {
             this->code += "{\n";
