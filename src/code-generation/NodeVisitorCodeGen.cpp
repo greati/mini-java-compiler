@@ -24,7 +24,12 @@ void NodeVisitorCodeGen::visitExprParen(ExprParen * expr) {
 }
 
 void NodeVisitorCodeGen::visitRelExpr(RelExpr * expr) {
-    expr->lhs->accept(*this);
+    auto tac = this->threeAddressesStacks.top();
+    int retNumberL = tac->top() + 1;
+    int retNumberR = tac->top() + 2;
+    tac->push(retNumberR); 
+    tac->push(retNumberL); 
+
     std::string opstr;
     switch(expr->op) {
         case RelExpr::RelOp::LESS:
@@ -46,8 +51,10 @@ void NodeVisitorCodeGen::visitRelExpr(RelExpr * expr) {
             opstr = "!=";
             break;
     }
-    this->code += opstr;
+    expr->lhs->accept(*this);
     expr->rhs->accept(*this);
+    //this->code += opstr;
+    this->code += "int " + makeVarTAC(tac->top()) + "=" + makeVarTAC(retNumberL) + opstr + makeVarTAC(retNumberR) + ";\n";
 }
 
 void NodeVisitorCodeGen::visitAlBinExpr(AlBinExpr * expr) {
@@ -121,7 +128,7 @@ void NodeVisitorCodeGen::visitLitExprInt(LitExpr<int> * intlit) {
      this->code += intlit->val;
    else {
      this->code += "int t"+std::to_string(p.top()->top())+ " = " + std::to_string(intlit->val) + ";\n";
-      p.top()->pop();
+     p.top()->pop();
    }
 }
 void NodeVisitorCodeGen::visitAccessOperation(AccessOperation *) {}
@@ -390,11 +397,12 @@ void NodeVisitorCodeGen::visitIfStmt(IfStmt * ifstmt) {
     std::string labelIn = this->makeLabel(LabelType::IF);
     std::string labelElse = this->makeLabel(LabelType::IF);
     std::string labelOut = this->makeLabel(LabelType::IF);
-    this->code += "if (";
+    this->startExprProc();
     ifstmt->expr->accept(*this);
-    this->code += ")";
+    this->code += "if (t0) \n";
     this->code += makeGotoStmt(labelIn);
     this->code += makeGotoStmt(labelElse);
+    this->endExprProc();
 
     this->code += makeLabelStmt(labelIn);
     ifstmt->stmts->accept(*this);
