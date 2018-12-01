@@ -145,7 +145,7 @@ void NodeVisitorCodeGen::visitDotAccess(DotAccess *) {}
 void NodeVisitorCodeGen::visitVar(Var * var) {
     auto p = this->threeAddressesStacks;
 
-    std::string framePath = "stackFrame->" + findVariableFramePath(var->id->id);
+    std::string framePath = "stackFrame->" + findVariableFramePath(var);
 
     if (!p.empty()) {
         std::shared_ptr<VarStaticInfo> varDecl = 
@@ -307,20 +307,25 @@ void NodeVisitorCodeGen::visitSwitchStmt(SwitchStmt * switchstmt) {
     
     std::string labelout = makeLabel(LabelType::SWITCH);
 
+    std::shared_ptr<Var> varExpr = std::static_pointer_cast<Var>(switchstmt->expr);
+
+    if (varExpr.get() == nullptr)
+        throw new std::logic_error("Invalid switch expression, use only an identifier");
     
     while (!switchstmt->caseList->constructs.empty()) {
         std::string labelcase = makeLabel(LabelType::SWITCH);
         std::string nextcase = makeLabel(LabelType::SWITCH);
         auto casestmt = 
             dynamic_cast<Case*>(switchstmt->caseList->constructs.front().get());
-        
-        this->code += "if (";
-        switchstmt->expr->accept(*this);
-        this->code += "==";
+
+        this->startExprProc();
         casestmt->expr->accept(*this);
-        this->code += ")";  
+        this->code += "if (";
+        this->code += "stackFrame->" + findVariableFramePath(varExpr.get());
+        this->code += "== t0)\n";  
         this->code += makeGotoStmt(labelcase);
         this->code += makeGotoStmt(nextcase);
+        this->endExprProc();
         this->code += makeLabelStmt(labelcase); 
         casestmt->stmts->accept(*this);
         this->code += makeGotoStmt(labelout);
@@ -795,7 +800,10 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
     return msi;
 }
 
-std::string NodeVisitorCodeGen::findVariableFramePath(std::string varId) {
+std::string NodeVisitorCodeGen::findVariableFramePath(Var * var) {
+
+    std::string varId = var->id->id;
+
     std::shared_ptr<VarStaticInfo> vsi = std::static_pointer_cast<VarStaticInfo>(
             MJResources::getInstance()->symbolTable.get(Symbol::symbol(varId))
             );

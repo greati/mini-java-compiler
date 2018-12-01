@@ -50,6 +50,9 @@ if (strcmp(currentReturn,"exit") == 0) {
 free(stackFrame);
 return 0;
 }
+if (strcmp(currentReturn,"Main$m1$c0$ret") == 0) {
+goto Main$m1$c0$ret;
+}
 Main$m1$body:
 {
 struct Frame* methodFrame = stackFrame;
@@ -86,6 +89,43 @@ goto while0;
 while2:
 ;
 {
+struct Frame * frame = stackFrame;
+int t0 = 4;
+frame->mframe.Main$m1->b = t0;}
+;
+{
+int t0 = 0;
+if (stackFrame->mframe.Main$m1->b== t0)
+goto switch1;
+goto switch2;
+}
+switch1:
+{
+char* t0 = "aa 0";
+printf("%s",t0);}
+;
+goto switch0;
+switch2:
+{
+int t0 = 1;
+if (stackFrame->mframe.Main$m1->b== t0)
+goto switch3;
+goto switch4;
+}
+switch3:
+{
+char* t0 = "aa 1";
+printf("%s",t0);}
+;
+goto switch0;
+switch4:
+{
+char* t0 = "DEFAULTAO";
+printf("%s",t0);}
+;
+switch0:
+;
+{
 int t0 = stackFrame->mframe.Main$m1->a;
 printf("%d",t0);}
 ;
@@ -113,6 +153,24 @@ int t4 = 5;
 int t2=t3*t4;
 int t0=t1+t2;
 printf("%d",t0);}
+;
+{
+struct method$Main$m1 *newMFrame= malloc(sizeof(struct method$Main$m1));
+struct Frame * newFrame = malloc(sizeof(struct Frame));
+newFrame->mframe.Main$m1 = newMFrame;
+newFrame->ftype = method$Main$m1;
+newFrame->prev = stackFrame;
+newFrame->next = NULL;
+stackFrame->next = newFrame;
+stackFrame = newFrame;
+newMFrame->retLabel = "Main$m1$c0$ret";
+{
+int t0 = 3;
+newFrame->mframe.Main$m1->a= t0;
+}
+goto Main$m1$body;
+}
+Main$m1$c0$ret:
 ;
 int n = strlen(stackFrame->mframe.Main$main->retLabel);
 currentReturn = (char *) realloc(currentReturn, n+1);
