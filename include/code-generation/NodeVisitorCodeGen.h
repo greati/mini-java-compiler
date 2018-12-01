@@ -43,7 +43,9 @@ class NodeVisitorCodeGen : public NodeVisitor {
         inline std::string getCType(std::string mjtype) const {
             if (mjtype == "string")
                 return "char *";
-            else return mjtype;
+            else if (mjtype == "int")
+                return "int";
+            else return "struct class$"+mjtype+"*";
         }
 
         std::string makeLabel(LabelType ltype, std::map<std::string, std::string> attrs = {}) {

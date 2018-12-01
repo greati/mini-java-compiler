@@ -138,6 +138,7 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
             std::string mFrameName = "method$" +csi->className+"$"+varId;
             std::string newFrameName = "newFrame";
             std::string unionName = csi->className + "$" + varId;
+            this->code += "{\n";
             this->code += "struct "+ mFrameName + " *"+ newMFrameName +"= malloc(sizeof(struct "+mFrameName + "));\n";
             this->code += "struct Frame * " + newFrameName + " = malloc(sizeof(struct Frame));\n";
             this->code += newFrameName + "->mframe."+unionName + " = " + newMFrameName + ";\n";
@@ -172,7 +173,7 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
             }
             
             this->code += "goto " + msi->codeLabel + ";\n";
-
+            this->code += "}\n";
             this->code += labelReturn + ":\n";
             /*
             std::shared_ptr<Frame> frame = MJResources::getInstance()->newFrame();
@@ -472,7 +473,7 @@ void NodeVisitorCodeGen::visitClassDecl(ClassDecl * classdecl) {
 
             this->frameStructDefinitions += structMethod;
 
-            csi->methods.insert(std::make_pair(Symbol::symbol(methodDecl->id->id), msi)); 
+            //csi->methods.insert(std::make_pair(Symbol::symbol(methodDecl->id->id), msi)); 
             if (methodDecl->id->id == "main") {
                 MJResources::getInstance()->mainMethod = msi;
                 foundMethodMain = true;
@@ -605,6 +606,7 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 
     auto msi = std::make_shared<MethodStaticInfo>();
 
+    csi->methods.insert(std::make_pair(Symbol::symbol(methodid), msi)); 
     msi->codeLabel = methodlabel;
 
     auto res = MJResources::getInstance();
@@ -680,12 +682,13 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 
     metdecl->block->accept(*this); 
 
-    this->code += "methodFrame->prev->next = NULL;\n";
-    this->code += "stackFrame = methodFrame->prev;\n";
-    this->code += "int n = strlen(methodFrame->mframe." + csi->className+"$"+ methodid + "->retLabel);\n";
+    this->code += "int n = strlen(stackFrame->mframe." + csi->className+"$"+ methodid + "->retLabel);\n";
     this->code += "currentReturn = (char *) realloc(currentReturn, n+1);\n";
-    this->code += "strcpy(currentReturn, methodFrame->mframe." + csi->className+"$"+ methodid + "->retLabel);\n";
-    this->code += "free(methodFrame);\n";
+    this->code += "strcpy(currentReturn, stackFrame->mframe." + csi->className+"$"+ methodid + "->retLabel);\n";
+    this->code += "stackFrame->prev->next = NULL;\n";
+    this->code += "struct Frame * toDelete = stackFrame;\n";
+    this->code += "stackFrame = toDelete->prev;\n";
+    this->code += "free(toDelete);\n";
     this->code += "}\n";
     this->code += "goto retSwitch;\n";
 
