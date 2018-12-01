@@ -153,6 +153,7 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
             this->codeSwitchReturns += "goto "+ labelReturn +";\n";
             this->codeSwitchReturns += "}\n";
 
+            this->code += newMFrameName + "->retLabel = \""+labelReturn+"\";\n";
 
             //TODO first load methods
             std::shared_ptr<MethodStaticInfo> msi = csi->methods.at(Symbol::symbol(varId));
@@ -503,7 +504,8 @@ void NodeVisitorCodeGen::visitProgram(Program * program) {
 
     this->codeSwitchReturns += "// switch for return points\n";
     mainDecl += "struct Frame * stackFrame = malloc(sizeof(struct Frame));\n";
-    mainDecl += "char * currentReturn = \"exit\";\n";
+    mainDecl += "char * currentReturn = (char*) malloc(5*sizeof(char));\n";
+    mainDecl += "strcpy(currentReturn, \"exit\");\n";
     this->codeSwitchReturns += "retSwitch:\n";
     this->codeSwitchReturns += "if (strcmp(currentReturn,\"exit\") == 0) {\n";
     this->codeSwitchReturns += "free(stackFrame);\n";
@@ -680,10 +682,10 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 
     this->code += "methodFrame->prev->next = NULL;\n";
     this->code += "stackFrame = methodFrame->prev;\n";
-    this->code += "free(methodFrame);\n";
     this->code += "int n = strlen(methodFrame->mframe." + csi->className+"$"+ methodid + "->retLabel);\n";
     this->code += "currentReturn = (char *) realloc(currentReturn, n+1);\n";
     this->code += "strcpy(currentReturn, methodFrame->mframe." + csi->className+"$"+ methodid + "->retLabel);\n";
+    this->code += "free(methodFrame);\n";
     this->code += "}\n";
     this->code += "goto retSwitch;\n";
 
