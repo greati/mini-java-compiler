@@ -2,8 +2,8 @@ program P;
 
 class A {
     declarations
-        int a = 2, z;
-        string b = "";
+#        int a = 2, z;
+#        string b = "";
     enddeclarations
     method void m1(val int a; val int b) 
         declarations
@@ -24,8 +24,8 @@ class A {
 
 class B {
     declarations
-        int a = 4;
-        int x;
+#        int a = 4;
+#        int x;
     enddeclarations
     method void m1(val int a) 
     {

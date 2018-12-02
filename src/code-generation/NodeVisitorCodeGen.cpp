@@ -555,7 +555,7 @@ void NodeVisitorCodeGen::visitReturnStmt(ReturnStmt * returnStmt) {
     returnStmt->expr->accept(*this);
     std::string retType = getCType(msi->retType.first, msi->retType.second);
     this->code += retType + " * $returnPointerValue = (" + retType + " *) malloc(sizeof("+ retType +"));\n";
-    this->code += "*$returnPointerValue = t0;\n";
+    this->code += "*$returnPointerValue = (" + retType + ") t0;\n";
     this->code += "returnPointer = $returnPointerValue;\n";
     this->code += "int n = strlen(stackFrame->mframe." + msi->className+"$"+ msi->methodName + "->retLabel);\n";
     this->code += "currentReturn = (char *) realloc(currentReturn, n+1);\n";
@@ -745,10 +745,37 @@ void NodeVisitorCodeGen::visitProgram(Program * program) {
 void NodeVisitorCodeGen::visitExprVarInit(ExprVarInit * varinit) {
     varinit->expr->accept(*this);
 }
-void NodeVisitorCodeGen::visitArrayInitVarInit(ArrayInitVarInit *) {}
-void NodeVisitorCodeGen::visitArrayCreation(ArrayCreation *) {}
-void NodeVisitorCodeGen::visitArrayCreationVarInit(ArrayCreationVarInit *) {}
 
+void NodeVisitorCodeGen::visitArrayInitVarInit(ArrayInitVarInit *) {}
+
+void NodeVisitorCodeGen::visitArrayCreation(ArrayCreation * arrcreation) {
+    std::shared_ptr<Type> type = arrcreation->type;
+    std::string ctype = getCType(type->typeName, type->numBrackets); 
+    
+    std::shared_ptr<ConstructList> dims = arrcreation->dims;
+    int dimsCount = 0;
+    std::vector<std::string> dimsVars;
+
+    while (!dims->constructs.empty()) {
+        std::string dimVarName = "k"+std::to_string(dimsCount);        
+        this->code += "int " + dimVarName + ";\n"; 
+        this->startExprProc();
+        dims->constructs.front()->accept(*this);
+        this->code += dimVarName + " = t0;\n"; 
+        this->endExprProc();
+        dimsVars.push_back(dimVarName);
+        dimsCount++;
+        dims->constructs.pop_front();
+    }
+
+    auto tac = threeAddressesStacks.top().first;
+    this->code += MJUtils::arrayCreationString(ctype, dimsVars, "t"+std::to_string(tac->top()));
+    doneExpr();
+}
+
+void NodeVisitorCodeGen::visitArrayCreationVarInit(ArrayCreationVarInit * acvi) {
+    acvi->accept(*this);
+}
 
 std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDeclaredVars(
         std::shared_ptr<FieldDecl> fielddecl, std::string & structFields, std::set<std::string> & alreadyDeclaredVars,NodeVisitorCodeGen::EntityType entityType,
@@ -786,7 +813,10 @@ std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDec
             MJResources::getInstance()->declareVar(symbol, vsi);
             std::shared_ptr<VarInit> varInit = varDecl->varInit;
             if (varInit != nullptr) {
-                //TODO: frame stack
+                this->startExprProc();
+                varInit->accept(*this);
+                this->code += "methodFrame->mframe." + entityName + "->" + id->id->id + "=t0;\n";
+                this->endExprProc();
             }
             declaredVars.insert(std::make_pair(symbol, vsi));
             varDecls->constructs.pop_front();

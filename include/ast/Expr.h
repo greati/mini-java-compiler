@@ -1231,10 +1231,9 @@ class ArrayInitVarInit : public VarInit {
 };
 
 class ArrayCreation : public VarInit {
-    protected:
+    public:
 	std::shared_ptr<Type> type;
 	std::shared_ptr<ConstructList> dims;
-    public:
         ArrayCreation(
             Position _pos, 
             std::shared_ptr<Type> _type, 

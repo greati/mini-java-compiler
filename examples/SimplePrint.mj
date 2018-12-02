@@ -31,6 +31,7 @@ class Main {
     method int fib(val int a) 
         declarations
             int c, d;
+            int[] l = @int[10];
         enddeclarations
     {
         if (a == 1) || (a == 0) {

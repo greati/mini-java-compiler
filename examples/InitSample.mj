@@ -1,0 +1,17 @@
+program P;
+
+class Main {
+    method int m1()
+        declarations
+            int a = 2*3;
+            int[][][] v = @int[10][20][2];
+        enddeclarations
+    {
+        return a
+    }
+
+    method void main()
+    {
+        print m1()
+    }
+}

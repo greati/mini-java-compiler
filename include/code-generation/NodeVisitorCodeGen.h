@@ -78,8 +78,9 @@ class NodeVisitorCodeGen : public NodeVisitor {
             else if (mjtype == "int")
                 typeRes += "int";
             else typeRes += "struct class$"+mjtype+"*";
-            if (numBrackets > 0)
+            while (numBrackets--) {
                 typeRes += "*";
+            }
             return typeRes;
         }
 

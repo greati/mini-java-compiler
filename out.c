@@ -34,9 +34,6 @@ struct method$Main$main *Main$main;
 };
 struct class$A
 {
-int a;
-int z;
-char * b;
 };
 struct method$A$m1{
 char * retLabel;
@@ -53,8 +50,6 @@ int *b;
 };
 struct class$B
 {
-int a;
-int x;
 };
 struct method$B$m1{
 char * retLabel;
@@ -84,7 +79,7 @@ int a;
 struct method$Main$r0{
 char * retLabel;
 struct Frame* classFrame;
-int* b;
+int** b;
 };
 struct method$Main$main{
 char * retLabel;
@@ -135,7 +130,6 @@ int a = methodFrame->mframe.A$m1->a;
 int b = methodFrame->mframe.A$m1->b;
 int c = methodFrame->mframe.A$m1->c;
 int d = methodFrame->mframe.A$m1->d;
-int z = classFrame->mframe.A->z;
 {
 char* t0 = "a\n";
 printf("%s",t0);}
@@ -154,8 +148,6 @@ A$m2$body:
 struct Frame* methodFrame = stackFrame;
 struct Frame* classFrame = methodFrame->mframe.A$m2->classFrame;
 int *b = methodFrame->mframe.A$m2->b;
-int a = classFrame->mframe.A->a;
-int z = classFrame->mframe.A->z;
 {
 char* t0 = "b\n";
 printf("%s",t0);}
@@ -197,7 +189,6 @@ B$m1$body:
 struct Frame* methodFrame = stackFrame;
 struct Frame* classFrame = methodFrame->mframe.B$m1->classFrame;
 int a = methodFrame->mframe.B$m1->a;
-int x = classFrame->mframe.B->x;
 {
 char* t0 = "c\n";
 printf("%s",t0);}
@@ -373,7 +364,7 @@ Main$r0$body:
 {
 struct Frame* methodFrame = stackFrame;
 struct Frame* classFrame = methodFrame->mframe.Main$r0->classFrame;
-int* b = methodFrame->mframe.Main$r0->b;
+int** b = methodFrame->mframe.Main$r0->b;
 {
 char* t0 = "oi\n";
 printf("%s",t0);}

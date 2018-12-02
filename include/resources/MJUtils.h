@@ -24,19 +24,19 @@ class MJUtils {
             return ret;
         }
 
-        inline static std::string makeMalloc(std::string baseType, std::vector<int> sizes, int dim, std::string id){
+        inline static std::string makeMalloc(std::string baseType, std::vector<std::string> sizes, int dim, std::string id){
             std::string ret = "";
             int n = sizes.size()-dim;
             std::string lhs = (dim == 0) ? (baseType + repeat("*",n) + " " + id) : makeLhs(id, "i", dim);
             std::string mallocType = baseType + repeat("*", n-1);
-            ret += lhs + " = " + "(" + baseType+ repeat("*", n)  + ") malloc(sizeof(" + mallocType + ") * " + std::to_string(sizes[dim]) + ");\n";
+            ret += lhs + " = " + "(" + baseType+ repeat("*", n)  + ") malloc(sizeof(" + mallocType + ") * " + sizes[dim] + ");\n";
             return ret;
         }
 
     public:
 
 
-        inline static std::string arrayCreationString(std::string baseType, std::vector<int> sizes, std::string id) {
+        inline static std::string arrayCreationString(std::string baseType, std::vector<std::string> sizes, std::string id) {
 
             std::string ret = "";
 
@@ -46,7 +46,7 @@ class MJUtils {
             while(dim != totalDims) {
                 for (int i = 0; i < dim; ++i) {
                     ret += "for (int i"+std::to_string(i)+"=0; i"+std::to_string(i)+"< " + 
-                        std::to_string(sizes[i]) + "; ++i"+std::to_string(i)+")\n";
+                        sizes[i] + "; ++i"+std::to_string(i)+")\n";
                 }
 
                 ret +=makeMalloc(baseType, sizes, dim, id);
