@@ -6,7 +6,7 @@
 
 class MJUtils {
 
-    private:
+    public:
 
         inline static std::string repeat(std::string c, int n) {
             std::string ret = "";
@@ -14,6 +14,13 @@ class MJUtils {
                 ret += c;
                 n--;
             }
+            return ret;
+        }
+
+        inline static std::string makeLhs(std::string id, std::vector<std::string> strs) {
+            std::string ret = id;
+            for (int i = 0; i < strs.size(); ++i)
+                ret += "[" + strs[i] + "]";
             return ret;
         }
 

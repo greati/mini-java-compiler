@@ -7,7 +7,8 @@ class Main {
             int[][][] v = @int[10][20][2];
         enddeclarations
     {
-        return a
+        v[2,4,4] := 10;
+        return v[2,4,4]
     }
 
     method void main()

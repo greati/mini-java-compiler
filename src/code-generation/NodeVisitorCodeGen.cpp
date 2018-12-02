@@ -273,13 +273,14 @@ void NodeVisitorCodeGen::visitAssignStmt(AssignStmt * assignStmt) {
     std::string methodName = csi->className + "$" + msi->methodName;
 
     this->startExprProc();
-    this->code += "struct Frame * frame = stackFrame;\n";
     expr->accept(*this);
+    this->code += "stackFrame->" + findVariableFramePath(var.get()) + "= t0;";
+/*    this->code += "struct Frame * frame = stackFrame;\n";
     if (vsi->scope == VarStaticInfo::ScopeType::METHOD)
         this->code += "stackFrame->mframe." + methodName + "->" + var->id->id + " = t0;";
     else
         this->code += "stackFrame->mframe." + methodName + "->classFrame->mframe." + csi->className +"->" + var->id->id + " = t0;";
-
+*/
     this->endExprProc();
 }
 
@@ -954,8 +955,39 @@ std::string NodeVisitorCodeGen::findVariableFramePath(Var * var) {
 
     std::string methodName = csi->className + "$" + msi->methodName;
 
+    std::string resPath = "";
+
     if (vsi->scope == VarStaticInfo::ScopeType::METHOD)
-        return "mframe." + methodName + "->" + varId;
+        resPath += "mframe." + methodName + "->" + varId;
     else
-        return "mframe." + methodName + "->classFrame->mframe." + csi->className +"->" + varId;
+        resPath += "mframe." + methodName + "->classFrame->mframe." + csi->className +"->" + varId;
+
+    if (var->accessOperation != nullptr) {
+       
+       if (BracketAccess * brackAcc = dynamic_cast<BracketAccess*>(var->accessOperation.get())){
+               
+           std::shared_ptr<ConstructList> exprs = brackAcc->expressionList;
+
+           int indexVarNumber = 0;
+           std::vector<std::string> indexes;
+           while(!exprs->constructs.empty()) {
+               std::string indexVarName = "i"+std::to_string(indexVarNumber);
+               this->code += "int " + indexVarName + ";\n";
+               this->startExprProc();
+               exprs->constructs.front()->accept(*this); 
+               this->code += indexVarName + " = t0;\n";
+               this->endExprProc();
+               indexes.push_back(indexVarName);
+               exprs->constructs.pop_front();
+               indexVarNumber++;
+           }
+
+           resPath += MJUtils::makeLhs("", indexes);
+
+       } else if (DotAccess * dotAcc = dynamic_cast<DotAccess*>(var->accessOperation.get())) {
+       
+       }
+    }
+
+    return resPath;
 }
