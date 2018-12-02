@@ -25,11 +25,13 @@ void NodeVisitorCodeGen::visitExprParen(ExprParen * expr) {
 }
 
 void NodeVisitorCodeGen::visitRelExpr(RelExpr * expr) {
-    auto tac = this->threeAddressesStacks.top();
-    int retNumberL = tac->top() + 1;
-    int retNumberR = tac->top() + 2;
-    tac->push(retNumberR); 
-    tac->push(retNumberL); 
+    auto tac = this->threeAddressesStacks.top().first;
+    //int retNumberL = tac->top() + 1;
+    //int retNumberR = tac->top() + 2;
+    //tac->push(retNumberL); 
+    //tac->push(retNumberR); 
+    int retNumberL = requireExpr();
+    int retNumberR = requireExpr();
 
     std::string opstr;
     switch(expr->op) {
@@ -55,16 +57,19 @@ void NodeVisitorCodeGen::visitRelExpr(RelExpr * expr) {
     expr->lhs->accept(*this);
     expr->rhs->accept(*this);
     //this->code += opstr;
-    this->code += "int " + makeVarTAC(tac->top()) + "=" + makeVarTAC(retNumberL) + opstr + makeVarTAC(retNumberR) + ";\n";
+    this->code += "int " + makeVarTAC(tac->top()) + "=" + makeVarTAC(retNumberR) + opstr + makeVarTAC(retNumberL) + ";\n";
+    doneExpr();
 }
 
 void NodeVisitorCodeGen::visitAlBinExpr(AlBinExpr * expr) {
 
-    auto tac = this->threeAddressesStacks.top();
-    int retNumberL = tac->top() + 1;
-    int retNumberR = tac->top() + 2;
-    tac->push(retNumberR); 
-    tac->push(retNumberL); 
+    auto tac = this->threeAddressesStacks.top().first;
+    //int retNumberL = tac->top() + 1;
+    //int retNumberR = tac->top() + 2;
+    //tac->push(retNumberL); 
+    //tac->push(retNumberR); 
+    int retNumberL = requireExpr();
+    int retNumberR = requireExpr();
 
     std::string opstr;
     switch(expr->op) {
@@ -92,15 +97,16 @@ void NodeVisitorCodeGen::visitAlBinExpr(AlBinExpr * expr) {
     }
     expr->lhs->accept(*this);
     expr->rhs->accept(*this);
-    this->code += "int " + makeVarTAC(tac->top()) + "=" + makeVarTAC(retNumberL) + opstr + makeVarTAC(retNumberR) + ";\n";
+    this->code += "int " + makeVarTAC(tac->top()) + "=" + makeVarTAC(retNumberR) + opstr + makeVarTAC(retNumberL) + ";\n";
     tac->pop();
 }
 
 void NodeVisitorCodeGen::visitAlUnExpr(AlUnExpr * expr) {
 
-    auto tac = this->threeAddressesStacks.top();
-    int retNumberL = tac->top() + 1;
-    tac->push(retNumberL); 
+    auto tac = this->threeAddressesStacks.top().first;
+    int retNumberL = requireExpr();
+    //int retNumberL = tac->top() + 1;
+    //tac->push(retNumberL); 
 
     std::string opstr;
     switch(expr->op) {
@@ -117,7 +123,8 @@ void NodeVisitorCodeGen::visitAlUnExpr(AlUnExpr * expr) {
 
     expr->alexpr->accept(*this);
     this->code += "int " + makeVarTAC(tac->top()) + "=" + opstr + "(" + makeVarTAC(retNumberL) + ")" + ";\n";
-    tac->pop();
+    //tac->pop();
+    doneExpr();
 }
 
 void NodeVisitorCodeGen::visitLitExprString(LitExpr<std::string> * strlit) {
@@ -125,8 +132,8 @@ void NodeVisitorCodeGen::visitLitExprString(LitExpr<std::string> * strlit) {
    if (p.empty())
       this->code += strlit->val;
    else {
-      this->code += "char* t"+std::to_string(p.top()->top())+ " = " + strlit->val + ";\n";
-      p.top()->pop();
+      this->code += "char* t"+std::to_string(p.top().first->top())+ " = " + strlit->val + ";\n";
+      p.top().first->pop();
    }
 }
 void NodeVisitorCodeGen::visitLitExprInt(LitExpr<int> * intlit) {
@@ -135,8 +142,8 @@ void NodeVisitorCodeGen::visitLitExprInt(LitExpr<int> * intlit) {
    if (p.empty())
      this->code += intlit->val;
    else {
-     this->code += "int t"+std::to_string(p.top()->top())+ " = " + std::to_string(intlit->val) + ";\n";
-     p.top()->pop();
+     this->code += "int t"+std::to_string(p.top().first->top())+ " = " + std::to_string(intlit->val) + ";\n";
+     p.top().first->pop();
    }
 }
 void NodeVisitorCodeGen::visitAccessOperation(AccessOperation *) {}
@@ -151,14 +158,98 @@ void NodeVisitorCodeGen::visitVar(Var * var) {
         std::shared_ptr<VarStaticInfo> varDecl = 
             std::static_pointer_cast<VarStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol(var->id->id)));
         auto varType = varDecl->varType;
-        this->code += getCType(varType.first, varType.second)+" t"+std::to_string(p.top()->top())+ " = " + framePath + ";\n";
-        p.top()->pop();
+        this->code += getCType(varType.first, varType.second)+" t"+std::to_string(p.top().first->top())+ " = " + framePath + ";\n";
+        p.top().first->pop();
     } else 
         this->code += var->id->id;
 
     // TODO: access operation
 }
-void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr *) {}
+void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr * funcall) {
+
+    std::shared_ptr<Var> var = funcall->var;
+    std::shared_ptr<ConstructList> actuals = funcall->actualParams;
+
+    // visit each var member
+    
+    std::shared_ptr<AccessOperation> itAccessOp = var->accessOperation;
+
+    std::string varId = var->id->id;
+
+    std::shared_ptr<ClassStaticInfo> csi = 
+        std::static_pointer_cast<ClassStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol("$$")));
+
+    if (itAccessOp == nullptr) {
+
+        try {
+            std::string newMFrameName = "newMFrame";
+            std::string mFrameName = "method$" +csi->className+"$"+varId;
+            std::string newFrameName = "newFrame";
+            std::string unionName = csi->className + "$" + varId;
+            this->code += "{\n";
+            this->code += "struct "+ mFrameName + " *"+ newMFrameName +"= malloc(sizeof(struct "+mFrameName + "));\n";
+            this->code += "struct Frame * " + newFrameName + " = malloc(sizeof(struct Frame));\n";
+            this->code += newFrameName + "->mframe."+unionName + " = " + newMFrameName + ";\n";
+            this->code += newFrameName + "->ftype = " + mFrameName + ";\n";
+            this->code += newFrameName + "->prev = " + "stackFrame;\n"; 
+            this->code += newFrameName + "->next = " + "NULL;\n"; 
+            this->code += "stackFrame->next = " + newFrameName + ";\n";
+            //this->code += "stackFrame = " + newFrameName + ";\n";
+
+            std::string labelReturn = makeLabel(LabelType::RETURN_CALL, {{"class", csi->className},{"method", varId}});
+
+            this->codeSwitchReturns += "if (strcmp(currentReturn,\""+ labelReturn + "\") == 0) {\n";
+            this->codeSwitchReturns += "goto "+ labelReturn +";\n";
+            this->codeSwitchReturns += "}\n";
+
+            this->code += newMFrameName + "->retLabel = \""+labelReturn+"\";\n";
+
+            //TODO first load methods
+            std::shared_ptr<MethodStaticInfo> msi = csi->methods.at(Symbol::symbol(varId));
+            if (actuals != nullptr) {
+                auto itFormals = msi->formalParams.begin();
+                auto itActuals = actuals->constructs.begin();
+
+                while (itFormals != msi->formalParams.end()) {
+                    std::string name = std::get<0>(*itFormals);
+                    StaticInfo::Type type = std::get<1>(*itFormals);
+                    bool val = std::get<2>(*itFormals);
+                    this->startExprProc();
+                    (*itActuals)->accept(*this);
+                    this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0";
+                    this->code += ";\n";
+                    this->endExprProc();
+                    itFormals++;
+                    itActuals++;
+                }
+            }
+            
+            this->code += "stackFrame = " + newFrameName + ";\n";
+            this->code += "goto " + msi->codeLabel + ";\n";
+            this->code += "}\n";
+            this->code += labelReturn + ":;\n";
+
+            auto p = this->threeAddressesStacks;
+            if (!p.empty()){
+               std::string retType = getCType(msi->retType.first, msi->retType.second);
+               this->code += retType + " t"+std::to_string(p.top().first->top())+ " = *(("+retType+"*) returnPointer);\n";
+               this->code += "if (returnPointer != NULL) free(returnPointer);\n";
+               this->code += "returnPointer = NULL;\n";
+               p.top().first->pop();
+            }
+        } catch (const std::out_of_range & out) {
+            throw std::logic_error("Subprogram not found");
+        }
+    }
+
+    std::shared_ptr<ConstructList> actualParams = funcall->actualParams;
+
+
+
+
+
+
+}
 
 void NodeVisitorCodeGen::visitStmt(Stmt *) {}
 void NodeVisitorCodeGen::visitAssignStmt(AssignStmt * assignStmt) {
@@ -185,9 +276,9 @@ void NodeVisitorCodeGen::visitAssignStmt(AssignStmt * assignStmt) {
     this->code += "struct Frame * frame = stackFrame;\n";
     expr->accept(*this);
     if (vsi->scope == VarStaticInfo::ScopeType::METHOD)
-        this->code += "frame->mframe." + methodName + "->" + var->id->id + " = t0;";
+        this->code += "stackFrame->mframe." + methodName + "->" + var->id->id + " = t0;";
     else
-        this->code += "frame->mframe." + methodName + "->classFrame->mframe." + csi->className +"->" + var->id->id + " = t0;";
+        this->code += "stackFrame->mframe." + methodName + "->classFrame->mframe." + csi->className +"->" + var->id->id + " = t0;";
 
     this->endExprProc();
 }
@@ -221,7 +312,6 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
             this->code += newFrameName + "->prev = " + "stackFrame;\n"; 
             this->code += newFrameName + "->next = " + "NULL;\n"; 
             this->code += "stackFrame->next = " + newFrameName + ";\n";
-            this->code += "stackFrame = " + newFrameName + ";\n";
 
             std::string labelReturn = makeLabel(LabelType::RETURN_CALL, {{"class", csi->className},{"method", varId}});
 
@@ -249,6 +339,7 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
                 itActuals++;
             }
             
+            this->code += "stackFrame = " + newFrameName + ";\n";
             this->code += "goto " + msi->codeLabel + ";\n";
             this->code += "}\n";
             this->code += labelReturn + ":\n";
@@ -263,21 +354,6 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
             throw std::logic_error("Subprogram not found");
         }
     }
-
-    /*if (csi != nullptr) {
-        while (itAccessOp != nullptr) {
-            
-            
-            itAccessOp = itAccessOp->accessOperation; 
-        }
-    } else throw std::logic_error("Variable " + varId + " not declared");
-    */
-
-    // match the function
-    // new scope
-    // new framestack
-
-    // a.b.c(0)
 
     std::shared_ptr<ConstructList> actualParams = funcall->actualParams;
 }
@@ -471,8 +547,27 @@ void NodeVisitorCodeGen::visitElseIf(ElseIf * elseifstmt) {
     elseifstmt->ifStmt->accept(*this);
 } 
 
-void NodeVisitorCodeGen::visitReturnStmt(ReturnStmt *) {
-    //TODO: frame stack
+void NodeVisitorCodeGen::visitReturnStmt(ReturnStmt * returnStmt) {
+
+    std::shared_ptr<MethodStaticInfo> msi = 
+        std::static_pointer_cast<MethodStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol("$")));
+    this->startExprProc();
+    returnStmt->expr->accept(*this);
+    std::string retType = getCType(msi->retType.first, msi->retType.second);
+    this->code += retType + " * $returnPointerValue = (" + retType + " *) malloc(sizeof("+ retType +"));\n";
+    this->code += "*$returnPointerValue = t0;\n";
+    this->code += "returnPointer = $returnPointerValue;\n";
+    this->code += "int n = strlen(stackFrame->mframe." + msi->className+"$"+ msi->methodName + "->retLabel);\n";
+    this->code += "currentReturn = (char *) realloc(currentReturn, n+1);\n";
+    this->code += "strcpy(currentReturn, stackFrame->mframe." + msi->className+"$"+ msi->methodName + "->retLabel);\n";
+
+    this->code += "stackFrame->prev->next = NULL;\n";
+    this->code += "struct Frame * toDelete = stackFrame;\n";
+    this->code += "stackFrame = toDelete->prev;\n";
+    this->code += "free(toDelete);\n";
+
+    this->code += "goto retSwitch;\n";
+    this->endExprProc();
 }
 
 void NodeVisitorCodeGen::visitType(Type * type) {}
@@ -596,6 +691,8 @@ void NodeVisitorCodeGen::visitProgram(Program * program) {
     this->frameTypesEnum += "enum FType {\n";
 
     std::string mainDecl = "int main(void) {\n";
+
+    mainDecl += "void * returnPointer = NULL;\n";
 
     this->codeSwitchReturns += "// switch for return points\n";
     mainDecl += "struct Frame * stackFrame = malloc(sizeof(struct Frame));\n";

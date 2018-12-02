@@ -40,10 +40,21 @@ class NodeVisitorCodeGen : public NodeVisitor {
                 std::string entityName = "");
         std::string findVariableFramePath(Var * var);
 
+        inline int requireExpr() {
+            int curr = threeAddressesStacks.top().second;
+            threeAddressesStacks.top().first->push(curr + 1);
+            threeAddressesStacks.top().second++;
+            return curr + 1;
+        }
+
+        inline void doneExpr() {
+            threeAddressesStacks.top().first->pop();
+        }
+
         inline std::string startExprProc() {
             this->code += "{\n";
-            threeAddressesStacks.push(std::make_shared<std::stack<int>>());
-            threeAddressesStacks.top()->push(0);
+            threeAddressesStacks.push(std::make_pair(std::make_shared<std::stack<int>>(), 0));
+            threeAddressesStacks.top().first->push(0);
             return "t"+std::to_string(0);
         }
         inline void endExprProc() {
@@ -54,8 +65,10 @@ class NodeVisitorCodeGen : public NodeVisitor {
         inline std::string makeVarTAC(int i) {
             return "t" + std::to_string(i);
         }
+    
+        typedef std::pair<std::shared_ptr<std::stack<int>>, int> ThreeAddressState;
 
-        std::stack<std::shared_ptr<std::stack<int>>> threeAddressesStacks;
+        std::stack<ThreeAddressState> threeAddressesStacks;
    
    public:
         inline std::string getCType(std::string mjtype, int numBrackets = 0) const {

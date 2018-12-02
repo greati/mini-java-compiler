@@ -403,10 +403,10 @@ class Var : public AlExpr {
 };
 
 class FunctionCallExpr : public AlExpr {
-    protected:
+    public:
         std::shared_ptr<Var> var;
         std::shared_ptr<ConstructList> actualParams;
-    public:
+
         FunctionCallExpr(
                 Position _pos,
                 std::shared_ptr<Var> _var,

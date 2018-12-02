@@ -10,14 +10,14 @@ class A {
             int c, d;
         enddeclarations 
     {
-        print "a"
+        print "a\n"
     }
 
     method int m2(int b) 
         declarations
         enddeclarations
     {
-        print "b";
+        print "b\n";
         m1(2, 3)
     }
 }
@@ -29,14 +29,15 @@ class B {
     enddeclarations
     method void m1(val int a) 
     {
-        print "c"
+        print "c\n"
     }
 }
 
 class Main {
 
     method void m2(val int a) {
-        print a
+        print a;
+        print "\n"
     }
     method void m1(val int a; val int b)
         declarations
@@ -44,32 +45,33 @@ class Main {
         enddeclarations
     {
         print a*b;
+        print "\n";
         c := 2;
-        print "olha o valor de c antes";
+        print "olha o valor de c antes\n";
         print c;
         c := 4;
-        print "olha o valor agora";
+        print "olha o valor agora\n";
         print c;
         #d := 10;
         m2(a+b);
-        print "retornou de m2"
+        print "retornou de m2\n"
     }
     method void m0(val int a) {
         if a == 0 {
-            print "fim da recursão"
+            print "fim da recursão\n"
         } else {
             print a;
+            print "\n";
             m0(a - 1)
         }
     }
     method void r0(val int[][] b) {
-        print "oi"
+        print "oi\n"
     }
     method void main() {
-        #print "a";
-        #m1(2,4);
-        #print "retornou!!!";
-        m0(10);
-        m1(2,4)
+        print "a\n";
+        m1(2,4);
+        print "retornou!!!\n";
+        m0(10)
     }
 }
