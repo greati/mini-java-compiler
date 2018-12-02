@@ -216,7 +216,10 @@ void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr * funcall) {
                     bool val = std::get<2>(*itFormals);
                     this->startExprProc();
                     (*itActuals)->accept(*this);
-                    this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0";
+                    if (val || (type.second > 0))
+                        this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0";
+                    else
+                        this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &t0";
                     this->code += ";\n";
                     this->endExprProc();
                     itFormals++;
@@ -275,12 +278,6 @@ void NodeVisitorCodeGen::visitAssignStmt(AssignStmt * assignStmt) {
     this->startExprProc();
     expr->accept(*this);
     this->code += "stackFrame->" + findVariableFramePath(var.get()) + "= t0;";
-/*    this->code += "struct Frame * frame = stackFrame;\n";
-    if (vsi->scope == VarStaticInfo::ScopeType::METHOD)
-        this->code += "stackFrame->mframe." + methodName + "->" + var->id->id + " = t0;";
-    else
-        this->code += "stackFrame->mframe." + methodName + "->classFrame->mframe." + csi->className +"->" + var->id->id + " = t0;";
-*/
     this->endExprProc();
 }
 
@@ -322,22 +319,28 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
 
             this->code += newMFrameName + "->retLabel = \""+labelReturn+"\";\n";
 
-            //TODO first load methods
             std::shared_ptr<MethodStaticInfo> msi = csi->methods.at(Symbol::symbol(varId));
-            auto itFormals = msi->formalParams.begin();
-            auto itActuals = actuals->constructs.begin();
 
-            while (itFormals != msi->formalParams.end()) {
-                std::string name = std::get<0>(*itFormals);
-                StaticInfo::Type type = std::get<1>(*itFormals);
-                bool val = std::get<2>(*itFormals);
-                this->startExprProc();
-                (*itActuals)->accept(*this);
-                this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0";
-                this->code += ";\n";
-                this->endExprProc();
-                itFormals++;
-                itActuals++;
+            if (actuals != nullptr){
+                //TODO first load methods
+                auto itFormals = msi->formalParams.begin();
+                auto itActuals = actuals->constructs.begin();
+
+                while (itFormals != msi->formalParams.end()) {
+                    std::string name = std::get<0>(*itFormals);
+                    StaticInfo::Type type = std::get<1>(*itFormals);
+                    bool val = std::get<2>(*itFormals);
+                    this->startExprProc();
+                    (*itActuals)->accept(*this);
+                    if (val || (type.second > 0))
+                        this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0";
+                    else
+                        this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &t0";
+                    this->code += ";\n";
+                    this->endExprProc();
+                    itFormals++;
+                    itActuals++;
+                }
             }
             
             this->code += "stackFrame = " + newFrameName + ";\n";
@@ -878,8 +881,10 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 
                     locals.insert(fid);
 
-                    genCode += getCType(ftype->typeName, sfType.second) + " " + (fval ? "" : "*") + fid + ";\n";
-                    this->code += getCType(ftype->typeName, sfType.second) + " " + (fval ? "" : "*") + fid + " = " + "methodFrame->mframe." + csi->className + "$" + methodid + "->" + fid  + ";\n";
+                    bool testIfPointer = (fval || (ftype->numBrackets > 0));
+
+                    genCode += getCType(ftype->typeName, sfType.second) + " " + (testIfPointer ? "" : "*") + fid + ";\n";
+                    this->code += getCType(ftype->typeName, sfType.second) + " " + (testIfPointer ? "" : "*") + fid + " = " + "methodFrame->mframe." + csi->className + "$" + methodid + "->" + fid  + ";\n";
 
                     // add to symbol table
                     std::shared_ptr<VarStaticInfo> vsi = std::make_shared<VarStaticInfo>();
@@ -985,7 +990,7 @@ std::string NodeVisitorCodeGen::findVariableFramePath(Var * var) {
            resPath += MJUtils::makeLhs("", indexes);
 
        } else if (DotAccess * dotAcc = dynamic_cast<DotAccess*>(var->accessOperation.get())) {
-       
+            //TODO class access       
        }
     }
 
