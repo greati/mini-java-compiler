@@ -14,9 +14,9 @@ class Main {
        };
        b := 4;
        switch b{
-           case 0 { print "aa 0" }
-           case 1 { print "aa 1" }
-           default { print "DEFAULTAO"}
+           case 0 { print "aa 0\n" }
+           case 1 { print "aa 1\n" }
+           default { print "DEFAULTAO\n"}
        };
        print a;
        for i := 0 to 2 step 2 {
@@ -31,6 +31,7 @@ class Main {
     method int fib(val int a) 
         declarations
             int c, d;
+            int[] l = @int[10];
         enddeclarations
     {
         if (a == 1) || (a == 0) {
@@ -44,6 +45,7 @@ class Main {
 
     method void main() {
         print fib(7) + fib(7);
+        print "\n";
         print m2() * 2 + 38;
         m1(3)
         #print "abc";
