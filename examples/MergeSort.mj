@@ -1,44 +1,45 @@
 program MergeSortProgram;
-class MergeSort
+class Main 
 {
 	method void merge(int[] v; int begin; int middle; int end)
 		declarations
             int i = begin, j = middle+1, k = begin, length = end-begin+1;
-            int[] aux;
+            int[] aux = @int[length];
 		enddeclarations
 	{
-        while (i <= middle) && (j <= end)
-        {
-            if v[i] < v[j] {
-                aux[k] := v[i];
-                i := i + 1
-            }
-            else
-            {
-                aux[k] := v[j];
-                j := j + 1
-            };
-            k := k + 1
-        };
+        print "a"
+#       while (i <= middle) && (j <= end)
+#       {
+#           if v[i] < v[j] {
+#               aux[k] := v[i];
+#               i := i + 1
+#           }
+#           else
+#           {
+#               aux[k] := v[j];
+#               j := j + 1
+#           };
+#           k := k + 1
+#       }
 
-        while i <= middle
-        {
-            aux[k] := v[i];
-            i := i + 1;
-            k := k + 1
-        };
-
-        while j <= end
-        {
-            aux[k] := v[j];
-            j := j + 1;
-            k := k + 1
-        };
-
-        for k := begin to end step 1
-        {
-            aux[k] := v[k]
-        }
+#       while i <= middle
+#       {
+#           aux[k] := v[i];
+#           i := i + 1;
+#           k := k + 1
+#       };
+#
+#       while j <= end
+#       {
+#           aux[k] := v[j];
+#           j := j + 1;
+#           k := k + 1
+#       };
+#
+#       for k := begin to end step 1
+#       {
+#           v[k] := aux[k]
+#       }
 	}
     method void mergeSort(int[] v; int begin; int end)
 		declarations
@@ -53,4 +54,35 @@ class MergeSort
             merge(v, begin, middle, end)
         }
 	}
+
+   method void perform()
+       declarations
+           int[] v = @int[10];
+           int begin = 0, end = 9;
+           int i;
+       enddeclarations 
+   {
+      print "a";
+      v[0] := 10;
+      v[1] := 9;
+      v[2] := 8;
+      v[3] := 7;
+      v[4] := 6;
+      v[5] := 5;
+      v[6] := 4;
+      v[7] := 3;
+      v[8] := 2;
+      v[9] := 1;
+      print "pelo menos criou o array";
+      mergeSort(v, begin, end);
+      print "fez o merge sort";
+      for i := 0 to 9 step 1 {
+        print v[i]
+      }
+   }
+
+    method void main() {
+        perform()
+    }
+
 }

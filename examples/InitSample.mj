@@ -16,6 +16,7 @@ class Main {
             int a = 2*3;
             int[][][] v = @int[10][20][2];
             int[] v2;
+            int i=2, l=3;
         enddeclarations
     {
         v[2,4,4] := 10;

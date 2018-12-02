@@ -154,14 +154,20 @@ void NodeVisitorCodeGen::visitVar(Var * var) {
 
     auto varPath = findVariableFramePath(var);
 
-    std::string framePath = "stackFrame->" + varPath.first;
+    std::string framePath = "stackFrame->" + std::get<0>(varPath);
 
     if (!p.empty()) {
         std::shared_ptr<VarStaticInfo> varDecl = 
             std::static_pointer_cast<VarStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol(var->id->id)));
         auto varType = varDecl->varType;
-        //this->code += getCType(varType.first, varType.second)+" t"+std::to_string(p.top().first->top())+ " = " + framePath + ";\n";
-        this->code += varPath.second +" t"+std::to_string(p.top().first->top())+ " = " + framePath + ";\n";
+
+        if ((std::get<2>(varPath) == RHandReference::IS_FORMAL_NEEDS_REF
+                    || std::get<2>(varPath) == RHandReference::IS_NOT_FORMAL)) {
+            this->code += std::get<1>(varPath) +" t"+std::to_string(p.top().first->top())+ " = " + framePath + ";\n";
+        } else {
+            this->code += std::get<1>(varPath) +" t"+std::to_string(p.top().first->top())+ " = *" + framePath + ";\n";
+        }
+
         p.top().first->pop();
     } else 
         this->code += var->id->id;
@@ -218,23 +224,29 @@ void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr * funcall) {
                     StaticInfo::Type type = std::get<1>(*itFormals);
                     bool val = std::get<2>(*itFormals);
                     this->startExprProc();
+
                     if (val || (type.second == 0)) {
                         // is it a variable?!
                         if (Var * varRef = dynamic_cast<Var *>((*itActuals).get())) {
                             if (varRef->accessOperation != nullptr) {
                                 throw std::logic_error("References must be simple variables!");
                             } else {
-                                this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &"
-                                    + "stackFrame->" + findVariableFramePath(varRef).first;
+                                auto varFramePath = findVariableFramePath(varRef);
+                                if (std::get<2>(varFramePath) == RHandReference::IS_FORMAL_NEEDS_REF)
+                                    this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &"
+                                    + "stackFrame->" + std::get<0>(varFramePath) + ";\n";
+                                else
+                                    this->code += newFrameName + "->mframe." + unionName + "->" + name + "="
+                                    + "stackFrame->" + std::get<0>(varFramePath) + ";\n";
                             }
                         } else 
                             throw std::logic_error("References must be simple variables!");
                     } else {
                         (*itActuals)->accept(*this);
                         if (val || (type.second > 0))
-                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0";
+                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0;\n";
                         else
-                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &t0";
+                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &t0;\n";
                     }
                     this->endExprProc();
                     itFormals++;
@@ -300,9 +312,9 @@ void NodeVisitorCodeGen::visitAssignStmt(AssignStmt * assignStmt) {
     expr->accept(*this);
     bool conditionForReference = !std::get<2>(*formalIt) && (std::get<1>(*formalIt).second == 0);
     if (formalIt != msi->formalParams.end() and conditionForReference) 
-        this->code += "*stackFrame->" + findVariableFramePath(var.get()).first + "= t0;";
+        this->code += "*stackFrame->" + std::get<0>(findVariableFramePath(var.get())) + "= t0;";
     else
-        this->code += "stackFrame->" + findVariableFramePath(var.get()).first + "= t0;";
+        this->code += "stackFrame->" + std::get<0>(findVariableFramePath(var.get())) + "= t0;";
     this->endExprProc();
 }
 
@@ -356,23 +368,33 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
                     StaticInfo::Type type = std::get<1>(*itFormals);
                     bool val = std::get<2>(*itFormals);
                     this->startExprProc();
-                    if (val || (type.second == 0)) {
+                    if (!val || (type.second > 0)) {
                         // is it a variable?!
                         if (Var * varRef = dynamic_cast<Var *>((*itActuals).get())) {
                             if (varRef->accessOperation != nullptr) {
                                 throw std::logic_error("References must be simple variables!");
                             } else {
-                                this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &"
-                                    + "stackFrame->" + findVariableFramePath(varRef).first;
+                                auto varFramePath = findVariableFramePath(varRef);
+                                if (std::get<2>(varFramePath) == RHandReference::IS_FORMAL_NEEDS_REF
+                                        ||(std::get<2>(varFramePath) == RHandReference::IS_NOT_FORMAL && type.second==0)) {
+                                    this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &"
+                                    + "stackFrame->" + std::get<0>(varFramePath) + ";\n";
+                                }
+                                else {
+                                    this->code += newFrameName + "->mframe." + unionName + "->" + name + "="
+                                    + "stackFrame->" + std::get<0>(varFramePath)+";\n" ;
+                                }
+                                //this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &"
+                                //   + "stackFrame->" + std::get<0>(findVariableFramePath(varRef));
                             }
                         } else 
                             throw std::logic_error("References must be simple variables!");
                     } else {
                         (*itActuals)->accept(*this);
                         if (val || (type.second > 0))
-                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0";
+                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0;\n";
                         else
-                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &t0";
+                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &t0;\n";
                     }
                     this->code += ";\n";
                     this->endExprProc();
@@ -439,7 +461,7 @@ void NodeVisitorCodeGen::visitSwitchStmt(SwitchStmt * switchstmt) {
         this->startExprProc();
         casestmt->expr->accept(*this);
         this->code += "if (";
-        this->code += "stackFrame->" + findVariableFramePath(varExpr.get()).first;
+        this->code += "stackFrame->" + std::get<0>(findVariableFramePath(varExpr.get()));
         this->code += "== t0)\n";  
         this->code += makeGotoStmt(labelcase);
         this->code += makeGotoStmt(nextcase);
@@ -483,7 +505,7 @@ void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
 
     std::shared_ptr<Var> var = std::make_shared<Var>(forStmt->pos, forStmt->id, nullptr);
 
-    std::string iterVarPath = "stackFrame->" + findVariableFramePath(var.get()).first;
+    std::string iterVarPath = "stackFrame->" + std::get<0>(findVariableFramePath(var.get()));
 
     this->startExprProc();
     forStmt->assignExpr->accept(*this);
@@ -979,7 +1001,7 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
     return msi;
 }
 
-std::pair<std::string, std::string> NodeVisitorCodeGen::findVariableFramePath(Var * var) {
+std::tuple<std::string, std::string, NodeVisitorCodeGen::RHandReference> NodeVisitorCodeGen::findVariableFramePath(Var * var) {
 
     std::string varId = var->id->id;
 
@@ -1006,19 +1028,39 @@ std::pair<std::string, std::string> NodeVisitorCodeGen::findVariableFramePath(Va
     else
         resPath += "mframe." + methodName + "->classFrame->mframe." + csi->className +"->" + varId;
 
+    MethodStaticInfo::FormalParam f;
+    std::deque<MethodStaticInfo::FormalParam>::iterator formalIt;
+    for (formalIt = msi->formalParams.begin(); formalIt != msi->formalParams.end(); ++formalIt) {
+        if (std::get<0>(*formalIt) == var->id->id) break;
+    }
+
+    RHandReference rhandreference = RHandReference::IS_NOT_FORMAL;
+
+    if (formalIt != msi->formalParams.end()) {
+        bool conditionForDemandReference = std::get<2>(*formalIt) && (std::get<1>(*formalIt).second == 0);
+        if (conditionForDemandReference)
+            rhandreference = RHandReference::IS_FORMAL_NEEDS_REF;
+        else
+            rhandreference = RHandReference::IS_FORMAL_NO_NEEDS_REF;
+    }
+
     if (var->accessOperation != nullptr) {
 
        if (BracketAccess * brackAcc = dynamic_cast<BracketAccess*>(var->accessOperation.get())){
 
            std::shared_ptr<ConstructList> exprs = brackAcc->expressionList;
 
-           int indexVarNumber = 0;
            std::vector<std::string> indexes;
+
+           int resultingDimension = vsi->varType.second-exprs->constructs.size();
 
            retType = getCType(vsi->varType.first,vsi->varType.second-exprs->constructs.size());
 
+            if (resultingDimension == 0 && rhandreference != RHandReference::IS_NOT_FORMAL) 
+                rhandreference = RHandReference::IS_FORMAL_NEEDS_REF;           
+
            while(!exprs->constructs.empty()) {
-               std::string indexVarName = "i"+std::to_string(indexVarNumber);
+               std::string indexVarName = "i"+std::to_string(getIndexLabel());
                this->code += "int " + indexVarName + ";\n";
                this->startExprProc();
                exprs->constructs.front()->accept(*this); 
@@ -1026,7 +1068,6 @@ std::pair<std::string, std::string> NodeVisitorCodeGen::findVariableFramePath(Va
                this->endExprProc();
                indexes.push_back(indexVarName);
                exprs->constructs.pop_front();
-               indexVarNumber++;
            }
 
            resPath += MJUtils::makeLhs("", indexes);
@@ -1036,5 +1077,5 @@ std::pair<std::string, std::string> NodeVisitorCodeGen::findVariableFramePath(Va
        }
     }
 
-    return std::make_pair(resPath, retType);
+    return std::make_tuple(resPath, retType, rhandreference);
 }

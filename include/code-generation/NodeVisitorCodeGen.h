@@ -21,6 +21,8 @@ class NodeVisitorCodeGen : public NodeVisitor {
         unsigned long labelMethodCounter = 0;
         unsigned long labelCallReturnCounter = 0;
 
+        unsigned long countIndexesLabels = 0;
+
     public:
 
         enum class EntityType {
@@ -31,6 +33,15 @@ class NodeVisitorCodeGen : public NodeVisitor {
             IF, FOR, WHILE, SWITCH, METHOD, RETURN_CALL
         };
 
+        inline long getIndexLabel() {
+            return countIndexesLabels++;
+        }
+
+        enum class RHandReference {
+            IS_FORMAL_NEEDS_REF,
+            IS_FORMAL_NO_NEEDS_REF,
+            IS_NOT_FORMAL,
+        };
    private:
         std::shared_ptr<MethodStaticInfo> generateDeclaredMethod(std::shared_ptr<MethodDecl>, std::string&,
                 std::shared_ptr<ClassStaticInfo> &);
@@ -38,7 +49,8 @@ class NodeVisitorCodeGen : public NodeVisitor {
                 std::string&,std::set<std::string> & alreadyDeclaredVars,
                 EntityType entityType = EntityType::METHOD,
                 std::string entityName = "");
-        std::pair<std::string, std::string> findVariableFramePath(Var * var);
+        std::tuple<std::string, std::string, RHandReference> findVariableFramePath(Var * var);
+
 
         inline int requireExpr() {
             int curr = threeAddressesStacks.top().second;
