@@ -2,6 +2,10 @@ program P;
 
 class Main {
 
+    method void m3(int b) {
+        b := 4
+    }
+
     method int m2(int[][][] arr) 
     {
         arr[2,4,4] := 15
@@ -19,6 +23,13 @@ class Main {
         v2 := v[2,4];
         print v2[4];
         print v[2,4,4];
+        print "ANTES: \n";
+        print a;
+        print "\n";
+        m3(a);
+        print "DEPOIS: \n";
+        print a;
+        print "\n";
         return 0
     }
 

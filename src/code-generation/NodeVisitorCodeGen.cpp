@@ -218,12 +218,24 @@ void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr * funcall) {
                     StaticInfo::Type type = std::get<1>(*itFormals);
                     bool val = std::get<2>(*itFormals);
                     this->startExprProc();
-                    (*itActuals)->accept(*this);
-                    if (val || (type.second > 0))
-                        this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0";
-                    else
-                        this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &t0";
-                    this->code += ";\n";
+                    if (val || (type.second == 0)) {
+                        // is it a variable?!
+                        if (Var * varRef = dynamic_cast<Var *>((*itActuals).get())) {
+                            if (varRef->accessOperation != nullptr) {
+                                throw std::logic_error("References must be simple variables!");
+                            } else {
+                                this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &"
+                                    + "stackFrame->" + findVariableFramePath(varRef).first;
+                            }
+                        } else 
+                            throw std::logic_error("References must be simple variables!");
+                    } else {
+                        (*itActuals)->accept(*this);
+                        if (val || (type.second > 0))
+                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0";
+                        else
+                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &t0";
+                    }
                     this->endExprProc();
                     itFormals++;
                     itActuals++;
@@ -278,9 +290,19 @@ void NodeVisitorCodeGen::visitAssignStmt(AssignStmt * assignStmt) {
 
     std::string methodName = csi->className + "$" + msi->methodName;
 
+    MethodStaticInfo::FormalParam f;
+    std::deque<MethodStaticInfo::FormalParam>::iterator formalIt;
+    for (formalIt = msi->formalParams.begin(); formalIt != msi->formalParams.end(); ++formalIt) {
+        if (std::get<0>(*formalIt) == var->id->id) break;
+    }
+
     this->startExprProc();
     expr->accept(*this);
-    this->code += "stackFrame->" + findVariableFramePath(var.get()).first + "= t0;";
+    bool conditionForReference = !std::get<2>(*formalIt) && (std::get<1>(*formalIt).second == 0);
+    if (formalIt != msi->formalParams.end() and conditionForReference) 
+        this->code += "*stackFrame->" + findVariableFramePath(var.get()).first + "= t0;";
+    else
+        this->code += "stackFrame->" + findVariableFramePath(var.get()).first + "= t0;";
     this->endExprProc();
 }
 
@@ -334,11 +356,24 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
                     StaticInfo::Type type = std::get<1>(*itFormals);
                     bool val = std::get<2>(*itFormals);
                     this->startExprProc();
-                    (*itActuals)->accept(*this);
-                    if (val || (type.second > 0))
-                        this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0";
-                    else
-                        this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &t0";
+                    if (val || (type.second == 0)) {
+                        // is it a variable?!
+                        if (Var * varRef = dynamic_cast<Var *>((*itActuals).get())) {
+                            if (varRef->accessOperation != nullptr) {
+                                throw std::logic_error("References must be simple variables!");
+                            } else {
+                                this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &"
+                                    + "stackFrame->" + findVariableFramePath(varRef).first;
+                            }
+                        } else 
+                            throw std::logic_error("References must be simple variables!");
+                    } else {
+                        (*itActuals)->accept(*this);
+                        if (val || (type.second > 0))
+                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0";
+                        else
+                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &t0";
+                    }
                     this->code += ";\n";
                     this->endExprProc();
                     itFormals++;
