@@ -225,19 +225,24 @@ void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr * funcall) {
                     bool val = std::get<2>(*itFormals);
                     this->startExprProc();
 
-                    if (val || (type.second == 0)) {
+                    if (!val || (type.second > 0)) {
                         // is it a variable?!
                         if (Var * varRef = dynamic_cast<Var *>((*itActuals).get())) {
                             if (varRef->accessOperation != nullptr) {
                                 throw std::logic_error("References must be simple variables!");
                             } else {
                                 auto varFramePath = findVariableFramePath(varRef);
-                                if (std::get<2>(varFramePath) == RHandReference::IS_FORMAL_NEEDS_REF)
+                                if (std::get<2>(varFramePath) == RHandReference::IS_FORMAL_NEEDS_REF
+                                        ||(std::get<2>(varFramePath) == RHandReference::IS_NOT_FORMAL && type.second==0)) {
                                     this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &"
                                     + "stackFrame->" + std::get<0>(varFramePath) + ";\n";
-                                else
+                                }
+                                else {
                                     this->code += newFrameName + "->mframe." + unionName + "->" + name + "="
-                                    + "stackFrame->" + std::get<0>(varFramePath) + ";\n";
+                                    + "stackFrame->" + std::get<0>(varFramePath)+";\n" ;
+                                }
+                                //this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &"
+                                //   + "stackFrame->" + std::get<0>(findVariableFramePath(varRef));
                             }
                         } else 
                             throw std::logic_error("References must be simple variables!");
@@ -248,6 +253,7 @@ void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr * funcall) {
                         else
                             this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &t0;\n";
                     }
+                    this->code += ";\n";
                     this->endExprProc();
                     itFormals++;
                     itActuals++;

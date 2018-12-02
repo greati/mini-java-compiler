@@ -48,8 +48,6 @@ class Main
        if begin < end
        {
            middle := (end + begin)/2;
-           print "computou o middle\n";
-           print middle;
            mergeSort(v, begin, middle);
            mergeSort(v, middle + 1, end);
            merge(v, begin, middle, end)
@@ -63,7 +61,6 @@ class Main
            int i;
        enddeclarations 
    {
-      print "a";
       v[0] := 10;
       v[1] := 9;
       v[2] := 8;
@@ -74,11 +71,10 @@ class Main
       v[7] := 3;
       v[8] := 2;
       v[9] := 1;
-      print "pelo menos criou o array";
       mergeSort(v, begin, end);
-      print "fez o merge sort";
       for i := 0 to 9 step 1 {
-        print v[i]
+        print v[i];
+        print "\n"
       }
    }
 
