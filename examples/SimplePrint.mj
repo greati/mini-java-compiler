@@ -2,34 +2,50 @@ program P;
 
 class Main {
 
-    method void m1(val int a)
+   method void m1(val int a)
+       declarations
+           int b, i;
+       enddeclarations
+   {
+       b := a;
+       while (b > 0) {
+           print b;
+           b := b - 1
+       };
+       b := 4;
+       switch b{
+           case 0 { print "aa 0" }
+           case 1 { print "aa 1" }
+           default { print "DEFAULTAO"}
+       };
+       print a;
+       for i := 0 to 2 step 2 {
+           print i
+       }
+   }
+
+   method int m2() {
+       return 2
+   }
+
+    method int fib(val int a) 
         declarations
-            int b, i;
+            int c, d;
         enddeclarations
     {
-        b := a;
-        while (b > 0) {
-            print b;
-            b := b - 1
-        };
-        b := 4;
-        switch b{
-            case 0 { print "aa 0" }
-            case 1 { print "aa 1" }
-            default { print "DEFAULTAO"}
-        };
-        print a;
-        for i := 0 to 2 step 2 {
-            print i
+        if (a == 1) || (a == 0) {
+            return a
+        } else {
+            c := fib(a-1);
+            d := fib(a-2);
+            return c + d
         }
     }
 
-    method int m2() {
-        return 1
-    }
-
     method void main() {
-        print m2()
+        print fib(7) + fib(7);
+        print m2() * 2 + 38;
+        m1(3)
         #print "abc";
         #print 2 + 3*5;
         #m1(3)
