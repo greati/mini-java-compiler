@@ -1,57 +1,58 @@
 program MergeSortProgram;
 class Main 
 {
-	method void merge(int[] v; int begin; int middle; int end)
+	method void merge(int[] v;  int begin;  int middle;  int end)
 		declarations
-            int i = begin, j = middle+1, k = begin, length = end-begin+1;
+            int i = begin, j = middle+1, k = 0, length = end-begin+1;
             int[] aux = @int[length];
 		enddeclarations
 	{
-        print "a"
-#       while (i <= middle) && (j <= end)
-#       {
-#           if v[i] < v[j] {
-#               aux[k] := v[i];
-#               i := i + 1
-#           }
-#           else
-#           {
-#               aux[k] := v[j];
-#               j := j + 1
-#           };
-#           k := k + 1
-#       }
+       while (i <= middle) && (j <= end)
+       {
+           if v[i] < v[j] {
+               aux[k] := v[i];
+               i := i + 1
+           }
+           else
+           {
+               aux[k] := v[j];
+               j := j + 1
+           };
+           k := k + 1
+       };
 
-#       while i <= middle
-#       {
-#           aux[k] := v[i];
-#           i := i + 1;
-#           k := k + 1
-#       };
-#
-#       while j <= end
-#       {
-#           aux[k] := v[j];
-#           j := j + 1;
-#           k := k + 1
-#       };
-#
-#       for k := begin to end step 1
-#       {
-#           v[k] := aux[k]
-#       }
+       while i <= middle
+       {
+           aux[k] := v[i];
+           i := i + 1;
+           k := k + 1
+       };
+
+       while j <= end
+       {
+           aux[k] := v[j];
+           j := j + 1;
+           k := k + 1
+       };
+
+       for k := begin to end step 1
+       {
+           v[k] := aux[k-begin]
+       }
 	}
-    method void mergeSort(int[] v; int begin; int end)
+    method void mergeSort(int[] v;  int begin;  int end)
 		declarations
             int middle;
+            int middlePlusOne;
 		enddeclarations
     {
-        if begin < end
-        {
-            middle := (end + begin)/2;
-            mergeSort(v, begin, middle);
-            mergeSort(v, middle, end);
-            merge(v, begin, middle, end)
+       if begin < end
+       {
+           middle := (end + begin)/2;
+           middlePlusOne := middle + 1;
+           mergeSort(v, begin, middle);
+           mergeSort(v, middlePlusOne, end);
+           merge(v, begin, middle, end)
         }
 	}
 
@@ -62,7 +63,6 @@ class Main
            int i;
        enddeclarations 
    {
-      print "a";
       v[0] := 10;
       v[1] := 9;
       v[2] := 8;
@@ -73,11 +73,10 @@ class Main
       v[7] := 3;
       v[8] := 2;
       v[9] := 1;
-      print "pelo menos criou o array";
       mergeSort(v, begin, end);
-      print "fez o merge sort";
       for i := 0 to 9 step 1 {
-        print v[i]
+        print v[i];
+        print "\n"
       }
    }
 
