@@ -38,7 +38,7 @@ class NodeVisitorCodeGen : public NodeVisitor {
                 std::string&,std::set<std::string> & alreadyDeclaredVars,
                 EntityType entityType = EntityType::METHOD,
                 std::string entityName = "");
-        std::string findVariableFramePath(Var * var);
+        std::pair<std::string, std::string> findVariableFramePath(Var * var);
 
         inline int requireExpr() {
             int curr = threeAddressesStacks.top().second;

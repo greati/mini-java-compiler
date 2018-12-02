@@ -152,13 +152,16 @@ void NodeVisitorCodeGen::visitDotAccess(DotAccess *) {}
 void NodeVisitorCodeGen::visitVar(Var * var) {
     auto p = this->threeAddressesStacks;
 
-    std::string framePath = "stackFrame->" + findVariableFramePath(var);
+    auto varPath = findVariableFramePath(var);
+
+    std::string framePath = "stackFrame->" + varPath.first;
 
     if (!p.empty()) {
         std::shared_ptr<VarStaticInfo> varDecl = 
             std::static_pointer_cast<VarStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol(var->id->id)));
         auto varType = varDecl->varType;
-        this->code += getCType(varType.first, varType.second)+" t"+std::to_string(p.top().first->top())+ " = " + framePath + ";\n";
+        //this->code += getCType(varType.first, varType.second)+" t"+std::to_string(p.top().first->top())+ " = " + framePath + ";\n";
+        this->code += varPath.second +" t"+std::to_string(p.top().first->top())+ " = " + framePath + ";\n";
         p.top().first->pop();
     } else 
         this->code += var->id->id;
@@ -277,7 +280,7 @@ void NodeVisitorCodeGen::visitAssignStmt(AssignStmt * assignStmt) {
 
     this->startExprProc();
     expr->accept(*this);
-    this->code += "stackFrame->" + findVariableFramePath(var.get()) + "= t0;";
+    this->code += "stackFrame->" + findVariableFramePath(var.get()).first + "= t0;";
     this->endExprProc();
 }
 
@@ -401,7 +404,7 @@ void NodeVisitorCodeGen::visitSwitchStmt(SwitchStmt * switchstmt) {
         this->startExprProc();
         casestmt->expr->accept(*this);
         this->code += "if (";
-        this->code += "stackFrame->" + findVariableFramePath(varExpr.get());
+        this->code += "stackFrame->" + findVariableFramePath(varExpr.get()).first;
         this->code += "== t0)\n";  
         this->code += makeGotoStmt(labelcase);
         this->code += makeGotoStmt(nextcase);
@@ -445,7 +448,7 @@ void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
 
     std::shared_ptr<Var> var = std::make_shared<Var>(forStmt->pos, forStmt->id, nullptr);
 
-    std::string iterVarPath = "stackFrame->" + findVariableFramePath(var.get());
+    std::string iterVarPath = "stackFrame->" + findVariableFramePath(var.get()).first;
 
     this->startExprProc();
     forStmt->assignExpr->accept(*this);
@@ -941,7 +944,7 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
     return msi;
 }
 
-std::string NodeVisitorCodeGen::findVariableFramePath(Var * var) {
+std::pair<std::string, std::string> NodeVisitorCodeGen::findVariableFramePath(Var * var) {
 
     std::string varId = var->id->id;
 
@@ -961,6 +964,7 @@ std::string NodeVisitorCodeGen::findVariableFramePath(Var * var) {
     std::string methodName = csi->className + "$" + msi->methodName;
 
     std::string resPath = "";
+    std::string retType = getCType(vsi->varType.first, vsi->varType.second);
 
     if (vsi->scope == VarStaticInfo::ScopeType::METHOD)
         resPath += "mframe." + methodName + "->" + varId;
@@ -968,13 +972,16 @@ std::string NodeVisitorCodeGen::findVariableFramePath(Var * var) {
         resPath += "mframe." + methodName + "->classFrame->mframe." + csi->className +"->" + varId;
 
     if (var->accessOperation != nullptr) {
-       
+
        if (BracketAccess * brackAcc = dynamic_cast<BracketAccess*>(var->accessOperation.get())){
-               
+
            std::shared_ptr<ConstructList> exprs = brackAcc->expressionList;
 
            int indexVarNumber = 0;
            std::vector<std::string> indexes;
+
+           retType = getCType(vsi->varType.first,vsi->varType.second-exprs->constructs.size());
+
            while(!exprs->constructs.empty()) {
                std::string indexVarName = "i"+std::to_string(indexVarNumber);
                this->code += "int " + indexVarName + ";\n";
@@ -994,5 +1001,5 @@ std::string NodeVisitorCodeGen::findVariableFramePath(Var * var) {
        }
     }
 
-    return resPath;
+    return std::make_pair(resPath, retType);
 }

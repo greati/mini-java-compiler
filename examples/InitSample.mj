@@ -11,13 +11,13 @@ class Main {
         declarations
             int a = 2*3;
             int[][][] v = @int[10][20][2];
+            int[] v2;
         enddeclarations
     {
         v[2,4,4] := 10;
-        print "ANTES!\n";
-        print v[2,4,4];
         m2(v);
-        print "DEPOIS!\n";
+        v2 := v[2,4];
+        print v2[4];
         print v[2,4,4];
         return 0
     }
