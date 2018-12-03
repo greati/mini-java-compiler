@@ -1,0 +1,17 @@
+program P;
+
+class Main {
+
+    method int m1(val int x) {
+        return x
+    }
+
+    method void main()
+        declarations
+            int x;
+        enddeclarations       
+    {
+        x := 2 + 5 * m1(x)
+    }
+
+}
