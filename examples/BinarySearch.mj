@@ -2,7 +2,7 @@ program BinarySearchProgram;
 
 class BinarySearch
 {
-	method int binarySearch(int[] arr; int l; int r; int x)
+	method int binarySearch(int[] arr; val int l; val int r; val int x)
 		declarations
 			int mid;
 		enddeclarations
