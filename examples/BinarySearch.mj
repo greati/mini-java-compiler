@@ -1,20 +1,20 @@
 program BinarySearchProgram;
 
-class BinarySearch
+class Main
 {
-	method int binarySearch(int[] arr; int l; int r; int x)
+	method int binarySearch(int[] arr; val int l; val int r; val int x)
 		declarations
 			int mid;
 		enddeclarations
 	{
-		if r >= 1
+		if r >= l
 		{
 			mid := l + (r - l)/2;
 			if arr[mid] == x
 			{
 				return mid
-			} 
-            else if arr[mid] > x
+			}; 
+            if arr[mid] > x
 			{
 				return binarySearch(arr, l, mid-1, x)
 			};
@@ -22,5 +22,30 @@ class BinarySearch
 		};
 		return -1
 	}
+
+    method void perform() 
+        declarations
+            int[] v = @int[10];
+            int l = 0, r = 9, x, i, ret;
+        enddeclarations
+    {
+        for i := 0 to r step 1 {
+            v[i] := i
+        };
+        x := 3; 
+        ret := binarySearch(v, l, r, x);
+        print "Element found at position ";
+        print ret;
+        print "\n";
+        x := 11;
+        ret := binarySearch(v, l, r, x);
+        print "Element not found, returned ";
+        print ret;
+        print "\n"
+    }
+
+    method void main() {
+        perform()
+    }
 }
 

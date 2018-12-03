@@ -1,0 +1,41 @@
+program P;
+
+class Main {
+
+    method void m3(int b) {
+        b := 4
+    }
+
+    method int m2(int[][][] arr) 
+    {
+        arr[2,4,4] := 15
+    }
+
+    method int m1()
+        declarations
+            int a = 2*3;
+            int[][][] v = @int[10][20][2];
+            int[] v2;
+            int i=2, l=3;
+        enddeclarations
+    {
+        v[2,4,4] := 10;
+        m2(v);
+        v2 := v[2,4];
+        print v2[4];
+        print v[2,4,4];
+        print "ANTES: \n";
+        print a;
+        print "\n";
+        m3(a);
+        print "DEPOIS: \n";
+        print a;
+        print "\n";
+        return 0
+    }
+
+    method void main()
+    {
+        m1()
+    }
+}

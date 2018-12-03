@@ -21,6 +21,8 @@ class NodeVisitorCodeGen : public NodeVisitor {
         unsigned long labelMethodCounter = 0;
         unsigned long labelCallReturnCounter = 0;
 
+        unsigned long countIndexesLabels = 0;
+
     public:
 
         enum class EntityType {
@@ -31,6 +33,15 @@ class NodeVisitorCodeGen : public NodeVisitor {
             IF, FOR, WHILE, SWITCH, METHOD, RETURN_CALL
         };
 
+        inline long getIndexLabel() {
+            return countIndexesLabels++;
+        }
+
+        enum class RHandReference {
+            IS_FORMAL_NEEDS_REF,
+            IS_FORMAL_NO_NEEDS_REF,
+            IS_NOT_FORMAL,
+        };
    private:
         std::shared_ptr<MethodStaticInfo> generateDeclaredMethod(std::shared_ptr<MethodDecl>, std::string&,
                 std::shared_ptr<ClassStaticInfo> &);
@@ -38,11 +49,24 @@ class NodeVisitorCodeGen : public NodeVisitor {
                 std::string&,std::set<std::string> & alreadyDeclaredVars,
                 EntityType entityType = EntityType::METHOD,
                 std::string entityName = "");
+        std::tuple<std::string, std::string, RHandReference> findVariableFramePath(Var * var);
+
+
+        inline int requireExpr() {
+            int curr = threeAddressesStacks.top().second;
+            threeAddressesStacks.top().first->push(curr + 1);
+            threeAddressesStacks.top().second++;
+            return curr + 1;
+        }
+
+        inline void doneExpr() {
+            threeAddressesStacks.top().first->pop();
+        }
 
         inline std::string startExprProc() {
             this->code += "{\n";
-            threeAddressesStacks.push(std::make_shared<std::stack<int>>());
-            threeAddressesStacks.top()->push(0);
+            threeAddressesStacks.push(std::make_pair(std::make_shared<std::stack<int>>(), 0));
+            threeAddressesStacks.top().first->push(0);
             return "t"+std::to_string(0);
         }
         inline void endExprProc() {
@@ -53,8 +77,10 @@ class NodeVisitorCodeGen : public NodeVisitor {
         inline std::string makeVarTAC(int i) {
             return "t" + std::to_string(i);
         }
+    
+        typedef std::pair<std::shared_ptr<std::stack<int>>, int> ThreeAddressState;
 
-        std::stack<std::shared_ptr<std::stack<int>>> threeAddressesStacks;
+        std::stack<ThreeAddressState> threeAddressesStacks;
    
    public:
         inline std::string getCType(std::string mjtype, int numBrackets = 0) const {
@@ -64,8 +90,9 @@ class NodeVisitorCodeGen : public NodeVisitor {
             else if (mjtype == "int")
                 typeRes += "int";
             else typeRes += "struct class$"+mjtype+"*";
-            if (numBrackets > 0)
+            while (numBrackets--) {
                 typeRes += "*";
+            }
             return typeRes;
         }
 

@@ -403,10 +403,10 @@ class Var : public AlExpr {
 };
 
 class FunctionCallExpr : public AlExpr {
-    protected:
+    public:
         std::shared_ptr<Var> var;
         std::shared_ptr<ConstructList> actualParams;
-    public:
+
         FunctionCallExpr(
                 Position _pos,
                 std::shared_ptr<Var> _var,
@@ -447,10 +447,9 @@ class Stmt : public Node {
 };
 
 class AssignStmt : public Stmt {
-    protected:
+    public:
 	std::shared_ptr<Var> var;
 	std::shared_ptr<Expr> expr;
-    public:
         AssignStmt(
             Position _pos,
 	    std::shared_ptr<Var> _var,
@@ -1232,10 +1231,9 @@ class ArrayInitVarInit : public VarInit {
 };
 
 class ArrayCreation : public VarInit {
-    protected:
+    public:
 	std::shared_ptr<Type> type;
 	std::shared_ptr<ConstructList> dims;
-    public:
         ArrayCreation(
             Position _pos, 
             std::shared_ptr<Type> _type, 

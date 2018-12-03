@@ -1,7 +1,7 @@
 program MergeSortProgram;
 class Main 
 {
-	method void merge(int[] v;  int begin;  int middle;  int end)
+	method void merge(int[] v; val int begin; val int middle; val int end)
 		declarations
             int i = begin, j = middle+1, k = 0, length = end-begin+1;
             int[] aux = @int[length];
@@ -40,18 +40,16 @@ class Main
            v[k] := aux[k-begin]
        }
 	}
-    method void mergeSort(int[] v;  int begin;  int end)
+    method void mergeSort(int[] v; val int begin; val int end)
 		declarations
             int middle;
-            int middlePlusOne;
 		enddeclarations
     {
        if begin < end
        {
            middle := (end + begin)/2;
-           middlePlusOne := middle + 1;
            mergeSort(v, begin, middle);
-           mergeSort(v, middlePlusOne, end);
+           mergeSort(v, middle + 1, end);
            merge(v, begin, middle, end)
         }
 	}

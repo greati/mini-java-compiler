@@ -18,17 +18,20 @@ void NodeVisitorCodeGen::visitExpr(Expr *) {}
 void NodeVisitorCodeGen::visitAlExpr(AlExpr *) {}
 
 void NodeVisitorCodeGen::visitExprParen(ExprParen * expr) {
-    this->code += "(";
+    //this->startExprProc();
     expr->expr->accept(*this);
-    this->code += ")";
+    //this->code += "(t0)";
+    //this->endExprProc();
 }
 
 void NodeVisitorCodeGen::visitRelExpr(RelExpr * expr) {
-    auto tac = this->threeAddressesStacks.top();
-    int retNumberL = tac->top() + 1;
-    int retNumberR = tac->top() + 2;
-    tac->push(retNumberR); 
-    tac->push(retNumberL); 
+    auto tac = this->threeAddressesStacks.top().first;
+    //int retNumberL = tac->top() + 1;
+    //int retNumberR = tac->top() + 2;
+    //tac->push(retNumberL); 
+    //tac->push(retNumberR); 
+    int retNumberL = requireExpr();
+    int retNumberR = requireExpr();
 
     std::string opstr;
     switch(expr->op) {
@@ -54,16 +57,19 @@ void NodeVisitorCodeGen::visitRelExpr(RelExpr * expr) {
     expr->lhs->accept(*this);
     expr->rhs->accept(*this);
     //this->code += opstr;
-    this->code += "int " + makeVarTAC(tac->top()) + "=" + makeVarTAC(retNumberL) + opstr + makeVarTAC(retNumberR) + ";\n";
+    this->code += "int " + makeVarTAC(tac->top()) + "=" + makeVarTAC(retNumberR) + opstr + makeVarTAC(retNumberL) + ";\n";
+    doneExpr();
 }
 
 void NodeVisitorCodeGen::visitAlBinExpr(AlBinExpr * expr) {
 
-    auto tac = this->threeAddressesStacks.top();
-    int retNumberL = tac->top() + 1;
-    int retNumberR = tac->top() + 2;
-    tac->push(retNumberR); 
-    tac->push(retNumberL); 
+    auto tac = this->threeAddressesStacks.top().first;
+    //int retNumberL = tac->top() + 1;
+    //int retNumberR = tac->top() + 2;
+    //tac->push(retNumberL); 
+    //tac->push(retNumberR); 
+    int retNumberL = requireExpr();
+    int retNumberR = requireExpr();
 
     std::string opstr;
     switch(expr->op) {
@@ -91,10 +97,17 @@ void NodeVisitorCodeGen::visitAlBinExpr(AlBinExpr * expr) {
     }
     expr->lhs->accept(*this);
     expr->rhs->accept(*this);
-    this->code += "int " + makeVarTAC(tac->top()) + "=" + makeVarTAC(retNumberL) + opstr + makeVarTAC(retNumberR) + ";\n";
+    this->code += "int " + makeVarTAC(tac->top()) + "=" + makeVarTAC(retNumberR) + opstr + makeVarTAC(retNumberL) + ";\n";
+    tac->pop();
 }
 
 void NodeVisitorCodeGen::visitAlUnExpr(AlUnExpr * expr) {
+
+    auto tac = this->threeAddressesStacks.top().first;
+    int retNumberL = requireExpr();
+    //int retNumberL = tac->top() + 1;
+    //tac->push(retNumberL); 
+
     std::string opstr;
     switch(expr->op) {
         case AlUnExpr::AlUnOp::PLUS:
@@ -107,9 +120,11 @@ void NodeVisitorCodeGen::visitAlUnExpr(AlUnExpr * expr) {
             opstr = "!";
             break;
     }
-    this->code += opstr + "(";
+
     expr->alexpr->accept(*this);
-    this->code += ")";
+    this->code += "int " + makeVarTAC(tac->top()) + "=" + opstr + "(" + makeVarTAC(retNumberL) + ")" + ";\n";
+    //tac->pop();
+    doneExpr();
 }
 
 void NodeVisitorCodeGen::visitLitExprString(LitExpr<std::string> * strlit) {
@@ -117,8 +132,8 @@ void NodeVisitorCodeGen::visitLitExprString(LitExpr<std::string> * strlit) {
    if (p.empty())
       this->code += strlit->val;
    else {
-      this->code += "char* t"+std::to_string(p.top()->top())+ " = " + strlit->val + ";\n";
-      p.top()->pop();
+      this->code += "char* t"+std::to_string(p.top().first->top())+ " = " + strlit->val + ";\n";
+      p.top().first->pop();
    }
 }
 void NodeVisitorCodeGen::visitLitExprInt(LitExpr<int> * intlit) {
@@ -127,32 +142,187 @@ void NodeVisitorCodeGen::visitLitExprInt(LitExpr<int> * intlit) {
    if (p.empty())
      this->code += intlit->val;
    else {
-     this->code += "int t"+std::to_string(p.top()->top())+ " = " + std::to_string(intlit->val) + ";\n";
-     p.top()->pop();
+     this->code += "int t"+std::to_string(p.top().first->top())+ " = " + std::to_string(intlit->val) + ";\n";
+     p.top().first->pop();
    }
 }
 void NodeVisitorCodeGen::visitAccessOperation(AccessOperation *) {}
 void NodeVisitorCodeGen::visitBrackAccess(BracketAccess *) {}
 void NodeVisitorCodeGen::visitDotAccess(DotAccess *) {}
 void NodeVisitorCodeGen::visitVar(Var * var) {
-
-    
     auto p = this->threeAddressesStacks;
+
+    auto varPath = findVariableFramePath(var);
+
+    std::string framePath = "stackFrame->" + std::get<0>(varPath);
+
     if (!p.empty()) {
         std::shared_ptr<VarStaticInfo> varDecl = 
             std::static_pointer_cast<VarStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol(var->id->id)));
         auto varType = varDecl->varType;
-        this->code += getCType(varType.first, varType.second)+" t"+std::to_string(p.top()->top())+ " = " + var->id->id + ";\n";
-        p.top()->pop();
+
+        if ((std::get<2>(varPath) == RHandReference::IS_FORMAL_NEEDS_REF
+                    || std::get<2>(varPath) == RHandReference::IS_NOT_FORMAL)) {
+            this->code += std::get<1>(varPath) +" t"+std::to_string(p.top().first->top())+ " = " + framePath + ";\n";
+        } else {
+            this->code += std::get<1>(varPath) +" t"+std::to_string(p.top().first->top())+ " = *" + framePath + ";\n";
+        }
+
+        p.top().first->pop();
     } else 
         this->code += var->id->id;
 
     // TODO: access operation
 }
-void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr *) {}
+void NodeVisitorCodeGen::visitFunctionCallExpr(FunctionCallExpr * funcall) {
+
+    std::shared_ptr<Var> var = funcall->var;
+    std::shared_ptr<ConstructList> actuals = funcall->actualParams;
+
+    // visit each var member
+    
+    std::shared_ptr<AccessOperation> itAccessOp = var->accessOperation;
+
+    std::string varId = var->id->id;
+
+    std::shared_ptr<ClassStaticInfo> csi = 
+        std::static_pointer_cast<ClassStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol("$$")));
+
+    if (itAccessOp == nullptr) {
+
+        try {
+            std::string newMFrameName = "newMFrame";
+            std::string mFrameName = "method$" +csi->className+"$"+varId;
+            std::string newFrameName = "newFrame";
+            std::string unionName = csi->className + "$" + varId;
+            this->code += "{\n";
+            this->code += "struct "+ mFrameName + " *"+ newMFrameName +"= malloc(sizeof(struct "+mFrameName + "));\n";
+            this->code += "struct Frame * " + newFrameName + " = malloc(sizeof(struct Frame));\n";
+            this->code += newFrameName + "->mframe."+unionName + " = " + newMFrameName + ";\n";
+            this->code += newFrameName + "->ftype = " + mFrameName + ";\n";
+            this->code += newFrameName + "->prev = " + "stackFrame;\n"; 
+            this->code += newFrameName + "->next = " + "NULL;\n"; 
+            this->code += "stackFrame->next = " + newFrameName + ";\n";
+            //this->code += "stackFrame = " + newFrameName + ";\n";
+
+            std::string labelReturn = makeLabel(LabelType::RETURN_CALL, {{"class", csi->className},{"method", varId}});
+
+            this->codeSwitchReturns += "if (strcmp(currentReturn,\""+ labelReturn + "\") == 0) {\n";
+            this->codeSwitchReturns += "goto "+ labelReturn +";\n";
+            this->codeSwitchReturns += "}\n";
+
+            this->code += newMFrameName + "->retLabel = \""+labelReturn+"\";\n";
+
+            //TODO first load methods
+            std::shared_ptr<MethodStaticInfo> msi = csi->methods.at(Symbol::symbol(varId));
+            if (actuals != nullptr) {
+                auto itFormals = msi->formalParams.begin();
+                auto itActuals = actuals->constructs.begin();
+
+                while (itFormals != msi->formalParams.end()) {
+                    std::string name = std::get<0>(*itFormals);
+                    StaticInfo::Type type = std::get<1>(*itFormals);
+                    bool val = std::get<2>(*itFormals);
+                    this->startExprProc();
+
+                    if (!val || (type.second > 0)) {
+                        // is it a variable?!
+                        if (Var * varRef = dynamic_cast<Var *>((*itActuals).get())) {
+                            if (varRef->accessOperation != nullptr) {
+                                throw std::logic_error("References must be simple variables!");
+                            } else {
+                                auto varFramePath = findVariableFramePath(varRef);
+                                if (std::get<2>(varFramePath) == RHandReference::IS_FORMAL_NEEDS_REF
+                                        ||(std::get<2>(varFramePath) == RHandReference::IS_NOT_FORMAL && type.second==0)) {
+                                    this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &"
+                                    + "stackFrame->" + std::get<0>(varFramePath) + ";\n";
+                                }
+                                else {
+                                    this->code += newFrameName + "->mframe." + unionName + "->" + name + "="
+                                    + "stackFrame->" + std::get<0>(varFramePath)+";\n" ;
+                                }
+                                //this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &"
+                                //   + "stackFrame->" + std::get<0>(findVariableFramePath(varRef));
+                            }
+                        } else 
+                            throw std::logic_error("References must be simple variables!");
+                    } else {
+                        (*itActuals)->accept(*this);
+                        if (val || (type.second > 0))
+                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0;\n";
+                        else
+                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &t0;\n";
+                    }
+                    this->code += ";\n";
+                    this->endExprProc();
+                    itFormals++;
+                    itActuals++;
+                }
+            }
+            
+            this->code += "stackFrame = " + newFrameName + ";\n";
+            this->code += "goto " + msi->codeLabel + ";\n";
+            this->code += "}\n";
+            this->code += labelReturn + ":;\n";
+
+            auto p = this->threeAddressesStacks;
+            if (!p.empty()){
+               std::string retType = getCType(msi->retType.first, msi->retType.second);
+               this->code += retType + " t"+std::to_string(p.top().first->top())+ " = *(("+retType+"*) returnPointer);\n";
+               this->code += "if (returnPointer != NULL) free(returnPointer);\n";
+               this->code += "returnPointer = NULL;\n";
+               p.top().first->pop();
+            }
+        } catch (const std::out_of_range & out) {
+            throw std::logic_error("Subprogram not found");
+        }
+    }
+
+    std::shared_ptr<ConstructList> actualParams = funcall->actualParams;
+
+
+
+
+
+
+}
 
 void NodeVisitorCodeGen::visitStmt(Stmt *) {}
-void NodeVisitorCodeGen::visitAssignStmt(AssignStmt *) {}
+void NodeVisitorCodeGen::visitAssignStmt(AssignStmt * assignStmt) {
+
+    auto var = assignStmt->var;
+    auto expr = assignStmt->expr;
+
+    std::shared_ptr<VarStaticInfo> vsi = std::static_pointer_cast<VarStaticInfo>(
+            MJResources::getInstance()->symbolTable.get(Symbol::symbol(var->id->id))
+            );
+
+    std::string entityStruct = vsi->entityName;
+
+   std::shared_ptr<MethodStaticInfo> msi = 
+       std::static_pointer_cast<MethodStaticInfo>(
+               MJResources::getInstance()->symbolTable.get(Symbol::symbol("$")));
+   std::shared_ptr<ClassStaticInfo> csi = 
+       std::static_pointer_cast<ClassStaticInfo>(
+               MJResources::getInstance()->symbolTable.get(Symbol::symbol("$$")));
+
+    std::string methodName = csi->className + "$" + msi->methodName;
+
+    MethodStaticInfo::FormalParam f;
+    std::deque<MethodStaticInfo::FormalParam>::iterator formalIt;
+    for (formalIt = msi->formalParams.begin(); formalIt != msi->formalParams.end(); ++formalIt) {
+        if (std::get<0>(*formalIt) == var->id->id) break;
+    }
+
+    this->startExprProc();
+    expr->accept(*this);
+    bool conditionForReference = !std::get<2>(*formalIt) && (std::get<1>(*formalIt).second == 0);
+    if (formalIt != msi->formalParams.end() and conditionForReference) 
+        this->code += "*stackFrame->" + std::get<0>(findVariableFramePath(var.get())) + "= t0;";
+    else
+        this->code += "stackFrame->" + std::get<0>(findVariableFramePath(var.get())) + "= t0;";
+    this->endExprProc();
+}
 
 void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
 
@@ -183,7 +353,6 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
             this->code += newFrameName + "->prev = " + "stackFrame;\n"; 
             this->code += newFrameName + "->next = " + "NULL;\n"; 
             this->code += "stackFrame->next = " + newFrameName + ";\n";
-            this->code += "stackFrame = " + newFrameName + ";\n";
 
             std::string labelReturn = makeLabel(LabelType::RETURN_CALL, {{"class", csi->className},{"method", varId}});
 
@@ -193,24 +362,54 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
 
             this->code += newMFrameName + "->retLabel = \""+labelReturn+"\";\n";
 
-            //TODO first load methods
             std::shared_ptr<MethodStaticInfo> msi = csi->methods.at(Symbol::symbol(varId));
-            auto itFormals = msi->formalParams.begin();
-            auto itActuals = actuals->constructs.begin();
 
-            while (itFormals != msi->formalParams.end()) {
-                std::string name = std::get<0>(*itFormals);
-                StaticInfo::Type type = std::get<1>(*itFormals);
-                bool val = std::get<2>(*itFormals);
-                this->startExprProc();
-                (*itActuals)->accept(*this);
-                this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0";
-                this->code += ";\n";
-                this->endExprProc();
-                itFormals++;
-                itActuals++;
+            if (actuals != nullptr){
+                //TODO first load methods
+                auto itFormals = msi->formalParams.begin();
+                auto itActuals = actuals->constructs.begin();
+
+                while (itFormals != msi->formalParams.end()) {
+                    std::string name = std::get<0>(*itFormals);
+                    StaticInfo::Type type = std::get<1>(*itFormals);
+                    bool val = std::get<2>(*itFormals);
+                    this->startExprProc();
+                    if (!val || (type.second > 0)) {
+                        // is it a variable?!
+                        if (Var * varRef = dynamic_cast<Var *>((*itActuals).get())) {
+                            if (varRef->accessOperation != nullptr) {
+                                throw std::logic_error("References must be simple variables!");
+                            } else {
+                                auto varFramePath = findVariableFramePath(varRef);
+                                if (std::get<2>(varFramePath) == RHandReference::IS_FORMAL_NEEDS_REF
+                                        ||(std::get<2>(varFramePath) == RHandReference::IS_NOT_FORMAL && type.second==0)) {
+                                    this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &"
+                                    + "stackFrame->" + std::get<0>(varFramePath) + ";\n";
+                                }
+                                else {
+                                    this->code += newFrameName + "->mframe." + unionName + "->" + name + "="
+                                    + "stackFrame->" + std::get<0>(varFramePath)+";\n" ;
+                                }
+                                //this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &"
+                                //   + "stackFrame->" + std::get<0>(findVariableFramePath(varRef));
+                            }
+                        } else 
+                            throw std::logic_error("References must be simple variables!");
+                    } else {
+                        (*itActuals)->accept(*this);
+                        if (val || (type.second > 0))
+                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= t0;\n";
+                        else
+                            this->code += newFrameName + "->mframe." + unionName + "->" + name + "= &t0;\n";
+                    }
+                    this->code += ";\n";
+                    this->endExprProc();
+                    itFormals++;
+                    itActuals++;
+                }
             }
             
+            this->code += "stackFrame = " + newFrameName + ";\n";
             this->code += "goto " + msi->codeLabel + ";\n";
             this->code += "}\n";
             this->code += labelReturn + ":\n";
@@ -225,21 +424,6 @@ void NodeVisitorCodeGen::visitFunctionCallStmt(FunctionCallStmt * funcall) {
             throw std::logic_error("Subprogram not found");
         }
     }
-
-    /*if (csi != nullptr) {
-        while (itAccessOp != nullptr) {
-            
-            
-            itAccessOp = itAccessOp->accessOperation; 
-        }
-    } else throw std::logic_error("Variable " + varId + " not declared");
-    */
-
-    // match the function
-    // new scope
-    // new framestack
-
-    // a.b.c(0)
 
     std::shared_ptr<ConstructList> actualParams = funcall->actualParams;
 }
@@ -269,20 +453,25 @@ void NodeVisitorCodeGen::visitSwitchStmt(SwitchStmt * switchstmt) {
     
     std::string labelout = makeLabel(LabelType::SWITCH);
 
+    std::shared_ptr<Var> varExpr = std::static_pointer_cast<Var>(switchstmt->expr);
+
+    if (varExpr.get() == nullptr)
+        throw new std::logic_error("Invalid switch expression, use only an identifier");
     
     while (!switchstmt->caseList->constructs.empty()) {
         std::string labelcase = makeLabel(LabelType::SWITCH);
         std::string nextcase = makeLabel(LabelType::SWITCH);
         auto casestmt = 
             dynamic_cast<Case*>(switchstmt->caseList->constructs.front().get());
-        
-        this->code += "if (";
-        switchstmt->expr->accept(*this);
-        this->code += "==";
+
+        this->startExprProc();
         casestmt->expr->accept(*this);
-        this->code += ")";  
+        this->code += "if (";
+        this->code += "stackFrame->" + std::get<0>(findVariableFramePath(varExpr.get()));
+        this->code += "== t0)\n";  
         this->code += makeGotoStmt(labelcase);
         this->code += makeGotoStmt(nextcase);
+        this->endExprProc();
         this->code += makeLabelStmt(labelcase); 
         casestmt->stmts->accept(*this);
         this->code += makeGotoStmt(labelout);
@@ -301,11 +490,12 @@ void NodeVisitorCodeGen::visitWhileStmt(WhileStmt * whilestmt) {
     std::string labelIn = this->makeLabel(LabelType::WHILE);
     std::string labelOut = this->makeLabel(LabelType::WHILE);
     this->code += makeLabelStmt(labelWhile);
-    this->code += "if (";
+    this->startExprProc();
     whilestmt->expr->accept(*this);
-    this->code += ")";
+    this->code += "if (t0)\n";
     this->code += makeGotoStmt(labelIn);
     this->code += makeGotoStmt(labelOut);
+    this->endExprProc();
     this->code += makeLabelStmt(labelIn);
     whilestmt->stmts->accept(*this);
     this->code += makeGotoStmt(labelWhile);
@@ -319,11 +509,16 @@ void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
     std::string labelEval = this->makeLabel(LabelType::FOR);
     std::string labelOut = this->makeLabel(LabelType::FOR);
 
-    //Evaluates assignment
-    forStmt->id->accept(*this);
-    this->code += "=";
+    std::shared_ptr<Var> var = std::make_shared<Var>(forStmt->pos, forStmt->id, nullptr);
+
+    std::string iterVarPath = "stackFrame->" + std::get<0>(findVariableFramePath(var.get()));
+
+    this->startExprProc();
     forStmt->assignExpr->accept(*this);
-    this->code += "; //TODO\n";
+    this->code += iterVarPath;
+    this->code += "=";
+    this->code += "t0;\n";
+    this->endExprProc();
 
     //Evaluates "from" and "to" Expressions detecting
     //min and max. These expressions are evaluated only
@@ -331,23 +526,26 @@ void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
     //e.g. for id := E1 to E2
     std::string min = labelFor + "min";
     std::string max = labelFor + "max";
+    this->code += "int " + min + ";\n";
+    this->code += "int " + max + ";\n";
     //Expr1 was previously evaluated
     this->code += min + "=";
-    forStmt->id->accept(*this);
-    this->code += ";";
-    //Evaluates Expr2
-    this->code += max + "=";
-    forStmt->toExpr->accept(*this);
+    this->code += iterVarPath;
     this->code += ";\n";
+    //Evaluates Expr2
+    this->startExprProc();
+    forStmt->toExpr->accept(*this);
+    this->code += max + "= t0;\n";
+    this->endExprProc();
     //Evaluates step expression
 	std::string step = labelFor + "step";
+    this->code += "int "+ step + " = 1;\n";
     if (forStmt->stepExpr != nullptr) {
-		this->code += step + "=";
+        this->startExprProc();
 		forStmt->stepExpr->accept(*this);
-		this->code += ";";
+		this->code += step + "= t0;\n";
+        this->endExprProc();
     }
-	else
-		this->code += step + "=1;";
     //Swaps min and max if necessary
     this->code += "if (" + min + ">" + max + ")";
     this->code += makeGotoStmt(labelEval);
@@ -359,10 +557,10 @@ void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
     this->code += makeLabelStmt(labelFor);
     this->code += "if (";
     this->code += min + "<=";
-    forStmt->id->accept(*this);
+    this->code += iterVarPath;
     this->code += " && ";
     this->code += max + ">=";
-    forStmt->id->accept(*this);
+    this->code += iterVarPath;
     this->code += ")";
     this->code += makeGotoStmt(labelIn);
     this->code += makeGotoStmt(labelOut);
@@ -374,12 +572,12 @@ void NodeVisitorCodeGen::visitForStmt(ForStmt * forStmt) {
     //Increments control variable and goes back to condition
     //TODO: verify operations of id->accept() and its side
     //effects
-    forStmt->id->accept(*this);
-    this->code += "+" + step + ";";
+    this->code += iterVarPath + "+=" + step + ";";
     this->code += makeGotoStmt(labelFor);
 
     //Adds label and implemantation for min and max swapping
     this->code += makeLabelStmt(labelEval);
+    this->code += ";int " + labelEval + "swap;\n";
     std::string swap = labelEval + "swap";
     this->code += swap + "=" + min + ";";
     this->code += min + "=" + max + ";";
@@ -419,8 +617,27 @@ void NodeVisitorCodeGen::visitElseIf(ElseIf * elseifstmt) {
     elseifstmt->ifStmt->accept(*this);
 } 
 
-void NodeVisitorCodeGen::visitReturnStmt(ReturnStmt *) {
-    //TODO: frame stack
+void NodeVisitorCodeGen::visitReturnStmt(ReturnStmt * returnStmt) {
+
+    std::shared_ptr<MethodStaticInfo> msi = 
+        std::static_pointer_cast<MethodStaticInfo>(MJResources::getInstance()->symbolTable.get(Symbol::symbol("$")));
+    this->startExprProc();
+    returnStmt->expr->accept(*this);
+    std::string retType = getCType(msi->retType.first, msi->retType.second);
+    this->code += retType + " * $returnPointerValue = (" + retType + " *) malloc(sizeof("+ retType +"));\n";
+    this->code += "*$returnPointerValue = (" + retType + ") t0;\n";
+    this->code += "returnPointer = $returnPointerValue;\n";
+    this->code += "int n = strlen(stackFrame->mframe." + msi->className+"$"+ msi->methodName + "->retLabel);\n";
+    this->code += "currentReturn = (char *) realloc(currentReturn, n+1);\n";
+    this->code += "strcpy(currentReturn, stackFrame->mframe." + msi->className+"$"+ msi->methodName + "->retLabel);\n";
+
+    this->code += "stackFrame->prev->next = NULL;\n";
+    this->code += "struct Frame * toDelete = stackFrame;\n";
+    this->code += "stackFrame = toDelete->prev;\n";
+    this->code += "free(toDelete);\n";
+
+    this->code += "goto retSwitch;\n";
+    this->endExprProc();
 }
 
 void NodeVisitorCodeGen::visitType(Type * type) {}
@@ -545,6 +762,8 @@ void NodeVisitorCodeGen::visitProgram(Program * program) {
 
     std::string mainDecl = "int main(void) {\n";
 
+    mainDecl += "void * returnPointer = NULL;\n";
+
     this->codeSwitchReturns += "// switch for return points\n";
     mainDecl += "struct Frame * stackFrame = malloc(sizeof(struct Frame));\n";
     mainDecl += "char * currentReturn = (char*) malloc(5*sizeof(char));\n";
@@ -596,10 +815,37 @@ void NodeVisitorCodeGen::visitProgram(Program * program) {
 void NodeVisitorCodeGen::visitExprVarInit(ExprVarInit * varinit) {
     varinit->expr->accept(*this);
 }
-void NodeVisitorCodeGen::visitArrayInitVarInit(ArrayInitVarInit *) {}
-void NodeVisitorCodeGen::visitArrayCreation(ArrayCreation *) {}
-void NodeVisitorCodeGen::visitArrayCreationVarInit(ArrayCreationVarInit *) {}
 
+void NodeVisitorCodeGen::visitArrayInitVarInit(ArrayInitVarInit *) {}
+
+void NodeVisitorCodeGen::visitArrayCreation(ArrayCreation * arrcreation) {
+    std::shared_ptr<Type> type = arrcreation->type;
+    std::string ctype = getCType(type->typeName, type->numBrackets); 
+    
+    std::shared_ptr<ConstructList> dims = arrcreation->dims;
+    int dimsCount = 0;
+    std::vector<std::string> dimsVars;
+
+    while (!dims->constructs.empty()) {
+        std::string dimVarName = "k"+std::to_string(dimsCount);        
+        this->code += "int " + dimVarName + ";\n"; 
+        this->startExprProc();
+        dims->constructs.front()->accept(*this);
+        this->code += dimVarName + " = t0;\n"; 
+        this->endExprProc();
+        dimsVars.push_back(dimVarName);
+        dimsCount++;
+        dims->constructs.pop_front();
+    }
+
+    auto tac = threeAddressesStacks.top().first;
+    this->code += MJUtils::arrayCreationString(ctype, dimsVars, "t"+std::to_string(tac->top()));
+    doneExpr();
+}
+
+void NodeVisitorCodeGen::visitArrayCreationVarInit(ArrayCreationVarInit * acvi) {
+    acvi->accept(*this);
+}
 
 std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDeclaredVars(
         std::shared_ptr<FieldDecl> fielddecl, std::string & structFields, std::set<std::string> & alreadyDeclaredVars,NodeVisitorCodeGen::EntityType entityType,
@@ -625,10 +871,22 @@ std::map<Symbol, std::shared_ptr<VarStaticInfo>> NodeVisitorCodeGen::generateDec
             Symbol symbol = Symbol::symbol(id->id->id); // \o/ =D
             std::shared_ptr<VarStaticInfo> vsi = std::make_shared<VarStaticInfo>();
             vsi->varType = std::make_pair(getCType(type->typeName), type->numBrackets);
+
+            if (entityType == NodeVisitorCodeGen::EntityType::METHOD) {
+                vsi->scope = VarStaticInfo::ScopeType::METHOD;
+            }
+            else {
+                vsi->scope = VarStaticInfo::ScopeType::CLASS;
+            }
+            vsi->entityName = entityName;
+
             MJResources::getInstance()->declareVar(symbol, vsi);
             std::shared_ptr<VarInit> varInit = varDecl->varInit;
             if (varInit != nullptr) {
-                //TODO: frame stack
+                this->startExprProc();
+                varInit->accept(*this);
+                this->code += "methodFrame->mframe." + entityName + "->" + id->id->id + "=t0;\n";
+                this->endExprProc();
             }
             declaredVars.insert(std::make_pair(symbol, vsi));
             varDecls->constructs.pop_front();
@@ -647,6 +905,7 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 	std::string methodlabel = makeLabel(LabelType::METHOD, {{"class", csi->className},{"method",methodid}});
 
     auto msi = std::make_shared<MethodStaticInfo>();
+    msi->methodName = methodid;
 
     csi->methods.insert(std::make_pair(Symbol::symbol(methodid), msi)); 
     msi->codeLabel = methodlabel;
@@ -688,12 +947,15 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
 
                     locals.insert(fid);
 
-                    genCode += getCType(ftype->typeName, sfType.second) + " " + (fval ? "" : "*") + fid + ";\n";
-                    this->code += getCType(ftype->typeName, sfType.second) + " " + (fval ? "" : "*") + fid + " = " + "methodFrame->mframe." + csi->className + "$" + methodid + "->" + fid  + ";\n";
+                    bool testIfPointer = (fval || (ftype->numBrackets > 0));
+
+                    genCode += getCType(ftype->typeName, sfType.second) + " " + (testIfPointer ? "" : "*") + fid + ";\n";
+                    this->code += getCType(ftype->typeName, sfType.second) + " " + (testIfPointer ? "" : "*") + fid + " = " + "methodFrame->mframe." + csi->className + "$" + methodid + "->" + fid  + ";\n";
 
                     // add to symbol table
                     std::shared_ptr<VarStaticInfo> vsi = std::make_shared<VarStaticInfo>();
                     vsi->varType = sfType;
+                    vsi->scope = VarStaticInfo::ScopeType::METHOD;
                     MJResources::getInstance()->declareVar(Symbol::symbol(fid), vsi);
 
                     MethodStaticInfo::FormalParam fp = std::make_tuple(fid, sfType, fval);
@@ -745,3 +1007,81 @@ std::shared_ptr<MethodStaticInfo> NodeVisitorCodeGen::generateDeclaredMethod(std
     return msi;
 }
 
+std::tuple<std::string, std::string, NodeVisitorCodeGen::RHandReference> NodeVisitorCodeGen::findVariableFramePath(Var * var) {
+
+    std::string varId = var->id->id;
+
+    std::shared_ptr<VarStaticInfo> vsi = std::static_pointer_cast<VarStaticInfo>(
+            MJResources::getInstance()->symbolTable.get(Symbol::symbol(varId))
+            );
+
+    std::string entityStruct = vsi->entityName;
+
+   std::shared_ptr<MethodStaticInfo> msi = 
+       std::static_pointer_cast<MethodStaticInfo>(
+               MJResources::getInstance()->symbolTable.get(Symbol::symbol("$")));
+   std::shared_ptr<ClassStaticInfo> csi = 
+       std::static_pointer_cast<ClassStaticInfo>(
+               MJResources::getInstance()->symbolTable.get(Symbol::symbol("$$")));
+
+    std::string methodName = csi->className + "$" + msi->methodName;
+
+    std::string resPath = "";
+    std::string retType = getCType(vsi->varType.first, vsi->varType.second);
+
+    if (vsi->scope == VarStaticInfo::ScopeType::METHOD)
+        resPath += "mframe." + methodName + "->" + varId;
+    else
+        resPath += "mframe." + methodName + "->classFrame->mframe." + csi->className +"->" + varId;
+
+    MethodStaticInfo::FormalParam f;
+    std::deque<MethodStaticInfo::FormalParam>::iterator formalIt;
+    for (formalIt = msi->formalParams.begin(); formalIt != msi->formalParams.end(); ++formalIt) {
+        if (std::get<0>(*formalIt) == var->id->id) break;
+    }
+
+    RHandReference rhandreference = RHandReference::IS_NOT_FORMAL;
+
+    if (formalIt != msi->formalParams.end()) {
+        bool conditionForDemandReference = std::get<2>(*formalIt) && (std::get<1>(*formalIt).second == 0);
+        if (conditionForDemandReference)
+            rhandreference = RHandReference::IS_FORMAL_NEEDS_REF;
+        else
+            rhandreference = RHandReference::IS_FORMAL_NO_NEEDS_REF;
+    }
+
+    if (var->accessOperation != nullptr) {
+
+       if (BracketAccess * brackAcc = dynamic_cast<BracketAccess*>(var->accessOperation.get())){
+
+           std::shared_ptr<ConstructList> exprs = brackAcc->expressionList;
+
+           std::vector<std::string> indexes;
+
+           int resultingDimension = vsi->varType.second-exprs->constructs.size();
+
+           retType = getCType(vsi->varType.first,vsi->varType.second-exprs->constructs.size());
+
+            if (resultingDimension == 0 && rhandreference != RHandReference::IS_NOT_FORMAL) 
+                rhandreference = RHandReference::IS_FORMAL_NEEDS_REF;           
+
+           while(!exprs->constructs.empty()) {
+               std::string indexVarName = "i"+std::to_string(getIndexLabel());
+               this->code += "int " + indexVarName + ";\n";
+               this->startExprProc();
+               exprs->constructs.front()->accept(*this); 
+               this->code += indexVarName + " = t0;\n";
+               this->endExprProc();
+               indexes.push_back(indexVarName);
+               exprs->constructs.pop_front();
+           }
+
+           resPath += MJUtils::makeLhs("", indexes);
+
+       } else if (DotAccess * dotAcc = dynamic_cast<DotAccess*>(var->accessOperation.get())) {
+            //TODO class access       
+       }
+    }
+
+    return std::make_tuple(resPath, retType, rhandreference);
+}
